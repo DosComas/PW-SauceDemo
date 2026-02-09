@@ -1,8 +1,8 @@
-# SauceDemo Shop Test Automation with Functional Helpers
+# SauceDemo Test Suite
 
-This project is an automation testing suite for the SauceDemo Shop web application, built using **Playwright** and **TypeScript**. It leverages **Functional Helpers** to improve test reusability and maintainability.  
+This project is an automation testing suite for the SauceDemo Shop web application, built using **Playwright** and **TypeScript**. It leverages **Functional Helpers** to improve test reusability and maintainability.
 
-The tests cover critical workflows such as login, adding items to the cart, and completing the checkout process. The suite is configured to run across different browsers and screen sizes, with detailed HTML reports generated for easy tracking of test results. 
+The tests cover critical workflows such as login, adding items to the cart, and completing the checkout process. The suite is configured to run across different browsers and screen sizes, with detailed HTML reports generated for easy tracking of test results.
 
 # Setup Instructions
 
@@ -25,7 +25,8 @@ npm install
 Rename `.env.example` to `.env` and update values as needed.
 
 ## 3. Update Screenshots (optional)
-If snapshots fail due to system or rendering differences, update them with: 
+
+If snapshots fail due to system or rendering differences, update them with:
 
 ```
 npx playwright test --update-snapshots

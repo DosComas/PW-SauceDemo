@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import { CURRENT_ENV } from './data/environments';
+import { t } from './helpers/i18n';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -22,15 +24,16 @@ export default defineConfig({
     [
       'html',
       {
-        title: 'Sauce Demo - PROD',
+        title: `Sauce Demo - ${CURRENT_ENV.reportName}`,
       },
     ],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'https://www.saucedemo.com',
+    baseURL: CURRENT_ENV.baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    locale: t('locale'),
     trace: 'on-first-retry',
     testIdAttribute: 'data-test',
     screenshot: 'only-on-failure',

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { accountUI, doLogin } from '../../helpers/account-helpers';
+import { accountLoc, doLogin } from '../../helpers/account-helpers';
 import { t } from '../../helpers/i18n';
-import { invalidUsers, anonymousVisitor as persona } from '../../data/users';
+import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users';
 import { toSnapshotName } from '../../helpers/string-utils';
 
 test.beforeEach(async ({ page }) => {
@@ -10,10 +10,10 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of invalidUsers) {
+for (const persona of INVALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test(`Validate login failure`, async ({ page }) => {
-      const { loginUI } = accountUI(page);
+      const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Login', async () => {
         await doLogin(page, { user: persona.user, pass: persona.pass });
@@ -26,9 +26,9 @@ for (const persona of invalidUsers) {
   });
 }
 
-test.describe(`${persona.role}`, () => {
-  test('Validate login page @visual', async ({ page }) => {
-    const { loginUI } = accountUI(page);
+test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
+  test('Validate login page layout @visual', async ({ page }) => {
+    const { loginUI } = accountLoc(page);
 
     await test.step('🟦 Wait for logo and login button', async () => {
       await loginUI.logoImage.waitFor({ state: 'visible' });
@@ -36,7 +36,7 @@ test.describe(`${persona.role}`, () => {
     });
 
     await expect(page, '🟧 Login page should be visible').toHaveScreenshot(
-      `${toSnapshotName(persona.role)}-login.png`,
+      `${toSnapshotName(ANONYMOUS_VISITOR.role)}-login.png`,
     );
   });
 });

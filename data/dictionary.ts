@@ -1,6 +1,9 @@
 export type TranslationKey = keyof typeof DICTIONARY;
 export type Language = 'en';
 
+type TranslationEntry = Record<Language, string>;
+type DictionarySchema = Record<string, TranslationEntry>;
+
 export const DICTIONARY = {
   locale: {
     en: 'en-US',
@@ -50,4 +53,16 @@ export const DICTIONARY = {
   'auth.logoutInvError': {
     en: "Epic sadface: You can only access '/inventory.html' when you are logged in.",
   },
-} as const;
+  'product.sort.nameAZ': {
+    en: 'Name (A to Z)',
+  },
+  'product.sort.nameZA': {
+    en: 'Name (Z to A)',
+  },
+  'product.sort.priceLowHigh': {
+    en: 'Price (low to high)',
+  },
+  'product.sort.priceHighLow': {
+    en: 'Price (high to low)',
+  },
+} satisfies DictionarySchema;

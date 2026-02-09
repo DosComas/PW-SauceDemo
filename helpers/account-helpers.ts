@@ -1,7 +1,7 @@
 import { Page, BrowserContext } from '@playwright/test';
 import { t } from './i18n';
 
-export const accountUI = (page: Page) => ({
+export const accountLoc = (page: Page) => ({
   // --- Login Screen ---
   loginUI: {
     usernameInput: page.getByPlaceholder(t('auth.username')),
@@ -19,14 +19,14 @@ export const accountUI = (page: Page) => ({
 });
 
 export async function doLogin(page: Page, { user, pass }: { user: string; pass: string }) {
-  const { loginUI } = accountUI(page);
+  const { loginUI } = accountLoc(page);
   await loginUI.usernameInput.fill(user);
   await loginUI.passwordInput.fill(pass);
   await loginUI.loginButton.click();
 }
 
 export async function doLogout(page: Page) {
-  const { navBarUI } = accountUI(page);
+  const { navBarUI } = accountLoc(page);
   await navBarUI.menuButton.click();
   await navBarUI.logoutButton.click();
 }

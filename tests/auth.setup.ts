@@ -1,10 +1,10 @@
 import { test as setup, expect } from '@playwright/test';
-import { doLogin, accountUI } from '../helpers/account-helpers';
-import { authUsers } from '../data/users';
+import { doLogin, accountLoc } from '../helpers/account-helpers';
+import { VALID_USERS } from '../data/users';
 
-for (const persona of authUsers) {
+for (const persona of VALID_USERS) {
   setup(`Authenticate as ${persona.role}`, async ({ page }) => {
-    const { navBarUI } = accountUI(page);
+    const { navBarUI } = accountLoc(page);
 
     await setup.step('🟦 Navigate and Login', async () => {
       await page.goto('/');

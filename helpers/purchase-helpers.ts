@@ -1,5 +1,4 @@
-import { Page } from '@playwright/test';
-import { getTranslation } from './translationHelpers';
+/*
 
 export async function getAmount(page: Page, dataTestId: string) {
   const text = await page.getByTestId(dataTestId).textContent();
@@ -29,3 +28,5 @@ export async function submitCheckoutInfo(
 
   await page.getByRole('button', { name: await getTranslation('continue') }).click();
 }
+
+*/
