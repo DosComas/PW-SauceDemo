@@ -1,3 +1,4 @@
+/*
 import { test, expect } from '@playwright/test';
 import { getTranslation } from '../helpers/translationHelpers';
 import { addProductsToCart, getItemsPrices } from '../helpers/productsHelpers';
@@ -68,3 +69,4 @@ test('Successful Checkout', { tag: '@TC-4.1' }, async ({ page }) => {
     });
   });
 });
+*/

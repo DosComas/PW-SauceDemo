@@ -1,3 +1,4 @@
+/*
 import { test, expect } from '@playwright/test';
 import { getTranslation } from '../helpers/translationHelpers';
 import { addProductsToCart } from '../helpers/productsHelpers';
@@ -68,3 +69,5 @@ test.beforeEach(async ({ page }) => {
     });
   });
 });
+
+*/

@@ -1,20 +1,26 @@
 import { test as setup, expect } from '@playwright/test';
-import { doLogin } from '../helpers/loginHelpers';
-import { getTranslation } from '../helpers/translationHelpers';
-import path from 'path';
+import { doLogin, accountUI } from '../helpers/account-helpers';
+import { authUsers } from '../data/users';
 
-const authFile = path.join(__dirname, '../.auth/user.json');
+for (const persona of authUsers) {
+  setup(`Authenticate as ${persona.role}`, async ({ page }) => {
+    const { navBarUI } = accountUI(page);
 
-const validUsername = process.env.VALID_USERNAME as string;
-const validPassword = process.env.VALID_PASSWORD as string;
+    await setup.step('🟦 Navigate and Login', async () => {
+      await page.goto('/');
+      await doLogin(page, { user: persona.user, pass: persona.pass });
+    });
 
-setup('Authenticate', async ({ page }) => {
-  await page.goto('');
-  await doLogin(page, validUsername, validPassword);
+    await expect(page, '🟧 URL should be inventory page').toHaveURL(/.*inventory.html/);
 
-  await expect(page, 'User should be logged into the landing page').toHaveURL(
-    '/inventory.html'
-  );
+    await setup.step('🟦 Open user menu', async () => {
+      await navBarUI.menuButton.click();
+    });
 
-  await page.context().storageState({ path: authFile });
-});
+    await expect(navBarUI.logoutButton, '🟧 Logout button should be visible').toBeVisible();
+
+    await setup.step('🟦 Save authentication state', async () => {
+      await page.context().storageState({ path: persona.storageState });
+    });
+  });
+}
