@@ -27,7 +27,7 @@ for (const persona of INVALID_USERS) {
 }
 
 test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
-  test('Validate login page layout @visual', async ({ page }) => {
+  test('Validate login page layout', { tag: '@visual' }, async ({ page }) => {
     const { loginUI } = accountLoc(page);
 
     await test.step('🟦 Wait for logo and login button', async () => {
