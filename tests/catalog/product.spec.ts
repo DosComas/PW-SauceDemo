@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getProductData, navToProduct, productLoc } from '../../helpers/catalog-helpers';
+import { catalog, productLoc } from '../../helpers/catalog-helpers';
 import { t } from '../../helpers/i18n';
 import { VALID_USERS } from '../../data/users';
 import { toSnapshotName } from '../../helpers/string-utils';
@@ -16,13 +16,14 @@ for (const persona of VALID_USERS) {
 
     test('Verify product data matches data from inventory', async ({ page }) => {
       const { productUI } = productLoc(page);
+      const firstProduct = 0;
 
       const expectedProduct = await test.step('⬜ Scrap product data', async () => {
-        return await getProductData(page, { productIndex: 0 });
+        return await catalog.getProductData(page, { from: 'inventory', index: firstProduct });
       });
 
       await test.step('🟦 Navigate to product', async () => {
-        await navToProduct(page, { productName: expectedProduct.name });
+        await catalog.openProductDetails(page, { index: firstProduct, via: 'name' });
       });
 
       await expect.soft(productUI.name(), '🟧 Name should match').toHaveText(expectedProduct.name);
@@ -31,14 +32,33 @@ for (const persona of VALID_USERS) {
     });
 
     test('Verify cart buttons stay syncronized beetwen pages', async ({ page }) => {
-      // add product to cart
-      // go to that product
-      // verify button shows remove and cart has 1 item
+      const { productUI, inventoryUI } = productLoc(page);
+      const firstProduct = 0;
+      const expectedBadgeCount = '1';
+
+      await test.step('🟦 Add product to cart', async () => {
+        await catalog.addProductToCart(page, { from: 'inventory', index: firstProduct });
+      });
+
+      await test.step('🟦 Navigate to product', async () => {
+        await catalog.openProductDetails(page, { index: firstProduct, via: 'img' });
+      });
+
+      await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
+      await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
+      await expect
+        .soft(inventoryUI.cartBadge, '🟧 Cart badge should show 1 item')
+        .toHaveText(expectedBadgeCount);
     });
 
     if (persona.isBaselineUser) {
       test('Verify product page layout', { tag: '@visual' }, async ({ page }) => {
-        // go to first product
+        const firstProduct = 0;
+
+        await test.step('🟦 Navigate to product', async () => {
+          await catalog.openProductDetails(page, { index: firstProduct, via: 'name' });
+        });
+
         // standardize title, info, price
         // snapshot
       });

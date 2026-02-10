@@ -1,50 +1,90 @@
 import { Page, Locator } from '@playwright/test';
 import { t } from './i18n';
 
+// --- TYPES ---
+interface ProductSource {
+  from: 'inventory' | 'pdp';
+  index?: number;
+}
+
+interface ProductClick {
+  index: number;
+  via: 'name' | 'img';
+}
+
+// --- LOCATORS ---
 export const productLoc = (page: Page) => ({
   // --- Inventory Screen ---
   inventoryUI: {
     productSortDropdown: page.getByTestId('product-sort-container'),
+    productCards: page.getByTestId('inventory-item'),
+    cartBadge: page.getByTestId('shopping-cart-badge'),
   },
 
   // --- Product Cards ---
   productUI: {
-    productCards: page.getByTestId('inventory-item'),
     name: (base: Page | Locator = page) => base.getByTestId('inventory-item-name'),
     desc: (base: Page | Locator = page) => base.getByTestId('inventory-item-desc'),
     price: (base: Page | Locator = page) => base.getByTestId('inventory-item-price'),
+    picture: (base: Page | Locator = page) => base.getByRole('img'),
+    addToCartButton: (base: Page | Locator = page) =>
+      base.getByRole('button', { name: t('product.addToCart') }),
+    removeButton: (base: Page | Locator = page) => base.getByRole('button', { name: t('product.remove') }),
   },
 });
 
-export async function getProductData(page: Page, { productIndex }: { productIndex: number }) {
-  const { productUI } = productLoc(page);
-
-  const productCard = productUI.productCards.nth(productIndex);
-
-  const rawData = {
-    name: await productUI.name(productCard).textContent(),
-    desc: await productUI.desc(productCard).textContent(),
-    price: await productUI.price(productCard).textContent(),
-  };
-
-  const cleanData: Record<string, string> = {};
-  for (const [key, value] of Object.entries(rawData)) {
-    if (!value || value.trim() === '') {
-      throw new Error(`Scraper Error: Could not find ${key} for product at index ${productIndex}.`);
-    } else {
-      cleanData[key as keyof typeof cleanData] = value.trim();
-    }
-  }
-
-  return cleanData as { name: string; desc: string; price: string };
+// --- PRIVATE UTILITIES ---
+function getProductScope(page: Page, { from, index = 0 }: ProductSource) {
+  const { inventoryUI } = productLoc(page);
+  return from === 'pdp' ? page : inventoryUI.productCards.nth(index);
 }
 
-export const navToProduct = async (page: Page, { productName }: { productName: string }) => {
+// --- ACTIONS ---
+export async function getProductData(page: Page, { from, index = 0 }: ProductSource) {
   const { productUI } = productLoc(page);
 
-  const exactNameRegex = new RegExp(`^${productName}$`);
-  await productUI.name().filter({ hasText: exactNameRegex }).click();
-};
+  const scope = getProductScope(page, { from, index });
+
+  const [name, desc, price] = await Promise.all([
+    productUI.name(scope).innerText(),
+    productUI.desc(scope).innerText(),
+    productUI.price(scope).innerText(),
+  ]);
+
+  if (!name || !desc || !price) {
+    throw new Error(`Scraper Error: Missing data on ${from} page`);
+  }
+
+  return { name: name.trim(), desc: desc.trim(), price: price.trim() };
+}
+
+export async function openProductDetails(page: Page, { index, via }: ProductClick) {
+  const { productUI } = productLoc(page);
+
+  const scope = getProductScope(page, { from: 'inventory', index });
+
+  const clickTargetMap = {
+    name: productUI.name,
+    img: productUI.picture,
+  } as const;
+
+  await clickTargetMap[via](scope).click();
+}
+
+export async function addProductToCart(page: Page, { from, index = 0 }: ProductSource) {
+  const { productUI } = productLoc(page);
+
+  const scope = getProductScope(page, { from, index });
+
+  await productUI.addToCartButton(scope).click();
+}
+
+// --- MODULE INTERFACE ---
+export const catalog = {
+  getProductData,
+  openProductDetails,
+  addProductToCart,
+} as const;
 
 /*
 export async function addProductsToCart(page: Page, quantity: number) {

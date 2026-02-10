@@ -110,3 +110,27 @@ To keep our Playwright reports scannable and consistent, we follow the **Arrange
 
 1.  **Categorized Failures:** If a **⬜** step fails, the **Environment** is likely the issue. If an **🟧** fails, the **Feature** is likely broken.
 2.  **Report Scannability:** Makes the Playwright HTML report and Trace Viewer incredibly easy to read for developers and stakeholders alike.
+
+# Helper File Architecture
+
+To maintain a clean and predictable codebase, all helper files follow this vertical structure:
+
+### 1. `// --- TYPES ---`
+
+**The Contract.** Defines interfaces and types. It sets the rules for what data each function requires.
+
+### 2. `// --- LOCATORS ---`
+
+**The Map.** The collection of element selectors. These are kept public to allow for assertions and `expect` statements directly in the test cases.
+
+### 3. `// --- PRIVATE UTILITIES ---`
+
+**The Guts.** Internal logic and scoping functions used by actions but hidden from the test files.
+
+### 4. `// --- ACTIONS ---`
+
+**The Behavior.** The actual Playwright implementation of user tasks (clicks, scrapes, inputs).
+
+### 5. `// --- MODULE INTERFACE ---`
+
+**The Remote Control.** The final `export const`. This is the **Public API** used in tests, mapping internal logic to clean, accessible keys.

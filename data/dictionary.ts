@@ -29,8 +29,11 @@ export const DICTIONARY = {
   'auth.lookupError': {
     en: 'Epic sadface: Sorry, this user has been locked out.',
   },
-  addToCart: {
+  'product.addToCart': {
     en: 'Add to cart',
+  },
+  'product.remove': {
+    en: 'Remove',
   },
   checkout: {
     en: 'Checkout',

@@ -1,6 +1,10 @@
 import { Page, BrowserContext } from '@playwright/test';
 import { t } from './i18n';
 
+// --- TYPES ---
+// ...
+
+// --- LOCATORS ---
 export const accountLoc = (page: Page) => ({
   // --- Login Screen ---
   loginUI: {
@@ -17,6 +21,11 @@ export const accountLoc = (page: Page) => ({
     logoutButton: page.getByRole('link', { name: t('auth.logout') }),
   },
 });
+
+// --- PRIVATE UTILITIES ---
+// ...
+
+// --- ACTIONS ---
 
 export async function doLogin(page: Page, { user, pass }: { user: string; pass: string }) {
   const { loginUI } = accountLoc(page);
@@ -36,3 +45,10 @@ export async function getSession(context: BrowserContext) {
   const sessionCookie = cookies.find((cookie) => cookie.name === 'session-username');
   return sessionCookie;
 }
+
+// --- MODULE INTERFACE ---
+export const account = {
+  doLogin,
+  doLogout,
+  getSession,
+} as const;
