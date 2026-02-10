@@ -24,7 +24,7 @@ export default defineConfig({
     [
       'html',
       {
-        title: `Sauce Demo - ${CURRENT_ENV.reportName}`,
+        title: `${CURRENT_ENV.reportName} Report`,
       },
     ],
   ],
