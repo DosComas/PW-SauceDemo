@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { accountLoc, doLogin } from '../../helpers/account-helpers'; //*
+import { getProductData, navToProduct, productLoc } from '../../helpers/catalog-helpers';
 import { t } from '../../helpers/i18n';
 import { VALID_USERS } from '../../data/users';
 import { toSnapshotName } from '../../helpers/string-utils';
-import { getProductData, productLoc } from '../../helpers/catalog-helpers';
 
 test.beforeEach(async ({ page }) => {
-  await test.step('🟦 Navigate', async () => {
+  await test.step('⬜ Go to inventory page', async () => {
     await page.goto('/inventory.html');
   });
 });
@@ -18,18 +17,17 @@ for (const persona of VALID_USERS) {
     test('Verify product data matches data from inventory', async ({ page }) => {
       const { productUI } = productLoc(page);
 
-      const { name, price, desc } = await test.step('⬜ Get product data', async () => {
-        const firstProduct = await getProductData(page);
-        return firstProduct;
+      const expectedProduct = await test.step('⬜ Scrap product data', async () => {
+        return await getProductData(page, { productIndex: 0 });
       });
 
-      await test.step('🟦 Go to product', async () => {
-        await productUI.name.filter({ hasText: name }).click();
+      await test.step('🟦 Navigate to product', async () => {
+        await navToProduct(page, { productName: expectedProduct.name });
       });
 
-      await expect(productUI.name, '🟧 Name should match').toHaveText(name);
-      await expect(productUI.desc, '🟧 Description should match').toHaveText(desc);
-      await expect(productUI.price, '🟧 Price should match').toHaveText(price);
+      await expect.soft(productUI.name(), '🟧 Name should match').toHaveText(expectedProduct.name);
+      await expect.soft(productUI.desc(), '🟧 Description should match').toHaveText(expectedProduct.desc);
+      await expect.soft(productUI.price(), '🟧 Price should match').toHaveText(expectedProduct.price);
     });
 
     test('Verify cart buttons stay syncronized beetwen pages', async ({ page }) => {

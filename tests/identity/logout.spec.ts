@@ -4,7 +4,7 @@ import { t } from '../../helpers/i18n';
 import { VALID_USERS } from '../../data/users';
 
 test.beforeEach(async ({ page }) => {
-  await test.step('🟦 Navigate', async () => {
+  await test.step('⬜ Go to inventory page', async () => {
     await page.goto('/inventory.html');
   });
 });

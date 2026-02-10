@@ -5,7 +5,7 @@ import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users';
 import { toSnapshotName } from '../../helpers/string-utils';
 
 test.beforeEach(async ({ page }) => {
-  await test.step('🟦 Navigate', async () => {
+  await test.step('⬜ Go to login page', async () => {
     await page.goto('/');
   });
 });
@@ -15,7 +15,7 @@ for (const persona of INVALID_USERS) {
     test(`Validate login failure`, async ({ page }) => {
       const { loginUI } = accountLoc(page);
 
-      await test.step('🟦 Login', async () => {
+      await test.step('🟦 Log into the app', async () => {
         await doLogin(page, { user: persona.user, pass: persona.pass });
       });
 
@@ -30,7 +30,7 @@ test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
   test('Validate login page layout', { tag: '@visual' }, async ({ page }) => {
     const { loginUI } = accountLoc(page);
 
-    await test.step('🟦 Wait for logo and login button', async () => {
+    await test.step('⬜ Wait for logo and login button', async () => {
       await loginUI.logoImage.waitFor({ state: 'visible' });
       await loginUI.loginButton.waitFor({ state: 'visible' });
     });

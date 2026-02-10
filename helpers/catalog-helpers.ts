@@ -1,34 +1,49 @@
-import { Page } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { t } from './i18n';
 
 export const productLoc = (page: Page) => ({
   // --- Inventory Screen ---
   inventoryUI: {
     productSortDropdown: page.getByTestId('product-sort-container'),
-    productCards: page.getByTestId('inventory-item'),
   },
 
+  // --- Product Cards ---
   productUI: {
-    name: page.getByTestId('inventory-item-name'),
-    desc: page.getByTestId('inventory-item-desc'),
-    price: page.getByTestId('inventory-item-price'),
+    productCards: page.getByTestId('inventory-item'),
+    name: (base: Page | Locator = page) => base.getByTestId('inventory-item-name'),
+    desc: (base: Page | Locator = page) => base.getByTestId('inventory-item-desc'),
+    price: (base: Page | Locator = page) => base.getByTestId('inventory-item-price'),
   },
 });
 
-export const getProductData = async (page: Page, { productIndex = 0 }: { productIndex?: number } = {}) => {
-  const { inventoryUI } = productLoc(page);
+export async function getProductData(page: Page, { productIndex }: { productIndex: number }) {
+  const { productUI } = productLoc(page);
 
-  const productCard = inventoryUI.productCards.nth(productIndex);
+  const productCard = productUI.productCards.nth(productIndex);
 
-  const name = await productCard.getByTestId('inventory-item-name').innerText();
-  const desc = await productCard.getByTestId('inventory-item-desc').innerText();
-  const price = await productCard.getByTestId('inventory-item-price').innerText();
-
-  return {
-    name,
-    desc,
-    price,
+  const rawData = {
+    name: await productUI.name(productCard).textContent(),
+    desc: await productUI.desc(productCard).textContent(),
+    price: await productUI.price(productCard).textContent(),
   };
+
+  const cleanData: Record<string, string> = {};
+  for (const [key, value] of Object.entries(rawData)) {
+    if (!value || value.trim() === '') {
+      throw new Error(`Scraper Error: Could not find ${key} for product at index ${productIndex}.`);
+    } else {
+      cleanData[key as keyof typeof cleanData] = value.trim();
+    }
+  }
+
+  return cleanData as { name: string; desc: string; price: string };
+}
+
+export const navToProduct = async (page: Page, { productName }: { productName: string }) => {
+  const { productUI } = productLoc(page);
+
+  const exactNameRegex = new RegExp(`^${productName}$`);
+  await productUI.name().filter({ hasText: exactNameRegex }).click();
 };
 
 /*

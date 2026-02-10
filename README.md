@@ -12,7 +12,7 @@ The tests cover critical workflows such as login, adding items to the cart, and 
 
 - NPM (comes with Node.js)
 
-## 1. Install Dependencies
+### 1. Install Dependencies
 
 Run the following command to install all required packages:
 
@@ -20,11 +20,11 @@ Run the following command to install all required packages:
 npm install
 ```
 
-## 2. Configure Environment Variables
+### 2. Configure Environment Variables
 
 Rename `.env.example` to `.env` and update values as needed.
 
-## 3. Update Screenshots (optional)
+### 3. Update Screenshots (optional)
 
 If snapshots fail due to system or rendering differences, update them with:
 
@@ -32,7 +32,7 @@ If snapshots fail due to system or rendering differences, update them with:
 npx playwright test --update-snapshots
 ```
 
-## 4. Run Tests
+### 4. Run Tests
 
 To execute the tests across all configured browsers:
 
@@ -47,7 +47,7 @@ npx playwright test --project=Chrome
 npx playwright test --project=Mobile Chrome
 ```
 
-## 5. View Reports
+### 5. View Reports
 
 After running the tests, view the results by running:
 
@@ -60,3 +60,53 @@ npx playwright show-report
 - `playwright` - Playwright for end-to-end testing.
 
 - `dotenv` - Environment variable management.
+
+To keep our Playwright reports scannable and consistent, we follow the **Arrange-Act-Assert (AAA)** pattern. Using emojis in `test.step` titles allows us to identify the "health" of our tests at a glance.
+
+# Test Orchestration Standards: AAA Step Categorization
+
+### ⬜ Arrange (Setup & Preparation)
+
+**Purpose:** Everything required to get the application into the starting state.
+
+- **Navigation:** `page.goto('/')`
+- **Waiting:** `element.waitFor({ state: 'visible' })`
+- **Infrastructure:** Saving `storageState`, setting cookies, or seeding data.
+- **Data Collection:** Scraping "Source of Truth" data from the UI to use for later comparisons.
+
+> **Example:** `await test.step('⬜ Navigate and wait for inventory', async () => { ... });`
+
+### 🟦 Act (Execution)
+
+**Purpose:** The specific user behavior or system action being tested.
+
+- **Interactions:** `click()`, `fill()`, `dragTo()`, `hover()`.
+- **Functional Actions:** Reloading the page to test persistence.
+- **User Flow:** Moving from one logical page or state to another.
+
+> **Example:** `await test.step('🟦 Add product to cart', async () => { ... });`
+
+### 🟧 Assert (Verification)
+
+**Purpose:** Confirming that the application is in the expected state.
+
+- **Expectations:** `toHaveText()`, `toBeVisible()`, `toHaveValue()`.
+- **Visual Testing:** `toHaveScreenshot()`.
+- **Data Integrity:** Comparing "Act" results against "Arrange" data.
+
+> **Example:** `await test.step('🟧 Verify price matches inventory', async () => { ... });`
+
+---
+
+### Quick Reference Table
+
+| Emoji  | Phase       | Logical Goal               | Example Actions                    |
+| :----- | :---------- | :------------------------- | :--------------------------------- |
+| **⬜** | **Arrange** | "Get to the starting line" | `goto`, `waitFor`, `storageState`  |
+| **🟦** | **Act**     | "Do the work"              | `click`, `fill`, `press`, `reload` |
+| **🟧** | **Assert**  | "Check the result"         | `expect`, `toHaveScreenshot`       |
+
+### Why we use this:
+
+1.  **Categorized Failures:** If a **⬜** step fails, the **Environment** is likely the issue. If an **🟧** fails, the **Feature** is likely broken.
+2.  **Report Scannability:** Makes the Playwright HTML report and Trace Viewer incredibly easy to read for developers and stakeholders alike.
