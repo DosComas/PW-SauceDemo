@@ -65,7 +65,7 @@ To keep our Playwright reports scannable and consistent, we follow the **Arrange
 
 # Test Orchestration Standards: AAA Step Categorization
 
-### ⬜ Arrange (Setup & Preparation)
+### ⬜ Arrange (Preparation)
 
 **Purpose:** Everything required to get the application into the starting state.
 

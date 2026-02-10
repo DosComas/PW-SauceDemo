@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { productLoc } from '../../helpers/catalog-helpers';
-import { t } from '../../helpers/i18n';
+import { productLoc } from '../../helpers/catalog.helpers';
+import { t } from '../../utils/i18n';
 import { VALID_USERS } from '../../data/users';
 
 test.beforeEach(async ({ page }) => {

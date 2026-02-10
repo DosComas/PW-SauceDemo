@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { accountLoc, doLogin } from '../../helpers/account-helpers';
-import { t } from '../../helpers/i18n';
+import { accountLoc, doLogin } from '../../helpers/account.helpers';
+import { t } from '../../utils/i18n';
 import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users';
-import { toSnapshotName } from '../../helpers/string-utils';
+import { toSnapshotName } from '../../utils/string.utils';
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to login page', async () => {

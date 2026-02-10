@@ -1,5 +1,5 @@
 import { test as setup, expect } from '@playwright/test';
-import { doLogin, accountLoc } from '../helpers/account-helpers';
+import { doLogin, accountLoc } from '../helpers/account.helpers';
 import { VALID_USERS } from '../data/users';
 
 for (const persona of VALID_USERS) {

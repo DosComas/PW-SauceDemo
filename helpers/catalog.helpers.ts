@@ -1,5 +1,5 @@
 import { Page, Locator } from '@playwright/test';
-import { t } from './i18n';
+import { t } from '../utils/i18n';
 
 // --- TYPES ---
 interface ProductSource {
@@ -79,11 +79,20 @@ export async function addProductToCart(page: Page, { from, index = 0 }: ProductS
   await productUI.addToCartButton(scope).click();
 }
 
+export async function removeProductFromCart(page: Page, { from, index = 0 }: ProductSource) {
+  const { productUI } = productLoc(page);
+
+  const scope = getProductScope(page, { from, index });
+
+  await productUI.removeButton(scope).click();
+}
+
 // --- MODULE INTERFACE ---
 export const catalog = {
   getProductData,
   openProductDetails,
   addProductToCart,
+  removeProductFromCart,
 } as const;
 
 /*

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { accountLoc, doLogout, getSession } from '../../helpers/account-helpers';
-import { t } from '../../helpers/i18n';
+import { accountLoc, doLogout, getSession } from '../../helpers/account.helpers';
+import { t } from '../../utils/i18n';
 import { VALID_USERS } from '../../data/users';
 
 test.beforeEach(async ({ page }) => {
