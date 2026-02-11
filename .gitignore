@@ -1,4 +1,4 @@
-# Playwright
+# --- Playwright Artifacts ---
 node_modules/
 /test-results/
 /playwright-report/
@@ -7,3 +7,9 @@ node_modules/
 .auth/
 .env
 
+# --- VS Code Configuration ---
+.vscode/*
+# EXCEPT these shared standards and tools
+!.vscode/playwright.code-snippets
+!.vscode/extensions.json
+!.vscode/settings.json
