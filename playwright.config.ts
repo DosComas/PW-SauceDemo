@@ -24,7 +24,7 @@ export default defineConfig({
     [
       'html',
       {
-        title: `${CURRENT_ENV.reportName} Report`,
+        title: `${CURRENT_ENV.reportName} Report - ${t('locale')}`,
       },
     ],
   ],

@@ -19,15 +19,15 @@ for (const persona of VALID_USERS) {
       const { productUI } = catalogLoc(page);
 
       const setup = {
-        targetIndex: 0,
+        firstProduct: 0,
       };
 
       const expectedProduct = await test.step('⬜ Scrape product data', async () => {
-        return await catalog.getProductData(page, { from: 'inventory', index: setup.targetIndex });
+        return await catalog.getProductData(page, { from: 'inventory', index: setup.firstProduct });
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'name' });
+        await catalog.openProductDetails(page, { index: setup.firstProduct, via: 'name' });
       });
 
       await expect.soft(productUI.name(), '🟧 Name should match').toHaveText(expectedProduct.name);
@@ -39,16 +39,16 @@ for (const persona of VALID_USERS) {
       const { productUI, inventoryUI } = catalogLoc(page);
 
       const setup = {
-        targetIndex: 0,
+        firstProduct: 0,
         expectedCount: '1',
       };
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'img' });
+        await catalog.openProductDetails(page, { index: setup.firstProduct, via: 'img' });
       });
 
       await test.step('🟦 Add product to cart', async () => {
-        await catalog.addProductToCart(page, { from: 'pdp', index: setup.targetIndex });
+        await catalog.addProductToCart(page, { from: 'pdp', index: setup.firstProduct });
       });
 
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
@@ -58,7 +58,7 @@ for (const persona of VALID_USERS) {
         .toHaveText(setup.expectedCount);
 
       await test.step('🟦 Remove product from cart', async () => {
-        await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.targetIndex });
+        await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.firstProduct });
       });
 
       await expect.soft(productUI.addToCartButton(), '🟧 Add to cart button should be visible').toBeVisible();
@@ -71,7 +71,7 @@ for (const persona of VALID_USERS) {
 
       const setup = {
         productIndices: [0, 1, 2],
-        get targetIndex() {
+        get lastProduct() {
           return this.productIndices.slice(-1)[0];
         },
         get expectedCount() {
@@ -86,7 +86,7 @@ for (const persona of VALID_USERS) {
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'img' });
+        await catalog.openProductDetails(page, { index: setup.lastProduct, via: 'img' });
       });
 
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
@@ -101,15 +101,15 @@ for (const persona of VALID_USERS) {
         const { productUI } = catalogLoc(page);
 
         const setup = {
-          targetIndex: 0,
+          firstProduct: 0,
         };
 
         await test.step('⬜ Navigate to PDP', async () => {
-          await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'name' });
+          await catalog.openProductDetails(page, { index: setup.firstProduct, via: 'name' });
         });
 
         await test.step('⬜ Standardize PDP data', async () => {
-          await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.targetIndex });
+          await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.firstProduct });
         });
 
         await expect(page, '🟧 PDP layout should be correct').toHaveScreenshot(
