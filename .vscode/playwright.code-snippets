@@ -1,6 +1,6 @@
 {
   "Playwright Helper Template": {
-    "prefix": "pw-helper",
+    "prefix": "new-helper",
     "body": [
       "import { Page, Locator } from '@playwright/test';",
       "import { t } from '../utils/i18n';",
@@ -35,11 +35,11 @@
       "  doSomething,",
       "} as const;",
     ],
-    "description": "Generate a standardized Playwright Helper module",
+    "description": "Create a standardized Playwright Helper module",
   },
 
   "Playwright Spec Template": {
-    "prefix": "pw-spec",
+    "prefix": "new-spec",
     "body": [
       "import { test, expect } from '@playwright/test';",
       "import { ${1:catalog}, ${1:catalog}Loc } from '../../helpers/${1:catalog}.helpers';",
@@ -76,7 +76,7 @@
       "  });",
       "}",
     ],
-    "description": "Create a standardized Playwright persona-based test suite",
+    "description": "Create a standardized Playwright persona-based test file",
   },
 
   "Playwright Step Block": {
@@ -89,24 +89,24 @@
     "prefix": "pw-test",
     "body": [
       "test(`\\${SCOPE}: ${1:test description}`, async ({ page }) => {",
+      "  const { ${2:catalog}UI } = ${2:catalog}Loc(page);",
+      "",
       "  const setup = {",
-      "    $2",
+      "    $3",
       "  };",
       "",
-      "  await test.step('⬜ Arrange: ${3:prepare state}', async () => {",
-      "    $4",
+      "  await test.step('⬜ Arrange: ${4:prepare state}', async () => {",
+      "    $5",
       "  });",
       "",
-      "  await test.step('🟦 Action: ${5:perform interaction}', async () => {",
+      "  await test.step('🟦 Action: ${6:perform interaction}', async () => {",
       "    $0",
       "  });",
       "",
-      "  await test.step('🟧 Assert: ${6:verify outcome}', async () => {",
-      "    $7",
-      "  });",
+      "  await expect.soft(${2:catalog}UI.${7:element}, '🟧 Assert: ${8:verify outcome}').toBeVisible();",
       "});",
     ],
-    "description": "Create a standardized AAA test block using SCOPE and setup",
+    "description": "Playwright test block",
   },
 
   "Playwright beforeEach block": {
