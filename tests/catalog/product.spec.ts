@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { catalog, productLoc } from '../../helpers/catalog.helpers';
+import { catalog, catalogLoc } from '../../helpers/catalog.helpers';
 import { VALID_USERS } from '../../data/users.data';
 import { toSnapshotName } from '../../utils/string.utils';
 
@@ -16,7 +16,7 @@ for (const persona of VALID_USERS) {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Content matches inventory data`, async ({ page }) => {
-      const { productUI } = productLoc(page);
+      const { productUI } = catalogLoc(page);
 
       const setup = {
         targetIndex: 0,
@@ -36,7 +36,7 @@ for (const persona of VALID_USERS) {
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { productUI, inventoryUI } = productLoc(page);
+      const { productUI, inventoryUI } = catalogLoc(page);
 
       const setup = {
         targetIndex: 0,
@@ -67,7 +67,7 @@ for (const persona of VALID_USERS) {
     });
 
     test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
-      const { productUI, inventoryUI } = productLoc(page);
+      const { productUI, inventoryUI } = catalogLoc(page);
 
       const setup = {
         productIndices: [0, 1, 2],
@@ -98,7 +98,7 @@ for (const persona of VALID_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { productUI } = productLoc(page);
+        const { productUI } = catalogLoc(page);
 
         const setup = {
           targetIndex: 0,
