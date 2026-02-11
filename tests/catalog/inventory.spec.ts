@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { catalog, productLoc } from '../../helpers/catalog.helpers';
+import { catalog, catalogLoc } from '../../helpers/catalog.helpers';
 import { t } from '../../utils/i18n';
 import { VALID_USERS } from '../../data/users.data';
 import { toSnapshotName } from '../../utils/string.utils';
@@ -13,9 +13,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 // TEST CASES:
-// sorting
-// cart badge
-// visual X
+// sorting - TODO
+// cart badge - TODO
+// visual - X
 
 for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
@@ -30,7 +30,7 @@ for (const persona of VALID_USERS) {
 
     CASES.forEach(({ title, sortBy }) => {
       test(`${SCOPE}: Verify sorting by ${title}`, async ({ page }) => {
-        const { inventoryUI } = productLoc(page);
+        const { inventoryUI } = catalogLoc(page);
 
         await test.step('🟦 Sort products', async () => {
           await inventoryUI.productSortDropdown.selectOption(t(`product.sort.${sortBy}`));
@@ -50,7 +50,7 @@ for (const persona of VALID_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { inventoryUI } = productLoc(page);
+        const { inventoryUI } = catalogLoc(page);
 
         const setup = {
           productCount: 5,
