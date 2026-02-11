@@ -20,7 +20,7 @@ export const productLoc = (page: Page) => ({
     productSortDropdown: page.getByTestId('product-sort-container'),
     productCards: page.getByTestId('inventory-item'),
     cartBadge: page.getByTestId('shopping-cart-badge'),
-    invetoryImg: page.locator('.inventory_item_img'),
+    inventoryImg: page.locator('.inventory_item_img'),
   },
 
   // --- Product Cards ---
