@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 // TEST CASES:
 // sorting
 // cart badge
-// visual
+// visual X
 
 for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
@@ -43,21 +43,16 @@ for (const persona of VALID_USERS) {
         const { inventoryUI } = productLoc(page);
 
         const setup = {
-          targets: [0],
+          productCount: 5,
         };
 
         await test.step('⬜ Standardize PDP data', async () => {
-          // standarire number of producst?
-          // LOOP fro all products?
-          // ?? how about standarizon the first elemnt and tehm copying it 4 times?
-          await catalog.standardizeProductCard(page, { from: 'inventory', index: 0 });
+          await catalog.standardizeInventoryGrid(page, { products: setup.productCount });
         });
-
-        const thing = inventoryUI.inventoryImg; // need to mask all img
 
         await expect(page, '🟧 Inventory layout should be correct').toHaveScreenshot(
           `${toSnapshotName(persona.role)}-inventory.png`,
-          // { mask: [inventoryUI.inventoryImg], fullPage: true }, need to mask all img
+          { mask: await inventoryUI.inventoryImg.all(), fullPage: true }
         );
       });
     }

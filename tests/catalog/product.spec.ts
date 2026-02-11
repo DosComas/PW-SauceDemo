@@ -19,15 +19,15 @@ for (const persona of VALID_USERS) {
       const { productUI } = productLoc(page);
 
       const setup = {
-        target: 0,
+        targetIndex: 0,
       };
 
       const expectedProduct = await test.step('⬜ Scrape product data', async () => {
-        return await catalog.getProductData(page, { from: 'inventory', index: setup.target });
+        return await catalog.getProductData(page, { from: 'inventory', index: setup.targetIndex });
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await catalog.openProductDetails(page, { index: setup.target, via: 'name' });
+        await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'name' });
       });
 
       await expect.soft(productUI.name(), '🟧 Name should match').toHaveText(expectedProduct.name);
@@ -39,22 +39,22 @@ for (const persona of VALID_USERS) {
       const { productUI, inventoryUI } = productLoc(page);
 
       const setup = {
-        target: 0,
+        targetIndex: 0,
       };
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await catalog.openProductDetails(page, { index: setup.target, via: 'img' });
+        await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'img' });
       });
 
       await test.step('🟦 Add product to cart', async () => {
-        await catalog.addProductToCart(page, { from: 'pdp', index: setup.target });
+        await catalog.addProductToCart(page, { from: 'pdp', index: setup.targetIndex });
       });
 
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
 
       await test.step('🟦 Remove product from cart', async () => {
-        await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.target });
+        await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.targetIndex });
       });
 
       await expect.soft(productUI.addToCartButton(), '🟧 Add to cart button should be visible').toBeVisible();
@@ -66,30 +66,30 @@ for (const persona of VALID_USERS) {
       const { productUI, inventoryUI } = productLoc(page);
 
       const setup = {
-        targets: [0, 1, 2],
-        get target() {
-          return this.targets.at(-1)!;
+        productIndices: [0, 1, 2],
+        get targetIndex() {
+          return this.productIndices.slice(-1)[0];
         },
-        get count() {
-          return this.targets.length.toString();
+        get expectedCount() {
+          return String(this.productIndices.length);
         },
       };
 
       await test.step('⬜ Add products to cart on inventory', async () => {
-        for (const productIndex of setup.targets) {
+        for (const productIndex of setup.productIndices) {
           await catalog.addProductToCart(page, { from: 'inventory', index: productIndex });
         }
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await catalog.openProductDetails(page, { index: setup.target, via: 'img' });
+        await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'img' });
       });
 
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
       await expect
-        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.count} items`)
-        .toHaveText(setup.count);
+        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.expectedCount} items`)
+        .toHaveText(setup.expectedCount);
     });
 
     if (persona.isBaselineUser) {
@@ -97,20 +97,20 @@ for (const persona of VALID_USERS) {
         const { productUI } = productLoc(page);
 
         const setup = {
-          target: 0,
+          targetIndex: 0,
         };
 
         await test.step('⬜ Navigate to PDP', async () => {
-          await catalog.openProductDetails(page, { index: setup.target, via: 'name' });
+          await catalog.openProductDetails(page, { index: setup.targetIndex, via: 'name' });
         });
 
         await test.step('⬜ Standardize PDP data', async () => {
-          await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.target });
+          await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.targetIndex });
         });
 
         await expect(page, '🟧 PDP layout should be correct').toHaveScreenshot(
           `${toSnapshotName(persona.role)}-product.png`,
-          { mask: [productUI.pdpImg], fullPage: true },
+          { mask: [productUI.pdpImg], fullPage: true }
         );
       });
     }

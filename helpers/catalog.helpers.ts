@@ -19,6 +19,7 @@ export const productLoc = (page: Page) => ({
   inventoryUI: {
     productSortDropdown: page.getByTestId('product-sort-container'),
     productCards: page.getByTestId('inventory-item'),
+    productList: page.getByTestId('inventory-list'),
     cartBadge: page.getByTestId('shopping-cart-badge'),
     inventoryImg: page.locator('.inventory_item_img'),
   },
@@ -29,8 +30,7 @@ export const productLoc = (page: Page) => ({
     desc: (base: Page | Locator = page) => base.getByTestId('inventory-item-desc'),
     price: (base: Page | Locator = page) => base.getByTestId('inventory-item-price'),
     picture: (base: Page | Locator = page) => base.getByRole('img'),
-    addToCartButton: (base: Page | Locator = page) =>
-      base.getByRole('button', { name: t('product.addToCart') }),
+    addToCartButton: (base: Page | Locator = page) => base.getByRole('button', { name: t('product.addToCart') }),
     removeButton: (base: Page | Locator = page) => base.getByRole('button', { name: t('product.remove') }),
     pdpImg: page.locator('.inventory_details_img'),
   },
@@ -100,6 +100,30 @@ export async function standardizeProductCard(page: Page, { from, index = 0 }: Pr
   await productUI.price(scope).evaluate((el, price) => (el.textContent = price), VISUAL_MOCK.product.price);
 }
 
+export async function standardizeInventoryGrid(page: Page, { products }: { products: number }) {
+  const { inventoryUI } = productLoc(page);
+
+  await standardizeProductCard(page, { from: 'inventory', index: 0 });
+
+  const listHandle = await inventoryUI.productList.elementHandle();
+  const itemHandle = await inventoryUI.productCards.first().elementHandle();
+
+  if (listHandle && itemHandle) {
+    await page.evaluate(
+      ({ list, item, n }) => {
+        // Clear the current list
+        list.innerHTML = '';
+
+        // Re-populate with clones of the standardized item
+        for (let i = 0; i < n; i++) {
+          list.appendChild(item.cloneNode(true));
+        }
+      },
+      { list: listHandle, item: itemHandle, n: products }
+    );
+  }
+}
+
 // --- MODULE INTERFACE ---
 export const catalog = {
   getProductData,
@@ -107,6 +131,7 @@ export const catalog = {
   addProductToCart,
   removeProductFromCart,
   standardizeProductCard,
+  standardizeInventoryGrid,
 } as const;
 
 /*
