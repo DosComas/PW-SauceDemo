@@ -3,6 +3,8 @@ import { accountLoc, doLogout, getSession } from '../../helpers/account.helpers'
 import { t } from '../../utils/i18n';
 import { VALID_USERS } from '../../data/users.data';
 
+const SCOPE = 'Identity';
+
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
     await page.goto('/inventory.html');
@@ -13,7 +15,7 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test('Identity: Secure logout and session destruction', async ({ page }) => {
+    test(`${SCOPE}: Secure logout and session destruction`, async ({ page }) => {
       const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Logout', async () => {

@@ -1,13 +1,21 @@
 import { test, expect } from '@playwright/test';
-import { productLoc } from '../../helpers/catalog.helpers';
+import { catalog, productLoc } from '../../helpers/catalog.helpers';
 import { t } from '../../utils/i18n';
 import { VALID_USERS } from '../../data/users.data';
+import { toSnapshotName } from '../../utils/string.utils';
+
+const SCOPE = 'Inventory';
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
     await page.goto('/inventory.html');
   });
 });
+
+// TEST CASES:
+// sorting
+// cart badge
+// visual
 
 for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
@@ -29,6 +37,30 @@ for (const persona of VALID_USERS) {
         });
       });
     });
+
+    if (persona.isBaselineUser) {
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
+        const { inventoryUI } = productLoc(page);
+
+        const setup = {
+          targets: [0],
+        };
+
+        await test.step('⬜ Standardize PDP data', async () => {
+          // standarire number of producst?
+          // LOOP fro all products?
+          // ?? how about standarizon the first elemnt and tehm copying it 4 times?
+          await catalog.standardizeProductCard(page, { from: 'inventory', index: 0 });
+        });
+
+        const thing = inventoryUI.inventoryImg; // need to mask all img
+
+        await expect(page, '🟧 Inventory layout should be correct').toHaveScreenshot(
+          `${toSnapshotName(persona.role)}-inventory.png`,
+          // { mask: [inventoryUI.inventoryImg], fullPage: true }, need to mask all img
+        );
+      });
+    }
   });
 }
 

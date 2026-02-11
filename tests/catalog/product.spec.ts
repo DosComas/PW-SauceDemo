@@ -3,6 +3,8 @@ import { catalog, productLoc } from '../../helpers/catalog.helpers';
 import { VALID_USERS } from '../../data/users.data';
 import { toSnapshotName } from '../../utils/string.utils';
 
+const SCOPE = 'PDP';
+
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
     await page.goto('/inventory.html');
@@ -13,7 +15,7 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test('PDP: Content matches inventory data', async ({ page }) => {
+    test(`${SCOPE}: Content matches inventory data`, async ({ page }) => {
       const { productUI } = productLoc(page);
 
       const setup = {
@@ -33,7 +35,7 @@ for (const persona of VALID_USERS) {
       await expect.soft(productUI.price(), '🟧 Price should match').toHaveText(expectedProduct.price);
     });
 
-    test('PDP: Add/Remove button toggles cart state', async ({ page }) => {
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
       const { productUI, inventoryUI } = productLoc(page);
 
       const setup = {
@@ -60,7 +62,7 @@ for (const persona of VALID_USERS) {
       await expect.soft(inventoryUI.cartBadge, `🟧 Cart badge should disappear`).not.toBeVisible();
     });
 
-    test('PDP: State persistence from inventory', async ({ page }) => {
+    test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
       const { productUI, inventoryUI } = productLoc(page);
 
       const setup = {
@@ -91,7 +93,7 @@ for (const persona of VALID_USERS) {
     });
 
     if (persona.isBaselineUser) {
-      test('PDP: Visual layout', { tag: '@visual' }, async ({ page }) => {
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
         const { productUI } = productLoc(page);
 
         const setup = {

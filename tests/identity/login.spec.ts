@@ -4,6 +4,8 @@ import { t } from '../../utils/i18n';
 import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users.data';
 import { toSnapshotName } from '../../utils/string.utils';
 
+const SCOPE = 'Identity';
+
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to login page', async () => {
     await page.goto('/');
@@ -12,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 
 for (const persona of INVALID_USERS) {
   test.describe(`${persona.role}`, () => {
-    test(`Identity: Reject invalid credentials`, async ({ page }) => {
+    test(`${SCOPE}: Reject invalid credentials`, async ({ page }) => {
       const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Log into the app', async () => {
@@ -27,7 +29,7 @@ for (const persona of INVALID_USERS) {
 }
 
 test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
-  test('Identity: Visual layout', { tag: '@visual' }, async ({ page }) => {
+  test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
     const { loginUI } = accountLoc(page);
 
     await test.step('⬜ Wait for logo and login button', async () => {
