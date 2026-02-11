@@ -29,13 +29,23 @@ for (const persona of VALID_USERS) {
     ] as const;
 
     CASES.forEach(({ title, sortBy }) => {
-      test(`Verify sorting by ${title}`, async ({ page }) => {
+      test(`${SCOPE}: Verify sorting by ${title}`, async ({ page }) => {
         const { inventoryUI } = productLoc(page);
 
         await test.step('🟦 Sort products', async () => {
           await inventoryUI.productSortDropdown.selectOption(t(`product.sort.${sortBy}`));
         });
       });
+    });
+
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
+      const setup = {};
+
+      await test.step('⬜ Arrange: prepare state', async () => {});
+
+      await test.step('🟦 Action: perform interaction', async () => {});
+
+      await test.step('🟧 Assert: verify outcome', async () => {});
     });
 
     if (persona.isBaselineUser) {

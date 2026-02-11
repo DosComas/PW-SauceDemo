@@ -40,6 +40,7 @@ for (const persona of VALID_USERS) {
 
       const setup = {
         targetIndex: 0,
+        expectedCount: '1',
       };
 
       await test.step('🟦 Navigate to PDP', async () => {
@@ -52,6 +53,9 @@ for (const persona of VALID_USERS) {
 
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
+      await expect
+        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.expectedCount} item/s`)
+        .toHaveText(setup.expectedCount);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.targetIndex });
@@ -88,7 +92,7 @@ for (const persona of VALID_USERS) {
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
       await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
       await expect
-        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.expectedCount} items`)
+        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.expectedCount} item/s`)
         .toHaveText(setup.expectedCount);
     });
 
