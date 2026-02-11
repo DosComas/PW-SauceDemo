@@ -20,7 +20,7 @@ for (const persona of VALID_USERS) {
         target: 0,
       };
 
-      const expectedProduct = await test.step('⬜ Scrap product data', async () => {
+      const expectedProduct = await test.step('⬜ Scrape product data', async () => {
         return await catalog.getProductData(page, { from: 'inventory', index: setup.target });
       });
 
@@ -73,7 +73,7 @@ for (const persona of VALID_USERS) {
         },
       };
 
-      await test.step('🟦 Add products to cart', async () => {
+      await test.step('⬜ Add products to cart on inventory', async () => {
         for (const productIndex of setup.targets) {
           await catalog.addProductToCart(page, { from: 'inventory', index: productIndex });
         }
@@ -98,7 +98,7 @@ for (const persona of VALID_USERS) {
           target: 0,
         };
 
-        await test.step('🟦 Navigate to PDP', async () => {
+        await test.step('⬜ Navigate to PDP', async () => {
           await catalog.openProductDetails(page, { index: setup.target, via: 'name' });
         });
 
