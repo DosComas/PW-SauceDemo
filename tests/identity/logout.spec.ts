@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { accountLoc, doLogout, getSession } from '../../helpers/account.helpers';
 import { t } from '../../utils/i18n';
-import { VALID_USERS } from '../../data/users';
+import { VALID_USERS } from '../../data/users.data';
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
@@ -13,7 +13,7 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test('Verify session is destroyed on logout', async ({ page }) => {
+    test('Identity: Secure logout and session destruction', async ({ page }) => {
       const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Logout', async () => {

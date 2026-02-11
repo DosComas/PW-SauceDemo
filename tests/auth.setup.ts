@@ -1,6 +1,6 @@
 import { test as setup, expect } from '@playwright/test';
 import { doLogin, accountLoc } from '../helpers/account.helpers';
-import { VALID_USERS } from '../data/users';
+import { VALID_USERS } from '../data/users.data';
 
 for (const persona of VALID_USERS) {
   setup(`Authenticate as ${persona.role}`, async ({ page }) => {

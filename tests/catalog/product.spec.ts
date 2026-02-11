@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { catalog, productLoc } from '../../helpers/catalog.helpers';
-import { t } from '../../utils/i18n';
-import { VALID_USERS } from '../../data/users';
+import { VALID_USERS } from '../../data/users.data';
 import { toSnapshotName } from '../../utils/string.utils';
 
 test.beforeEach(async ({ page }) => {
@@ -14,7 +13,7 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test('Verify product data matches data from inventory', async ({ page }) => {
+    test('PDP: Content matches inventory data', async ({ page }) => {
       const { productUI } = productLoc(page);
 
       const setup = {
@@ -25,7 +24,7 @@ for (const persona of VALID_USERS) {
         return await catalog.getProductData(page, { from: 'inventory', index: setup.target });
       });
 
-      await test.step('🟦 Navigate to product', async () => {
+      await test.step('🟦 Navigate to PDP', async () => {
         await catalog.openProductDetails(page, { index: setup.target, via: 'name' });
       });
 
@@ -34,14 +33,14 @@ for (const persona of VALID_USERS) {
       await expect.soft(productUI.price(), '🟧 Price should match').toHaveText(expectedProduct.price);
     });
 
-    test('Verify product can be added and removed from cart', async ({ page }) => {
+    test('PDP: Add/Remove button toggles cart state', async ({ page }) => {
       const { productUI, inventoryUI } = productLoc(page);
 
       const setup = {
         target: 0,
       };
 
-      await test.step('🟦 Navigate to product', async () => {
+      await test.step('🟦 Navigate to PDP', async () => {
         await catalog.openProductDetails(page, { index: setup.target, via: 'img' });
       });
 
@@ -61,7 +60,7 @@ for (const persona of VALID_USERS) {
       await expect.soft(inventoryUI.cartBadge, `🟧 Cart badge should disappear`).not.toBeVisible();
     });
 
-    test('Verify cart buttons stay syncronized beetwen pages', async ({ page }) => {
+    test('PDP: State persistence from inventory', async ({ page }) => {
       const { productUI, inventoryUI } = productLoc(page);
 
       const setup = {
@@ -80,7 +79,7 @@ for (const persona of VALID_USERS) {
         }
       });
 
-      await test.step('🟦 Navigate to product', async () => {
+      await test.step('🟦 Navigate to PDP', async () => {
         await catalog.openProductDetails(page, { index: setup.target, via: 'img' });
       });
 
@@ -92,15 +91,25 @@ for (const persona of VALID_USERS) {
     });
 
     if (persona.isBaselineUser) {
-      test('Verify product page layout', { tag: '@visual' }, async ({ page }) => {
-        const productToOpen = 0;
+      test('PDP: Visual layout', { tag: '@visual' }, async ({ page }) => {
+        const { productUI } = productLoc(page);
 
-        await test.step('🟦 Navigate to product', async () => {
-          await catalog.openProductDetails(page, { index: productToOpen, via: 'name' });
+        const setup = {
+          target: 0,
+        };
+
+        await test.step('🟦 Navigate to PDP', async () => {
+          await catalog.openProductDetails(page, { index: setup.target, via: 'name' });
         });
 
-        // standardize title, info, price
-        // snapshot
+        await test.step('⬜ Standardize PDP data', async () => {
+          await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.target });
+        });
+
+        await expect(page, '🟧 PDP layout should be correct').toHaveScreenshot(
+          `${toSnapshotName(persona.role)}-product.png`,
+          { mask: [productUI.pdpImg], fullPage: true },
+        );
       });
     }
   });

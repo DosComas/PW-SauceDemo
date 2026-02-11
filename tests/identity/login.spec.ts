@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { accountLoc, doLogin } from '../../helpers/account.helpers';
 import { t } from '../../utils/i18n';
-import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users';
+import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users.data';
 import { toSnapshotName } from '../../utils/string.utils';
 
 test.beforeEach(async ({ page }) => {
@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 
 for (const persona of INVALID_USERS) {
   test.describe(`${persona.role}`, () => {
-    test(`Validate login failure`, async ({ page }) => {
+    test(`Identity: Reject invalid credentials`, async ({ page }) => {
       const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Log into the app', async () => {
@@ -27,7 +27,7 @@ for (const persona of INVALID_USERS) {
 }
 
 test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
-  test('Validate login page layout', { tag: '@visual' }, async ({ page }) => {
+  test('Identity: Visual layout', { tag: '@visual' }, async ({ page }) => {
     const { loginUI } = accountLoc(page);
 
     await test.step('⬜ Wait for logo and login button', async () => {
@@ -35,8 +35,9 @@ test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
       await loginUI.loginButton.waitFor({ state: 'visible' });
     });
 
-    await expect(page, '🟧 Login page should be visible').toHaveScreenshot(
+    await expect(page, '🟧 Login layout should be correct').toHaveScreenshot(
       `${toSnapshotName(ANONYMOUS_VISITOR.role)}-login.png`,
+      { fullPage: true },
     );
   });
 });

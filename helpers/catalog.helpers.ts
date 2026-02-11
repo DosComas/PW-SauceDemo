@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { t } from '../utils/i18n';
+import { VISUAL_MOCK } from '../data/products.data';
 
 // --- TYPES ---
 interface ProductSource {
@@ -19,6 +20,7 @@ export const productLoc = (page: Page) => ({
     productSortDropdown: page.getByTestId('product-sort-container'),
     productCards: page.getByTestId('inventory-item'),
     cartBadge: page.getByTestId('shopping-cart-badge'),
+    invetoryImg: page.locator('.inventory_item_img'),
   },
 
   // --- Product Cards ---
@@ -30,6 +32,7 @@ export const productLoc = (page: Page) => ({
     addToCartButton: (base: Page | Locator = page) =>
       base.getByRole('button', { name: t('product.addToCart') }),
     removeButton: (base: Page | Locator = page) => base.getByRole('button', { name: t('product.remove') }),
+    pdpImg: page.locator('.inventory_details_img'),
   },
 });
 
@@ -87,12 +90,23 @@ export async function removeProductFromCart(page: Page, { from, index = 0 }: Pro
   await productUI.removeButton(scope).click();
 }
 
+export async function standardizeProductCard(page: Page, { from, index = 0 }: ProductSource) {
+  const { productUI } = productLoc(page);
+
+  const scope = getProductScope(page, { from, index });
+
+  await productUI.name(scope).evaluate((el, name) => (el.textContent = name), VISUAL_MOCK.product.name);
+  await productUI.desc(scope).evaluate((el, desc) => (el.textContent = desc), VISUAL_MOCK.product.desc);
+  await productUI.price(scope).evaluate((el, price) => (el.textContent = price), VISUAL_MOCK.product.price);
+}
+
 // --- MODULE INTERFACE ---
 export const catalog = {
   getProductData,
   openProductDetails,
   addProductToCart,
   removeProductFromCart,
+  standardizeProductCard,
 } as const;
 
 /*

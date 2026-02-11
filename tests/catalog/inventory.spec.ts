@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { productLoc } from '../../helpers/catalog.helpers';
 import { t } from '../../utils/i18n';
-import { VALID_USERS } from '../../data/users';
+import { VALID_USERS } from '../../data/users.data';
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
