@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { TranslationKey } from './dictionary';
+import { TranslationKey } from './dictionary.data';
 
 const VALID_USERNAME = process.env.VALID_USERNAME as string;
 const VALID_PASSWORD = process.env.VALID_PASSWORD as string;
