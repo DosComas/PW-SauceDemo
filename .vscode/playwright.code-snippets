@@ -119,7 +119,7 @@
 
   "Playwright test.use block": {
     "prefix": "pw-use",
-    "body": ["test.use({ ${1:storageState}: ${2:persona.storageState} });"],
+    "body": ["test.use({", "  $0", "});"],
     "description": "Playwright test.use block",
   },
 }
