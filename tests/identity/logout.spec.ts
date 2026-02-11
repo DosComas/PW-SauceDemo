@@ -26,9 +26,7 @@ for (const persona of VALID_USERS) {
         await page.goBack();
       });
 
-      await expect(loginUI.errorMessage, '🟧 Error message should be displayed').toHaveText(
-        t('auth.logoutInvError'),
-      );
+      await expect(loginUI.errorMessage, '🟧 Error message should be displayed').toHaveText(t('auth.logoutInvError'));
 
       await test.step('🟦 Reload the page', async () => {
         await page.reload();

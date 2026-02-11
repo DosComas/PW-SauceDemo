@@ -22,7 +22,7 @@ for (const persona of INVALID_USERS) {
       });
 
       await expect(loginUI.errorMessage, '🟧 Error message should be displayed').toContainText(
-        t(persona.expectedError),
+        t(persona.expectedError)
       );
     });
   });
@@ -39,7 +39,7 @@ test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
 
     await expect(page, '🟧 Login layout should be correct').toHaveScreenshot(
       `${toSnapshotName(ANONYMOUS_VISITOR.role)}-login.png`,
-      { fullPage: true },
+      { fullPage: true }
     );
   });
 });
