@@ -1,7 +1,6 @@
 import { Page, Locator } from '@playwright/test';
-import { t } from '../utils/i18n';
-import { VISUAL_MOCK, STORAGE_KEYS } from '../data/products.data';
-import { error } from 'console';
+import { t } from '@utils';
+import { VISUAL_MOCK, STORAGE_KEYS } from '@data';
 
 // --- TYPES ---
 interface ProductSource {

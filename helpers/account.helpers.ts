@@ -1,5 +1,5 @@
 import { Page, BrowserContext } from '@playwright/test';
-import { t } from '../utils/i18n';
+import { t } from '@utils';
 
 // --- TYPES ---
 // ...
