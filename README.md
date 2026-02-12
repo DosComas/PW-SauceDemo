@@ -190,3 +190,34 @@ code logic:
 - **Consistency:** Every test file follows the same architectural "Blueprint."
 - **Scannability:** Debug failures faster by identifying which "Phase" (Arrange, Act, or Assert) failed at a glance.
 - **Speed:** Write complex, persona-driven tests in seconds rather than minutes.
+
+---
+
+# Playwright Assertion Style Guide
+
+### Core Rule
+
+Every assertion message must be **Categorized**, **Outcome-Oriented**, and **Concise**.
+
+---
+
+### The Guide
+
+- **Format:** `[Emoji] [Category]: [Target] [Outcome]`
+- **Verb Style:** Use **Active Facts** (e.g., _matches_, _visible_) instead of "should."
+- **Prefixes:**
+  - `🟧 UI:` Visibility, text content, and layout/screenshots.
+  - `🟧 Data:` LocalStorage, session state, and background logic.
+
+---
+
+### Examples
+
+| Category | Message Example                        |
+| :------- | :------------------------------------- |
+| **UI**   | `'🟧 UI: Product name matches'`        |
+| **UI**   | `'🟧 UI: Layout visual check'`         |
+| **Data** | `'🟧 Data: Local storage has 3 items'` |
+| **Data** | `'🟧 Data: Session state is empty'`    |
+
+---

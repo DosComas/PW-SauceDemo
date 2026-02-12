@@ -1,8 +1,6 @@
-import { test, expect } from '@playwright/test';
-import { accountLoc, doLogin } from '../../helpers/account.helpers';
-import { t } from '../../utils/i18n';
-import { INVALID_USERS, ANONYMOUS_VISITOR } from '../../data/users.data';
-import { toSnapshotName } from '../../utils/string.utils';
+import { test, expect, t, toSnapshotName } from '@utils';
+import { accountLoc, doLogin } from '@helpers';
+import { INVALID_USERS, ANONYMOUS_VISITOR } from '@data';
 
 const SCOPE = 'Identity';
 
@@ -21,9 +19,7 @@ for (const persona of INVALID_USERS) {
         await doLogin(page, { user: persona.user, pass: persona.pass });
       });
 
-      await expect(loginUI.errorMessage, '🟧 Error message should be displayed').toContainText(
-        t(persona.expectedError)
-      );
+      await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toContainText(t(persona.expectedError));
     });
   });
 }
@@ -37,7 +33,7 @@ test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
       await loginUI.loginButton.waitFor({ state: 'visible' });
     });
 
-    await expect(page, '🟧 Login layout should be correct').toHaveScreenshot(
+    await expect(page, '🟧 UI: Login layout visual check').toHaveScreenshot(
       `${toSnapshotName(ANONYMOUS_VISITOR.role)}-login.png`,
       { fullPage: true }
     );

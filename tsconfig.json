@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@data": ["data/index.ts"],
+      "@helpers": ["helpers/index.ts"],
+      "@utils": ["utils/index.ts"]
+    }
+  }
+}

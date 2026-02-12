@@ -14,13 +14,12 @@ for (const persona of VALID_USERS) {
       await doLogin(page, { user: persona.user, pass: persona.pass });
     });
 
-    await expect(page, '🟧 URL should be inventory page').toHaveURL(/.*inventory.html/);
-
     await setup.step('🟦 Open user menu', async () => {
       await navBarUI.menuButton.click();
     });
 
-    await expect(navBarUI.logoutButton, '🟧 Logout button should be visible').toBeVisible();
+    await expect(navBarUI.logoutButton, '🟧 UI: Logout button visible').toBeVisible();
+    await expect(page, '🟧 Data: Inventory URL active').toHaveURL(/.*inventory.html/);
 
     await setup.step('⬜ Save authentication state', async () => {
       await page.context().storageState({ path: persona.storageState });

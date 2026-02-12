@@ -1,7 +1,6 @@
-import { test, expect } from '@playwright/test';
-import { accountLoc, doLogout, getSession } from '../../helpers/account.helpers';
-import { t } from '../../utils/i18n';
-import { VALID_USERS } from '../../data/users.data';
+import { test, expect, t } from '@utils';
+import { accountLoc, doLogout, getSession } from '@helpers';
+import { VALID_USERS } from '@data';
 
 const SCOPE = 'Identity';
 
@@ -26,14 +25,13 @@ for (const persona of VALID_USERS) {
         await page.goBack();
       });
 
-      await expect(loginUI.errorMessage, '🟧 Error message should be displayed').toHaveText(t('auth.logoutInvError'));
+      await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toHaveText(t('auth.logoutInvError'));
 
       await test.step('🟦 Reload the page', async () => {
         await page.reload();
       });
 
-      const sessionCookie = await getSession(page.context());
-      expect(sessionCookie, '🟧 Cookies should be deleted').toBeUndefined();
+      expect(await getSession(page.context()), '🟧 Data: Session cookies deleted').toBeUndefined();
     });
   });
 }

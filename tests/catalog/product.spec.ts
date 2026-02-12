@@ -1,7 +1,6 @@
-import { test, expect } from '@playwright/test';
-import { catalog, catalogLoc } from '../../helpers/catalog.helpers';
-import { VALID_USERS } from '../../data/users.data';
-import { toSnapshotName } from '../../utils/string.utils';
+import { test, expect, toSnapshotName } from '@utils';
+import { catalog, catalogLoc } from '@helpers';
+import { VALID_USERS, STORAGE_KEYS } from '@data';
 
 const SCOPE = 'PDP';
 
@@ -30,9 +29,9 @@ for (const persona of VALID_USERS) {
         await catalog.openProductDetails(page, { index: setup.firstProduct, via: 'name' });
       });
 
-      await expect.soft(productUI.name(), '🟧 Name should match').toHaveText(expectedProduct.name);
-      await expect.soft(productUI.desc(), '🟧 Description should match').toHaveText(expectedProduct.desc);
-      await expect.soft(productUI.price(), '🟧 Price should match').toHaveText(expectedProduct.price);
+      await expect.soft(productUI.name(), '🟧 UI: Product name matches').toHaveText(expectedProduct.name);
+      await expect.soft(productUI.desc(), '🟧 UI: Product description matches').toHaveText(expectedProduct.desc);
+      await expect.soft(productUI.price(), '🟧 UI: Product price matches').toHaveText(expectedProduct.price);
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
@@ -40,7 +39,6 @@ for (const persona of VALID_USERS) {
 
       const setup = {
         firstProduct: 0,
-        expectedCount: '1',
       };
 
       await test.step('🟦 Navigate to PDP', async () => {
@@ -51,19 +49,17 @@ for (const persona of VALID_USERS) {
         await catalog.addProductToCart(page, { from: 'pdp', index: setup.firstProduct });
       });
 
-      await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
-      await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
-      await expect
-        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.expectedCount} item/s`)
-        .toHaveText(setup.expectedCount);
+      await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 1`).toHaveText('1');
+      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(1);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.firstProduct });
       });
 
-      await expect.soft(productUI.addToCartButton(), '🟧 Add to cart button should be visible').toBeVisible();
-      await expect.soft(productUI.addToCartButton(), '🟧 Add to cart button should be enabled').toBeEnabled();
-      await expect.soft(inventoryUI.cartBadge, `🟧 Cart badge should disappear`).not.toBeVisible();
+      await expect.soft(productUI.addToCartButton(), '🟧 UI: Add button visible').toBeVisible();
+      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge removed`).not.toBeVisible();
+      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage is empty`).toHaveStorageLength(0);
     });
 
     test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
@@ -73,9 +69,6 @@ for (const persona of VALID_USERS) {
         productIndices: [0, 1, 2],
         get lastProduct() {
           return this.productIndices.slice(-1)[0];
-        },
-        get expectedCount() {
-          return String(this.productIndices.length);
         },
       };
 
@@ -89,11 +82,9 @@ for (const persona of VALID_USERS) {
         await catalog.openProductDetails(page, { index: setup.lastProduct, via: 'img' });
       });
 
-      await expect.soft(productUI.removeButton(), '🟧 Remove button should be visible').toBeVisible();
-      await expect.soft(productUI.removeButton(), '🟧 Remove button should be enabled').toBeEnabled();
-      await expect
-        .soft(inventoryUI.cartBadge, `🟧 Cart badge should show ${setup.expectedCount} item/s`)
-        .toHaveText(setup.expectedCount);
+      await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 3`).toHaveText('3');
+      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage has 3 item`).toHaveStorageLength(3);
     });
 
     if (persona.isBaselineUser) {
@@ -112,7 +103,7 @@ for (const persona of VALID_USERS) {
           await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.firstProduct });
         });
 
-        await expect(page, '🟧 PDP layout should be correct').toHaveScreenshot(
+        await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot(
           `${toSnapshotName(persona.role)}-product.png`,
           { mask: [productUI.pdpImg], fullPage: true }
         );

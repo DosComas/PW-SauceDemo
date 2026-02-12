@@ -1,6 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { t } from '../utils/i18n';
-import { VISUAL_MOCK } from '../data/products.data';
+import { VISUAL_MOCK, STORAGE_KEYS } from '../data/products.data';
+import { error } from 'console';
 
 // --- TYPES ---
 interface ProductSource {
@@ -124,6 +125,15 @@ export async function standardizeInventoryGrid(page: Page, { products }: { produ
   }
 }
 
+export async function getCartState(page: Page) {
+  return await page.evaluate<number[], string>((key) => {
+    const session = localStorage.getItem(key);
+
+    if (!session) return [];
+    return JSON.parse(session);
+  }, STORAGE_KEYS.cart);
+}
+
 // --- MODULE INTERFACE ---
 export const catalog = {
   getProductData,
@@ -132,6 +142,7 @@ export const catalog = {
   removeProductFromCart,
   standardizeProductCard,
   standardizeInventoryGrid,
+  getCartState,
 } as const;
 
 /*
