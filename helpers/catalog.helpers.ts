@@ -48,17 +48,19 @@ export async function getProductData(page: Page, { from, index = 0 }: ProductSou
 
   const scope = getProductScope(page, { from, index });
 
-  const [name, desc, price] = await Promise.all([
+  const rawData = await Promise.all([
     productUI.name(scope).innerText(),
     productUI.desc(scope).innerText(),
     productUI.price(scope).innerText(),
   ]);
 
+  const [name, desc, price] = rawData.map((val) => val.trim());
+
   if (!name || !desc || !price) {
     throw new Error(`Scraper Error: Missing data on ${from} page`);
   }
 
-  return { name: name.trim(), desc: desc.trim(), price: price.trim() };
+  return { name: name, desc: desc, price: price };
 }
 
 export async function openProductDetails(page: Page, { index, via }: ProductClick) {
