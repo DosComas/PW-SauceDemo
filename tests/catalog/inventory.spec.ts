@@ -1,6 +1,6 @@
 import { test, expect, t, toSnapshotName } from '@utils';
 import { catalog, catalogLoc } from '@helpers';
-import { VALID_USERS } from '@data';
+import { VALID_USERS, STORAGE_KEYS } from '@data';
 
 const SCOPE = 'Inventory';
 
@@ -12,10 +12,8 @@ test.beforeEach(async ({ page }) => {
 
 // TEST CASES:
 // sorting - TODO
-// cart badge - TODO
-// visual - X
-
-// how about tracking cart data using the app(browser) data? keeping the key in test data.
+// cart badge (Add/Remove button toggles cart state)- X
+// visual (Visual layout)- X
 
 for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
@@ -40,17 +38,20 @@ for (const persona of VALID_USERS) {
         // how to accert? get list of all prices / titles and compare
       });
     });
+    // END
 
-    // TODO
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { inventoryUI } = catalogLoc(page);
+      const { inventoryUI, productUI } = catalogLoc(page);
 
       const setup = {
         productIndices: [0, 1, 2],
         get firstProduct() {
           return this.productIndices[0];
         },
-      }; // all of this into either a heler test data or something?
+        get firstProductLoc() {
+          return inventoryUI.productCards.nth(this.firstProduct);
+        },
+      };
 
       await test.step('🟦 Add products to cart', async () => {
         for (const productIndex of setup.productIndices) {
@@ -58,16 +59,18 @@ for (const persona of VALID_USERS) {
         }
       });
 
-      // how about an expect here? probably uncesseray
+      await expect.soft(productUI.removeButton(setup.firstProductLoc), '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(inventoryUI.cartBadge, '🟧 UI: Badge shows 3').toHaveText('3');
+      await expect.soft({ page, key: STORAGE_KEYS.cart }, '🟧 Data: Local storage has 3 items').toHaveStorageLength(3);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'inventory', index: setup.firstProduct });
       });
 
-      // also check buttons states?
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 2`).toHaveText('2');
+      await expect.soft(productUI.addToCartButton(setup.firstProductLoc), '🟧 UI: Add button visible').toBeVisible();
+      await expect.soft(inventoryUI.cartBadge, '🟧 UI: Badge shows 2').toHaveText('2');
+      await expect.soft({ page, key: STORAGE_KEYS.cart }, '🟧 Data: Local storage has 2 items').toHaveStorageLength(2);
     });
-    // END
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
@@ -77,13 +80,14 @@ for (const persona of VALID_USERS) {
           productCount: 5,
         };
 
-        await test.step('⬜ Standardize grid data', async () => {
+        const inventoryImgs = await test.step('⬜ Standardize grid data', async () => {
           await catalog.standardizeInventoryGrid(page, { products: setup.productCount });
+          return await inventoryUI.inventoryImg.all();
         });
 
         await expect(page, '🟧 UI: Inventory layout visual check').toHaveScreenshot(
           `${toSnapshotName(persona.role)}-inventory.png`,
-          { mask: await inventoryUI.inventoryImg.all(), fullPage: true }
+          { mask: inventoryImgs, fullPage: true }
         );
       });
     }

@@ -216,7 +216,7 @@ Every assertion message must be **Categorized**, **Outcome-Oriented**, and **Con
 | Category | Message Example                        |
 | :------- | :------------------------------------- |
 | **UI**   | `'🟧 UI: Product name matches'`        |
-| **UI**   | `'🟧 UI: Layout visual check'`         |
+| **UI**   | `'🟧 UI: Login Layout visual check'`   |
 | **Data** | `'🟧 Data: Local storage has 3 items'` |
 | **Data** | `'🟧 Data: Session state is empty'`    |
 

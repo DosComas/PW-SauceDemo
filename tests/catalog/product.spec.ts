@@ -84,7 +84,7 @@ for (const persona of VALID_USERS) {
 
       await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 3`).toHaveText('3');
-      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage has 3 item`).toHaveStorageLength(3);
+      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(3);
     });
 
     if (persona.isBaselineUser) {

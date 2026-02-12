@@ -5,6 +5,9 @@
       "@data": ["data/index.ts"],
       "@helpers": ["helpers/index.ts"],
       "@utils": ["utils/index.ts"]
-    }
+    },
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   }
 }
