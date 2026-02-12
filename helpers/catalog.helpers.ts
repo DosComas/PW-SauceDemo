@@ -124,15 +124,6 @@ export async function standardizeInventoryGrid(page: Page, { products }: { produ
   }
 }
 
-export async function getCartState(page: Page) {
-  return await page.evaluate<number[], string>((key) => {
-    const session = localStorage.getItem(key);
-
-    if (!session) return [];
-    return JSON.parse(session);
-  }, STORAGE_KEYS.cart);
-}
-
 // --- MODULE INTERFACE ---
 export const catalog = {
   getProductData,
@@ -141,7 +132,6 @@ export const catalog = {
   removeProductFromCart,
   standardizeProductCard,
   standardizeInventoryGrid,
-  getCartState,
 } as const;
 
 /*
