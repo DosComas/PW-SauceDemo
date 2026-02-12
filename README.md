@@ -156,18 +156,18 @@ boilerplate.
 
 ### Architectural Templates
 
-| Prefix      | Snippet Name   | Description                                                   |
-| :---------- | :------------- | :------------------------------------------------------------ |
-| `pw-spec`   | **New Spec**   | Full test suite template with Persona loops and `SCOPE`.      |
-| `pw-helper` | **New Helper** | Standardized module for Locators, Private Utils, and Actions. |
-| `pw-step`   | **Emoji Step** | `test.step` with an integrated phase picker (⬜/🟦/🟧).       |
+| Prefix        | Snippet Name       | Description                                                   |
+| :------------ | :----------------- | :------------------------------------------------------------ |
+| `new-spec`    | **New Spec**       | Full test suite template with Persona loops and `SCOPE`.      |
+| `new-helper`  | **New Helper**     | Standardized module for Locators, Private Utils, and Actions. |
+| `pw-describe` | **Emoji Describe** | `test.describe()` with standardized test and steps.           |
+| `pw-test`     | **Emoji Test**     | `test()` with standardized steps.                             |
+| `pw-step`     | **Emoji Step**     | `test.step` with an integrated phase picker (⬜/🟦/🟧).       |
 
 ### Standard Lifecycle Blocks
 
 | Prefix          | Description                                         |
 | :-------------- | :-------------------------------------------------- |
-| `pw-test`       | Standard `test()` block.                            |
-| `pw-describe`   | Standard `test.describe()` block.                   |
 | `pw-beforeEach` | `beforeEach` hook for setup logic.                  |
 | `pw-afterEach`  | `afterEach` hook for cleanup logic.                 |
 | `pw-beforeAll`  | `beforeAll` hook for one-time setup.                |
