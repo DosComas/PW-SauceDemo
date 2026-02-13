@@ -19,6 +19,7 @@ export const catalogLocators = (page: Page) => ({
     productList: page.getByTestId('inventory-list'),
     cartBadge: page.getByTestId('shopping-cart-badge'),
     inventoryImg: page.locator('.inventory_item_img'),
+    cartButton: page.getByTestId('shopping-cart-link'),
   },
 
   // --- Product Cards ---
@@ -102,7 +103,7 @@ async function removeProductFromCart(page: Page, source: ProductSource) {
   await productUI.removeButton(scope).click();
 }
 
-async function standardizeProductCard(page: Page, source: ProductSource) {
+export async function standardizeProductCard(page: Page, source: ProductSource) {
   const { productUI } = catalogLocators(page);
 
   const scope = await getProductScope(page, source);
@@ -117,23 +118,23 @@ async function standardizeInventoryGrid(page: Page, { products }: { products: nu
 
   await standardizeProductCard(page, { from: 'inventory', index: 0 });
 
-  const listHandle = await inventoryUI.productList.elementHandle();
-  const itemHandle = await inventoryUI.productCards.first().elementHandle();
+  // Pass the first card locator as an argument
+  await inventoryUI.productList.evaluate(
+    (listElement, { templateElement, n }) => {
+      // templateElement is now a REAL DOM node, not a locator string!
+      const cleanClone = templateElement.cloneNode(true) as HTMLElement;
 
-  if (listHandle && itemHandle) {
-    await page.evaluate(
-      ({ list, item, n }) => {
-        // Clear the current list
-        list.innerHTML = '';
+      listElement.innerHTML = '';
 
-        // Re-populate with clones of the standardized item
-        for (let i = 0; i < n; i++) {
-          list.appendChild(item.cloneNode(true));
-        }
-      },
-      { list: listHandle, item: itemHandle, n: products }
-    );
-  }
+      for (let i = 0; i < n; i++) {
+        listElement.appendChild(cleanClone.cloneNode(true));
+      }
+    },
+    {
+      templateElement: await inventoryUI.productCards.first().elementHandle(),
+      n: products,
+    }
+  );
 }
 
 // --- MODULE INTERFACE ---

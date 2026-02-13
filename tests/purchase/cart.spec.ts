@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test';
-import { catalog, catalogLocators } from '../../helpers/catalog.helpers';
-import { VALID_USERS } from '../../data/users.data';
-import { toSnapshotName } from '../../utils/string.utils';
+import { test, expect, toSnapshotName } from '@utils';
+import { purchase, catalog, purchaseLocators, catalogLocators } from '@helpers';
+import { VALID_USERS } from '@data';
+import { t } from '@i18n';
 
 const SCOPE = 'Cart';
 
@@ -23,8 +23,8 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test.skip(`${SCOPE}: test description`, async ({ page }) => {
-      const { productUI } = catalogLocators(page);
+    test.only(`${SCOPE}: synct inventory to cart?`, async ({ page }) => {
+      const {} = purchaseLocators(page);
 
       const setup = {};
 
@@ -34,6 +34,40 @@ for (const persona of VALID_USERS) {
 
       await expect.soft(page, '🟧 UI: verify outcome').toHaveURL('d');
     });
+
+    test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page }) => {
+      const {} = purchaseLocators(page);
+
+      const setup = {};
+
+      await test.step('⬜ Arrange: prepare state', async () => {});
+
+      await test.step('🟦 Action: perform interaction', async () => {});
+
+      await expect.soft(page, '🟧 UI: verify outcome').toHaveURL('d');
+    });
+
+    if (persona.isBaselineUser) {
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
+        const { inventoryUI } = catalogLocators(page);
+
+        const setup = {
+          firstProduct: 0,
+          productCount: 3,
+        };
+
+        await test.step('⬜ Arrange: add 1 product and go to cart', async () => {
+          await catalog.addProductToCart(page, { from: 'inventory', index: setup.firstProduct });
+          await inventoryUI.cartButton.click();
+          await purchase.standardizeCartList(page, { products: setup.productCount });
+        });
+
+        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(
+          `${toSnapshotName(persona.role)}-cart.png`,
+          { fullPage: true }
+        );
+      });
+    }
   });
 }
 
