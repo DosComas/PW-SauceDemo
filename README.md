@@ -111,7 +111,7 @@ await expect(inventoryUI.productCards).toBeSortedBy('price', 'asc');
 
 ## Polling Utility
 
-`poll()` is a generic helper function in `utils/polling.ts` for custom matchers that need to wait for async conditions.
+`poll()` is a generic helper function in `utils/matchers.ts` for custom matchers that need to wait for async conditions.
 It handles timeouts, progressive backoff, and **transient errors** automatically.
 
 **Key features:**
@@ -132,10 +132,10 @@ const { pass, value } = await poll(
 );
 ```
 
-## VS Code Snippets (`pw-`)
+## VS Code Snippets (`pw-` or `new-` )
 
-Type `pw-` and press Enter in any `.ts` file to expand templates. Snippets enforce AAA structure and auto-inject emoji
-categories.
+Type `pw-` or `new-` and press Enter in any `.ts` file to expand templates. Snippets enforce AAA structure and
+auto-inject emoji categories.
 
 **Architectural Templates:**
 
