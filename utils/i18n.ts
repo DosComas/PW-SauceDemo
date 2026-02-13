@@ -1,4 +1,4 @@
-import { DICTIONARY, TranslationKey, Language } from '../data/dictionary.data.ts';
+import { DICTIONARY, TranslationKey, Language } from '@data';
 
 const currentLang = (process.env.LANGUAGE as Language) || 'en';
 

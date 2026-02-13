@@ -1,223 +1,176 @@
 # SauceDemo Test Suite
 
-This project is an automation testing suite for the SauceDemo Shop web application, built using **Playwright** and
-**TypeScript**. It leverages **Functional Helpers** to improve test reusability and maintainability.
+Automation testing suite for the SauceDemo Shop web application built with **Playwright**, **TypeScript**, and
+**Functional Helpers**. Tests cover login, cart operations, and checkout workflows across multiple browsers and screen
+sizes with a focus on data-driven assertions and resilient custom matchers.
 
-The tests cover critical workflows such as login, adding items to the cart, and completing the checkout process. The
-suite is configured to run across different browsers and screen sizes, with detailed HTML reports generated for easy
-tracking of test results.
+## Quick Start
 
-# Setup Instructions
+**Prerequisites:** Node.js (>= 16.x) and NPM
 
-## Prerequisites
+1. **Install:** `npm install`
+2. **Configure:** Rename `.env.example` to `.env` and add your environment variables
+3. **Run:** `npx playwright test` (all browsers) or `npx playwright test --project=Chrome` (specific browser)
+4. **Report:** `npx playwright show-report` to view detailed HTML report
 
-- Node.js (>= 16.x)
+**Additional Commands:**
 
-- NPM (comes with Node.js)
+- Update snapshots: `npx playwright test --update-snapshots`
+- Single test file: `npx playwright test tests/auth.setup.ts`
+- Debug mode: `npx playwright test --debug`
 
-### 1. Install Dependencies
+**Dependencies:** `playwright` (end-to-end testing), `dotenv` (environment management)
 
-Run the following command to install all required packages:
+## Test Philosophy
+
+**Tests validate functionality regardless of data.** Use the **Arrange-Act-Assert (AAA)** pattern with emoji categories
+for clarity. Collect data during Arrange and use it for comparisons in Assert—no hard-coded product names or counts.
+This ensures resilience across environments and data changes.
+
+**Example:** Instead of asserting "Product X is at position 1", collect all product names during Arrange, apply a sort
+action during Act, then compare the new order against the collected data during Assert.
+
+## AAA Step Categorization
+
+| Emoji  | Phase       | Description                                           | Examples                                    |
+| :----- | :---------- | :---------------------------------------------------- | :------------------------------------------ |
+| **⬜** | **Arrange** | Set up the test environment and collect baseline data | navigation, waiting, setup, data collection |
+| **🟦** | **Act**     | Perform the user action or workflow being tested      | clicks, form fills, reload, user workflows  |
+| **🟧** | **Assert**  | Verify the application state or behavior              | expectations, screenshots, result checks    |
+
+**Benefit:** Categorical failures pinpoint the issue. Debug faster by knowing if failure is in setup, feature, or
+verification.
+
+## Helper File Structure
+
+All helpers follow this pattern:
+
+1. `// --- TYPES ---` – Interfaces and type contracts
+2. `// --- LOCATORS ---` – Public element selectors (used directly in tests)
+3. `// --- PRIVATE UTILITIES ---` – Internal helper functions
+4. `// --- ACTIONS ---` – Playwright user task implementations
+5. `// --- MODULE INTERFACE ---` – Public API export (`export const`)
+
+**Usage in tests:** Import locators and actions, use them to build readable test workflows:
+
+```typescript
+const { inventoryUI, productUI } = catalogLoc(page);
+await catalog.addProductToCart(page, { from: 'inventory', index: 0 });
+```
+
+## Project Structure
 
 ```
-npm install
+PW-SauceDemo/
+├── data/                  # Test data, user personas, environment config, selectors
+├── helpers/               # Reusable actions and locators organized by feature
+├── tests/                 # Test specifications organized by workflow
+│   ├── auth.setup.ts      # Authentication setup for persona storage
+│   ├── catalog/           # Inventory and product tests
+│   ├── identity/          # Login/logout tests
+│   ├── journeys/          # End-to-end workflows
+│   └── purchase/          # Cart and checkout tests
+├── utils/                 # Testing utilities, custom matchers, polling logic
+└── playwright.config.ts   # Playwright configuration with path aliases
 ```
 
-### 2. Configure Environment Variables
+## Import Paths
 
-Rename `.env.example` to `.env` and update values as needed.
+The project uses TypeScript path aliases for clean imports:
 
-### 3. Update Screenshots (optional)
-
-If snapshots fail due to system or rendering differences, update them with:
-
-```
-npx playwright test --update-snapshots
+```typescript
+import { catalogLoc, catalog } from '@helpers'; // helpers/index.ts
+import { STORAGE_KEYS, VALID_USERS } from '@data'; // data/index.ts
+import { expect, poll } from '@utils'; // utils/index.ts
 ```
 
-### 4. Run Tests
+These aliases are configured in `tsconfig.json` and prevent deeply-nested relative paths.
 
-To execute the tests across all configured browsers:
+## Custom Matchers & Assertions
 
-```
-npx playwright test
-```
+Custom matchers are extended with **polling logic** to handle dynamic content and async state changes. They use the
+`poll` utility for progressive wait intervals (100ms → 250ms → 500ms → 1000ms).
 
-For specific browsers, use the following commands:
+### toHaveStorageLength(page, key, expected)
 
-```
-npx playwright test --project=Chrome
-npx playwright test --project=Mobile Chrome
-```
+Verifies that a localStorage key contains an array with a specific length. Useful for validating cart counts and session
+data.
 
-### 5. View Reports
-
-After running the tests, view the results by running:
-
-```
-npx playwright show-report
+```typescript
+await expect(page).toHaveStorageLength(STORAGE_KEYS.cart, 3);
 ```
 
-## Dependencies
+### toBeSortedBy(locator, attribute, order)
 
-- `playwright` - Playwright for end-to-end testing.
+Validates that a collection of elements is sorted by `name` or `price` in `asc` or `desc` order. Works with product
+lists and dynamic sorting.
 
-- `dotenv` - Environment variable management.
+```typescript
+await expect(inventoryUI.productCards).toBeSortedBy('price', 'asc');
+```
 
-To keep our Playwright reports scannable and consistent, we follow the **Arrange-Act-Assert (AAA)** pattern. Using
-emojis in `test.step` titles allows us to identify the "health" of our tests at a glance.
+## Polling Utility
 
-# Test Orchestration Standards: AAA Step Categorization
+`poll()` is a generic helper function in `utils/polling.ts` for custom matchers that need to wait for async conditions.
+It handles timeouts, progressive backoff, and **transient errors** automatically.
 
-### ⬜ Arrange (Preparation)
+**Key features:**
 
-**Purpose:** Everything required to get the application into the starting state.
+- Retries on transient failures (stale elements, timing issues, element not yet loaded)
+- Progressive wait intervals: 100ms → 250ms → 500ms → 1000ms
+- Returns both the final value and pass/fail status
 
-- **Navigation:** `page.goto('/')`
-- **Waiting:** `element.waitFor({ state: 'visible' })`
-- **Infrastructure:** Saving `storageState`, setting cookies, or seeding data.
-- **Data Collection:** Scraping "Source of Truth" data from the UI to use for later comparisons.
+```typescript
+const { pass, value } = await poll(
+  async () => {
+    /* check condition */
+  },
+  (value) => {
+    /* validation logic */
+  },
+  5000 // timeout in ms
+);
+```
 
-> **Example:** `await test.step('⬜ Navigate and wait for inventory', async () => { ... });`
+## VS Code Snippets (`pw-`)
 
-### 🟦 Act (Execution)
+Type `pw-` and press Enter in any `.ts` file to expand templates. Snippets enforce AAA structure and auto-inject emoji
+categories.
 
-**Purpose:** The specific user behavior or system action being tested.
+**Architectural Templates:**
 
-- **Interactions:** `click()`, `fill()`, `dragTo()`, `hover()`.
-- **Functional Actions:** Reloading the page to test persistence.
-- **User Flow:** Moving from one logical page or state to another.
+- `new-spec` – Full test suite with persona loops and SCOPE variable
+- `new-helper` – Helper module scaffold with all 5 sections
+- `pw-describe` – Test describe block with structural template
+- `pw-test` – Test case with AAA steps
+- `pw-step` – Individual step with emoji picker (⬜/🟦/🟧)
 
-> **Example:** `await test.step('🟦 Add product to cart', async () => { ... });`
+**Lifecycle Hooks:**
 
-### 🟧 Assert (Verification)
+- `pw-beforeEach` – Setup before each test
+- `pw-afterEach` – Cleanup after each test
+- `pw-beforeAll` – One-time setup
+- `pw-afterAll` – One-time teardown
+- `pw-use` – Context configuration override
 
-**Purpose:** Confirming that the application is in the expected state.
+## Assertion Style Guide
 
-- **Expectations:** `toHaveText()`, `toBeVisible()`, `toHaveValue()`.
-- **Visual Testing:** `toHaveScreenshot()`.
-- **Data Integrity:** Comparing "Act" results against "Arrange" data.
+**Core rule:** Every assertion must be categorized, outcome-oriented, and concise.
 
-> **Example:** `await test.step('🟧 Verify price matches inventory', async () => { ... });`
+**Format:** `[Emoji] [Category]: [Assertion Context]`  
+**Verb style:** Use active facts (`matches`, `visible`) not "should"  
+**Categories:**
 
----
+- `🟧 UI:` Visibility, text content, layout, and visual regression checks
+- `🟧 Data:` localStorage, session state, API responses, and business logic
 
-### Quick Reference Table
+**Examples:**
 
-| Emoji  | Phase       | Logical Goal               | Example Actions                    |
-| :----- | :---------- | :------------------------- | :--------------------------------- |
-| **⬜** | **Arrange** | "Get to the starting line" | `goto`, `waitFor`, `storageState`  |
-| **🟦** | **Act**     | "Do the work"              | `click`, `fill`, `press`, `reload` |
-| **🟧** | **Assert**  | "Check the result"         | `expect`, `toHaveScreenshot`       |
+```typescript
+await expect.soft(page).toHaveStorageLength('cart', 3, '🟧 Data: Local storage has 3 items');
+await expect.soft(inventoryUI.cartBadge).toHaveText('3', '🟧 UI: Badge shows correct count');
+await expect(page).toHaveScreenshot('inventory.png', '🟧 UI: Inventory layout visual check');
+```
 
-### Why we use this:
-
-1.  **Categorized Failures:** If a **⬜** step fails, the **Environment** is likely the issue. If an **🟧** fails, the
-    **Feature** is likely broken.
-2.  **Report Scannability:** Makes the Playwright HTML report and Trace Viewer incredibly easy to read for developers
-    and stakeholders alike.
-
-# Helper File Architecture
-
-To maintain a clean and predictable codebase, all helper files follow this vertical structure:
-
-### 1. `// --- TYPES ---`
-
-**The Contract.** Defines interfaces and types. It sets the rules for what data each function requires.
-
-### 2. `// --- LOCATORS ---`
-
-**The Map.** The collection of element selectors. These are kept public to allow for assertions and `expect` statements
-directly in the test cases.
-
-### 3. `// --- PRIVATE UTILITIES ---`
-
-**The Guts.** Internal logic and scoping functions used by actions but hidden from the test files.
-
-### 4. `// --- ACTIONS ---`
-
-**The Behavior.** The actual Playwright implementation of user tasks (clicks, scrapes, inputs).
-
-### 5. `// --- MODULE INTERFACE ---`
-
-**The Remote Control.** The final `export const`. This is the **Public API** used in tests, mapping internal logic to
-clean, accessible keys.
-
-# Playwright Productivity Snippets (`pw-`)
-
-This repository uses custom VS Code snippets to enforce our **Arrange-Act-Assert** architecture and eliminate
-boilerplate.
-
-### How to Use
-
-1. Start typing `pw-` in any `.ts` file.
-2. Press **Enter** to expand the template.
-3. Use **Tab** to navigate between placeholders (names, emoji pickers, and logic).
-
-### Architectural Templates
-
-| Prefix        | Snippet Name       | Description                                                   |
-| :------------ | :----------------- | :------------------------------------------------------------ |
-| `new-spec`    | **New Spec**       | Full test suite template with Persona loops and `SCOPE`.      |
-| `new-helper`  | **New Helper**     | Standardized module for Locators, Private Utils, and Actions. |
-| `pw-describe` | **Emoji Describe** | `test.describe()` with standardized test and steps.           |
-| `pw-test`     | **Emoji Test**     | `test()` with standardized steps.                             |
-| `pw-step`     | **Emoji Step**     | `test.step` with an integrated phase picker (⬜/🟦/🟧).       |
-
-### Standard Lifecycle Blocks
-
-| Prefix          | Description                                         |
-| :-------------- | :-------------------------------------------------- |
-| `pw-beforeEach` | `beforeEach` hook for setup logic.                  |
-| `pw-afterEach`  | `afterEach` hook for cleanup logic.                 |
-| `pw-beforeAll`  | `beforeAll` hook for one-time setup.                |
-| `pw-afterAll`   | `afterAll` hook for one-time teardown.              |
-| `pw-use`        | `test.use()` to override **Context** configuration. |
-
-### Visual Language (Emoji System)
-
-We use emojis to make our **Trace Viewers** and **HTML Reports** instantly scannable. Choose the phase that matches your
-code logic:
-
-- ⬜ **Arrange:** Setting up state, navigation, or authentication.
-- 🟦 **Act:** Primary user interactions (clicks, form fills, submissions).
-- 🟧 **Assert:** Verifications, expectations, and snapshots.
-
----
-
-### Why it Matters
-
-- **Consistency:** Every test file follows the same architectural "Blueprint."
-- **Scannability:** Debug failures faster by identifying which "Phase" (Arrange, Act, or Assert) failed at a glance.
-- **Speed:** Write complex, persona-driven tests in seconds rather than minutes.
-
----
-
-# Playwright Assertion Style Guide
-
-### Core Rule
-
-Every assertion message must be **Categorized**, **Outcome-Oriented**, and **Concise**.
-
----
-
-### The Guide
-
-- **Format:** `[Emoji] [Category]: [Target] [Outcome]`
-- **Verb Style:** Use **Active Facts** (e.g., _matches_, _visible_) instead of "should."
-- **Prefixes:**
-  - `🟧 UI:` Visibility, text content, and layout/screenshots.
-  - `🟧 Data:` LocalStorage, session state, and background logic.
-
----
-
-### Examples
-
-| Category | Message Example                        |
-| :------- | :------------------------------------- |
-| **UI**   | `'🟧 UI: Product name matches'`        |
-| **UI**   | `'🟧 UI: Login Layout visual check'`   |
-| **Data** | `'🟧 Data: Local storage has 3 items'` |
-| **Data** | `'🟧 Data: Session state is empty'`    |
-
----
+**Why it matters:** Clear categorization helps report readers instantly identify whether failures are UI, data, or
+environment issues.

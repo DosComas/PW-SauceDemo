@@ -46,34 +46,34 @@ for (const persona of VALID_USERS) {
       });
 
       await test.step('🟦 Add product to cart', async () => {
-        await catalog.addProductToCart(page, { from: 'pdp', index: setup.firstProduct });
+        await catalog.addProductToCart(page, { from: 'pdp' });
       });
 
       await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 1`).toHaveText('1');
-      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(1);
+      await expect.soft(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STORAGE_KEYS.cart, 1);
 
       await test.step('🟦 Remove product from cart', async () => {
-        await catalog.removeProductFromCart(page, { from: 'pdp', index: setup.firstProduct });
+        await catalog.removeProductFromCart(page, { from: 'pdp' });
       });
 
       await expect.soft(productUI.addToCartButton(), '🟧 UI: Add button visible').toBeVisible();
       await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge removed`).not.toBeVisible();
-      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage is empty`).toHaveStorageLength(0);
+      await expect.soft(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STORAGE_KEYS.cart, 0);
     });
 
     test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
       const { productUI, inventoryUI } = catalogLoc(page);
 
       const setup = {
-        productIndices: [0, 1, 2],
+        productIndexes: [0, 1, 2],
         get lastProduct() {
-          return this.productIndices.slice(-1)[0];
+          return this.productIndexes.slice(-1)[0];
         },
       };
 
       await test.step('⬜ Add products to cart on inventory', async () => {
-        for (const productIndex of setup.productIndices) {
+        for (const productIndex of setup.productIndexes) {
           await catalog.addProductToCart(page, { from: 'inventory', index: productIndex });
         }
       });
@@ -84,7 +84,7 @@ for (const persona of VALID_USERS) {
 
       await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 3`).toHaveText('3');
-      await expect.soft({ page, key: STORAGE_KEYS.cart }, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(3);
+      await expect.soft(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STORAGE_KEYS.cart, 3);
     });
 
     if (persona.isBaselineUser) {
@@ -100,7 +100,7 @@ for (const persona of VALID_USERS) {
         });
 
         await test.step('⬜ Standardize PDP data', async () => {
-          await catalog.standardizeProductCard(page, { from: 'pdp', index: setup.firstProduct });
+          await catalog.standardizeProductCard(page, { from: 'pdp' });
         });
 
         await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot(

@@ -3,15 +3,12 @@ import { t } from '@utils';
 import { VISUAL_MOCK } from '@data';
 
 // --- TYPES ---
-interface ProductSource {
-  from: 'inventory' | 'pdp';
-  index?: number;
-}
+type ProductSource = { from: 'inventory'; index: number } | { from: 'pdp' };
 
-interface ProductClick {
+type ProductClick = {
   index: number;
   via: 'name' | 'img';
-}
+};
 
 // --- LOCATORS ---
 export const catalogLoc = (page: Page) => ({
@@ -37,16 +34,27 @@ export const catalogLoc = (page: Page) => ({
 });
 
 // --- PRIVATE UTILITIES ---
-function getProductScope(page: Page, { from, index = 0 }: ProductSource) {
+async function getProductScope(page: Page, source: ProductSource) {
   const { inventoryUI } = catalogLoc(page);
-  return from === 'pdp' ? page : inventoryUI.productCards.nth(index);
+
+  if (source.from === 'pdp') return page;
+
+  const count = await inventoryUI.productCards.count();
+  if (count === 0) {
+    throw new Error(`Scraper Error: No products found on the ${source.from} page. UI might be empty.`);
+  }
+  if (source.index >= count) {
+    throw new Error(`Index Out of Bounds: Requested product index ${source.index}, but only ${count} products exist.`);
+  }
+
+  return inventoryUI.productCards.nth(source.index);
 }
 
 // --- ACTIONS ---
-export async function getProductData(page: Page, { from, index = 0 }: ProductSource) {
+export async function getProductData(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
-  const scope = getProductScope(page, { from, index });
+  const scope = await getProductScope(page, source);
 
   const rawData = await Promise.all([
     productUI.name(scope).innerText(),
@@ -57,7 +65,7 @@ export async function getProductData(page: Page, { from, index = 0 }: ProductSou
   const [name, desc, price] = rawData.map((val) => val.trim());
 
   if (!name || !desc || !price) {
-    throw new Error(`Scraper Error: Missing data on ${from} page`);
+    throw new Error(`Scraper Error: Missing data on ${source.from} page.`);
   }
 
   return { name: name, desc: desc, price: price };
@@ -66,36 +74,36 @@ export async function getProductData(page: Page, { from, index = 0 }: ProductSou
 export async function openProductDetails(page: Page, { index, via }: ProductClick) {
   const { productUI } = catalogLoc(page);
 
-  const scope = getProductScope(page, { from: 'inventory', index });
+  const scope = (await getProductScope(page, { from: 'inventory', index })) as Locator;
 
-  const clickTargetMap = {
+  const clickTargetMap: Record<ProductClick['via'], (base: Locator) => Locator> = {
     name: productUI.name,
     img: productUI.picture,
-  } as const;
+  };
 
   await clickTargetMap[via](scope).click();
 }
 
-export async function addProductToCart(page: Page, { from, index = 0 }: ProductSource) {
+export async function addProductToCart(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
-  const scope = getProductScope(page, { from, index });
+  const scope = await getProductScope(page, source);
 
   await productUI.addToCartButton(scope).click();
 }
 
-export async function removeProductFromCart(page: Page, { from, index = 0 }: ProductSource) {
+export async function removeProductFromCart(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
-  const scope = getProductScope(page, { from, index });
+  const scope = await getProductScope(page, source);
 
   await productUI.removeButton(scope).click();
 }
 
-export async function standardizeProductCard(page: Page, { from, index = 0 }: ProductSource) {
+export async function standardizeProductCard(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
-  const scope = getProductScope(page, { from, index });
+  const scope = await getProductScope(page, source);
 
   await productUI.name(scope).evaluate((el, name) => (el.textContent = name), VISUAL_MOCK.product.name);
   await productUI.desc(scope).evaluate((el, desc) => (el.textContent = desc), VISUAL_MOCK.product.desc);

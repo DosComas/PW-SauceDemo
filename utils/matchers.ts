@@ -1,73 +1,154 @@
-import { expect as baseExpect, Page } from '@playwright/test';
+import { expect as baseExpect, Page, Locator } from '@playwright/test';
 
-type StorageTarget = { page: Page; key: string };
+// --- TYPES ---
+export type SortAttribute = 'name' | 'price';
+export type SortOrder = 'asc' | 'desc';
 
+// --- PRIVATE UTILITIES ---
+async function poll<T>(
+  callback: () => Promise<T | null>,
+  condition: (value: T) => boolean,
+  timeout: number = 5000
+): Promise<{ value: T | null; pass: boolean }> {
+  const start = Date.now();
+  let currentWait = 100;
+  let value: T | null = null;
+
+  while (Date.now() - start < timeout) {
+    try {
+      value = await callback();
+
+      // Ensure we have a value and it meets our business logic
+      if (value !== null && condition(value)) {
+        return { value, pass: true };
+      }
+    } catch (error) {
+      // Transient errors are expected during polling (stale elements, timing issues).
+      // Silently continue and retry—the UI may be in a loading or transitional state.
+    }
+
+    // Progressive Polling: 100ms → 250ms → 500ms → 1000ms
+    await new Promise((res) => setTimeout(res, currentWait));
+
+    // Step up the wait time: 100 -> 250 -> 500 -> 1000
+    if (currentWait < 1000) {
+      currentWait = currentWait < 250 ? 250 : currentWait < 500 ? 500 : 1000;
+    }
+  }
+
+  return { value, pass: false };
+}
+
+// --- MATCHERS ---
 export const expect = baseExpect.extend({
-  async toHaveStorageLength(target: StorageTarget, expected: number, options?: { timeout?: number }) {
+  async toHaveStorageLength(page: Page, key: string, expected: number, options?: { timeout?: number }) {
     const assertionName = 'toHaveStorageLength';
-    const timeout = options?.timeout || 5000;
-    const start = Date.now();
 
     let actualLength: number | null = null;
     let keyExists = false;
-    let pass = false;
-    let currentWait = 100;
+    let errorType: string | null = null;
 
-    // The Polling Loop
-    while (Date.now() - start < timeout) {
-      const rawValue = await target.page.evaluate((k) => window.localStorage.getItem(k), target.key);
+    const { pass } = await poll(
+      async () => {
+        const rawValue = await page.evaluate((k) => window.localStorage.getItem(k), key);
 
-      if (rawValue === null) {
-        keyExists = false;
-        actualLength = null;
-      } else {
+        if (rawValue === null) {
+          keyExists = false;
+          actualLength = null;
+          return null;
+        }
+
         keyExists = true;
         try {
           const parsed = JSON.parse(rawValue);
           actualLength = Array.isArray(parsed) ? parsed.length : -1;
+          if (actualLength === -1) {
+            errorType = 'Not an array';
+            return null;
+          }
         } catch {
-          actualLength = -2; // Signal for invalid JSON
+          errorType = 'Invalid JSON';
+          actualLength = -2;
+          return null;
         }
-      }
 
-      if (actualLength === expected) {
-        pass = true;
-        break;
-      }
-
-      // Progressive Polling
-      await new Promise((res) => setTimeout(res, currentWait));
-
-      if (currentWait < 250) {
-        currentWait = 250;
-      } else if (currentWait < 500) {
-        currentWait = 500;
-      } else if (currentWait < 1000) {
-        currentWait = 1000;
-      }
-    }
+        return actualLength;
+      },
+      (value) => value === expected,
+      options?.timeout
+    );
 
     const message = () => {
-      const header = this.utils.matcherHint(assertionName, 'storage', 'expected', { isNot: this.isNot });
+      const matcherHint = this.utils.matcherHint(assertionName, `page.localeStorage`, JSON.stringify(expected), {
+        isNot: this.isNot,
+      });
 
-      let receivedInfo: string;
+      const details: string[] = [];
+
       if (!keyExists) {
-        receivedInfo = `Received: ${this.utils.printReceived(null)} (Key not found in LocalStorage)`;
-      } else if (actualLength === -1) {
-        receivedInfo = `Received: ${this.utils.printReceived('Not an Array')}`;
-      } else if (actualLength === -2) {
-        receivedInfo = `Received: ${this.utils.printReceived('Invalid JSON')}`;
-      } else {
-        receivedInfo = `Received length: ${this.utils.printReceived(actualLength)}`;
+        details.push(`Key "${key}" not found in localStorage`);
+      } else if (errorType) {
+        details.push(`Value error: ${errorType}`);
+      } else if (actualLength !== null) {
+        details.push(`Expected: ${this.utils.printExpected(expected)}`);
+        details.push(`Received: ${this.utils.printReceived(actualLength)}`);
       }
 
-      return (
-        header +
-        '\n\n' +
-        `Storage Key: "${target.key}"\n` +
-        `Expected length: ${this.utils.printExpected(expected)}\n` +
-        receivedInfo
-      );
+      return matcherHint + '\n\n' + details.join('\n');
+    };
+
+    return { message, pass };
+  },
+
+  async toBeSortedBy(locator: Locator, attribute: SortAttribute, order: SortOrder, options?: { timeout?: number }) {
+    const assertionName = 'toBeSortedBy';
+
+    const isDescending = order === 'desc';
+    let actualValues: (string | number)[] = [];
+
+    const { pass } = await poll(
+      // Action: Just get the raw data
+      async () => {
+        actualValues = await locator.evaluateAll((elements, attr) => {
+          return elements.map((el) => {
+            if (attr === 'price') {
+              const text = el.querySelector('.inventory_item_price')?.textContent || '0';
+              return parseFloat(text.replace('$', ''));
+            }
+            return el.querySelector('.inventory_item_name')?.textContent?.trim() || '';
+          });
+        }, attribute);
+        return actualValues;
+      },
+      // Condition: Does the data meet our sorting requirement?
+      (values) =>
+        values.every((val, i) => {
+          if (i === 0) return true;
+          const prev = values[i - 1];
+          return typeof prev === 'number' && typeof val === 'number'
+            ? isDescending
+              ? prev >= val
+              : prev <= val
+            : isDescending
+              ? String(prev).localeCompare(String(val)) >= 0
+              : String(prev).localeCompare(String(val)) <= 0;
+        }),
+      options?.timeout
+    );
+
+    const message = () => {
+      const matcherHint = this.utils.matcherHint(assertionName, 'locator', `'${attribute}', '${order}'`, {
+        isNot: this.isNot,
+      });
+
+      const valuesToShow = actualValues.length > 10 ? [...actualValues.slice(0, 10), '...'] : actualValues;
+
+      const details: string[] = [];
+      details.push(`Attribute: ${this.utils.printExpected(attribute)}`);
+      details.push(`Order:     ${this.utils.printExpected(order)}`);
+      details.push(`Received:  ${this.utils.printReceived(valuesToShow)}`);
+
+      return matcherHint + '\n\n' + details.join('\n');
     };
 
     return { message, pass };
