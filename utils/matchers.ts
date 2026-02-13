@@ -114,7 +114,6 @@ export const expect = baseExpect.extend({
         actualValues = await locator.evaluateAll((elements, attr) => {
           return elements.map((el) => {
             if (attr === 'price') {
-              // Parse "$9.99" -> 9.99
               const text = el.querySelector('.inventory_item_price')?.textContent || '0';
               return parseFloat(text.replace('$', ''));
             }
@@ -124,11 +123,11 @@ export const expect = baseExpect.extend({
         return actualValues;
       },
       (values) => {
-        // Validation Logic
+        if (values.length < 2) return true;
         return values.every((val, i) => {
           if (i === 0) return true;
           const prev = values[i - 1];
-          // Number comparison or String comparison
+
           return typeof prev === 'number' && typeof val === 'number'
             ? isDescending
               ? prev >= val
@@ -143,58 +142,53 @@ export const expect = baseExpect.extend({
 
     // 2. Reporting Phase
     const message = () => {
-      const matcherHint = this.utils.matcherHint(assertionName, 'locator', `'${attribute}', '${order}'`, {
+      const matcherHint = this.utils.matcherHint(assertionName, 'locator', undefined, {
         isNot: this.isNot,
+        promise: this.promise,
       });
 
-      const details: string[] = [];
-      details.push(`Attribute: ${this.utils.printExpected(attribute)}`);
-      details.push(`Order:     ${this.utils.printExpected(order)}`);
+      const expectedValues = [...actualValues].sort((a, b) => {
+        const isNum = typeof a === 'number' && typeof b === 'number';
+        if (isDescending) {
+          return isNum ? (b as number) - (a as number) : String(b).localeCompare(String(a));
+        }
+        return isNum ? (a as number) - (b as number) : String(a).localeCompare(String(b));
+      });
 
       if (pass) {
-        // Pass case (only shown if .not is used)
-        details.push(`Received:  ${this.utils.printReceived(actualValues)}`);
-      } else {
-        // Fail case: Find and highlight the specific violation
-        let violationIndex = -1;
-        for (let i = 1; i < actualValues.length; i++) {
-          const prev = actualValues[i - 1];
-          const curr = actualValues[i];
-
-          const isCorrect =
-            typeof prev === 'number' && typeof curr === 'number'
-              ? isDescending
-                ? prev >= curr
-                : prev <= curr
-              : isDescending
-                ? String(prev).localeCompare(String(curr)) >= 0
-                : String(prev).localeCompare(String(curr)) <= 0;
-
-          if (!isCorrect) {
-            violationIndex = i;
-            break;
-          }
-        }
-
-        if (violationIndex !== -1) {
-          const prev = actualValues[violationIndex - 1];
-          const curr = actualValues[violationIndex];
-          const operator = isDescending ? '>=' : '<=';
-
-          details.push(
-            `Violation: ${this.utils.printReceived(prev)} ${operator} ${this.utils.printReceived(curr)} at index [${violationIndex - 1}→${violationIndex}]`
-          );
-        }
-
-        // Show relevant slice of the array
-        const sliceEnd = Math.min(violationIndex + 2, actualValues.length);
-        const relevantSlice = actualValues.slice(0, sliceEnd);
-        details.push(
-          `Received:  ${this.utils.printReceived(relevantSlice)}${actualValues.length > sliceEnd ? ' ...' : ''}`
+        return (
+          matcherHint +
+          '\n\n' +
+          `Expected: not sorted by ${attribute} ${order}\n` +
+          `Received: ${this.utils.printReceived(actualValues.slice(0, 3))}...`
         );
       }
 
-      return matcherHint + '\n\n' + details.join('\n');
+      // Find the violation
+      const vIndex = actualValues.findIndex((val, i) => {
+        if (i === 0) return false;
+        const prev = actualValues[i - 1];
+        return typeof prev === 'number' && typeof val === 'number'
+          ? isDescending
+            ? prev < val
+            : prev > val
+          : isDescending
+            ? String(prev).localeCompare(String(val)) < 0
+            : String(prev).localeCompare(String(val)) > 0;
+      });
+
+      const prev = actualValues[vIndex - 1];
+      const curr = actualValues[vIndex];
+      const expectedOp = isDescending ? '≥' : '≤';
+      const actualOp = isDescending ? '<' : '>';
+
+      return (
+        matcherHint +
+        '\n\n' +
+        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${attribute} ${order})\n` +
+        `Received: ${this.utils.printReceived(`${prev} ${actualOp} ${curr}`)} at index ${vIndex - 1}\n\n` +
+        `Diff:\n${this.utils.diff(expectedValues, actualValues)}`
+      );
     };
 
     return { message, pass };

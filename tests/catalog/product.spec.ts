@@ -1,5 +1,5 @@
 import { test, expect, toSnapshotName } from '@utils';
-import { catalog, catalogLoc } from '@helpers';
+import { catalog, catalogLocators } from '@helpers';
 import { VALID_USERS, STORAGE_KEYS } from '@data';
 
 const SCOPE = 'PDP';
@@ -15,7 +15,7 @@ for (const persona of VALID_USERS) {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Content matches inventory data`, async ({ page }) => {
-      const { productUI } = catalogLoc(page);
+      const { productUI } = catalogLocators(page);
 
       const setup = {
         firstProduct: 0,
@@ -35,7 +35,7 @@ for (const persona of VALID_USERS) {
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { productUI, inventoryUI } = catalogLoc(page);
+      const { productUI, inventoryUI } = catalogLocators(page);
 
       const setup = {
         firstProduct: 0,
@@ -63,7 +63,7 @@ for (const persona of VALID_USERS) {
     });
 
     test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
-      const { productUI, inventoryUI } = catalogLoc(page);
+      const { productUI, inventoryUI } = catalogLocators(page);
 
       const setup = {
         productIndexes: [0, 1, 2],
@@ -89,7 +89,7 @@ for (const persona of VALID_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { productUI } = catalogLoc(page);
+        const { productUI } = catalogLocators(page);
 
         const setup = {
           firstProduct: 0,

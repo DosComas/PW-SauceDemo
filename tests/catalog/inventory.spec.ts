@@ -1,5 +1,5 @@
 import { test, expect, toSnapshotName } from '@utils';
-import { catalog, catalogLoc } from '@helpers';
+import { catalog, catalogLocators } from '@helpers';
 import { VALID_USERS, STORAGE_KEYS } from '@data';
 import { t } from '@i18n';
 
@@ -17,12 +17,12 @@ for (const persona of VALID_USERS) {
 
     const SORT_CASES = [
       { sortLabel: t.catalog.sort.nameAZ, attribute: 'name', order: 'desc' },
-      { sortLabel: t.catalog.sort.priceLowHigh, attribute: 'price', order: 'asc' },
+      { sortLabel: t.catalog.sort.priceHighLow, attribute: 'price', order: 'asc' },
     ] as const;
 
     for (const { sortLabel, attribute, order } of SORT_CASES) {
       test(`${SCOPE}: Items follow ${sortLabel} order`, async ({ page }) => {
-        const { inventoryUI } = catalogLoc(page);
+        const { inventoryUI } = catalogLocators(page);
 
         await test.step('🟦 Sort products', async () => {
           await inventoryUI.productSortDropdown.selectOption(sortLabel);
@@ -33,7 +33,7 @@ for (const persona of VALID_USERS) {
     }
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { inventoryUI, productUI } = catalogLoc(page);
+      const { inventoryUI, productUI } = catalogLocators(page);
 
       const setup = {
         productIndexes: [0, 1, 2],
@@ -66,7 +66,7 @@ for (const persona of VALID_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { inventoryUI } = catalogLoc(page);
+        const { inventoryUI } = catalogLocators(page);
 
         const setup = {
           productCount: 5,

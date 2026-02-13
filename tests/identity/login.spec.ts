@@ -1,5 +1,5 @@
 import { test, expect, toSnapshotName } from '@utils';
-import { account, accountLoc } from '@helpers';
+import { identity, identityLocators } from '@helpers';
 import { INVALID_USERS, ANONYMOUS_VISITOR } from '@data';
 import { t } from '@i18n';
 
@@ -14,10 +14,10 @@ test.beforeEach(async ({ page }) => {
 for (const persona of INVALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test(`${SCOPE}: Reject invalid credentials`, async ({ page }) => {
-      const { loginUI } = accountLoc(page);
+      const { loginUI } = identityLocators(page);
 
       await test.step('🟦 Log into the app', async () => {
-        await account.doLogin(page, { user: persona.user, pass: persona.pass });
+        await identity.doLogin(page, { user: persona.user, pass: persona.pass });
       });
 
       await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toContainText(
@@ -29,7 +29,7 @@ for (const persona of INVALID_USERS) {
 
 test.describe(`${ANONYMOUS_VISITOR.role}`, () => {
   test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-    const { loginUI } = accountLoc(page);
+    const { loginUI } = identityLocators(page);
 
     await test.step('⬜ Wait for logo and login button', async () => {
       await loginUI.logoImage.waitFor({ state: 'visible' });

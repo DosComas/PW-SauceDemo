@@ -2,10 +2,13 @@ import { Page, BrowserContext } from '@playwright/test';
 import { t } from '@i18n';
 
 // --- TYPES ---
-// ...
+type LoginCredentials = {
+  user: string;
+  pass: string;
+};
 
 // --- LOCATORS ---
-export const accountLoc = (page: Page) => ({
+export const identityLocators = (page: Page) => ({
   // --- Login Screen ---
   loginUI: {
     usernameInput: page.getByPlaceholder(t.identity.username),
@@ -15,10 +18,10 @@ export const accountLoc = (page: Page) => ({
     logoImage: page.locator('.login_logo'),
   },
 
-  // --- Navigation Bar ---
-  navBarUI: {
-    menuButton: page.getByRole('button', { name: t.layout.openMenu }),
-    logoutButton: page.getByRole('link', { name: t.identity.logout }),
+  // --- Page Header ---
+  headerUI: {
+    menuButton: page.getByRole('button', { name: t.identity.header.openMenu }),
+    logoutButton: page.getByRole('link', { name: t.identity.header.logout }),
   },
 });
 
@@ -26,17 +29,17 @@ export const accountLoc = (page: Page) => ({
 // ...
 
 // --- ACTIONS ---
-async function doLogin(page: Page, { user, pass }: { user: string; pass: string }) {
-  const { loginUI } = accountLoc(page);
+async function doLogin(page: Page, { user, pass }: LoginCredentials) {
+  const { loginUI } = identityLocators(page);
   await loginUI.usernameInput.fill(user);
   await loginUI.passwordInput.fill(pass);
   await loginUI.loginButton.click();
 }
 
 async function doLogout(page: Page) {
-  const { navBarUI } = accountLoc(page);
-  await navBarUI.menuButton.click();
-  await navBarUI.logoutButton.click();
+  const { headerUI } = identityLocators(page);
+  await headerUI.menuButton.click();
+  await headerUI.logoutButton.click();
 }
 
 async function getSession(context: BrowserContext) {
@@ -46,7 +49,7 @@ async function getSession(context: BrowserContext) {
 }
 
 // --- MODULE INTERFACE ---
-export const account = {
+export const identity = {
   doLogin,
   doLogout,
   getSession,

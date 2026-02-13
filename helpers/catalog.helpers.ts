@@ -11,7 +11,7 @@ type ProductClick = {
 };
 
 // --- LOCATORS ---
-export const catalogLoc = (page: Page) => ({
+export const catalogLocators = (page: Page) => ({
   // --- Inventory Screen ---
   inventoryUI: {
     productSortDropdown: page.getByTestId('product-sort-container'),
@@ -35,7 +35,7 @@ export const catalogLoc = (page: Page) => ({
 
 // --- PRIVATE UTILITIES ---
 async function getProductScope(page: Page, source: ProductSource) {
-  const { inventoryUI } = catalogLoc(page);
+  const { inventoryUI } = catalogLocators(page);
 
   if (source.from === 'pdp') return page;
 
@@ -54,7 +54,7 @@ async function getProductScope(page: Page, source: ProductSource) {
 
 // --- ACTIONS ---
 async function getProductData(page: Page, source: ProductSource) {
-  const { productUI } = catalogLoc(page);
+  const { productUI } = catalogLocators(page);
 
   const scope = await getProductScope(page, source);
 
@@ -74,7 +74,7 @@ async function getProductData(page: Page, source: ProductSource) {
 }
 
 async function openProductDetails(page: Page, { index, via }: ProductClick) {
-  const { productUI } = catalogLoc(page);
+  const { productUI } = catalogLocators(page);
 
   const scope = (await getProductScope(page, { from: 'inventory', index })) as Locator;
 
@@ -87,7 +87,7 @@ async function openProductDetails(page: Page, { index, via }: ProductClick) {
 }
 
 async function addProductToCart(page: Page, source: ProductSource) {
-  const { productUI } = catalogLoc(page);
+  const { productUI } = catalogLocators(page);
 
   const scope = await getProductScope(page, source);
 
@@ -95,7 +95,7 @@ async function addProductToCart(page: Page, source: ProductSource) {
 }
 
 async function removeProductFromCart(page: Page, source: ProductSource) {
-  const { productUI } = catalogLoc(page);
+  const { productUI } = catalogLocators(page);
 
   const scope = await getProductScope(page, source);
 
@@ -103,7 +103,7 @@ async function removeProductFromCart(page: Page, source: ProductSource) {
 }
 
 async function standardizeProductCard(page: Page, source: ProductSource) {
-  const { productUI } = catalogLoc(page);
+  const { productUI } = catalogLocators(page);
 
   const scope = await getProductScope(page, source);
 
@@ -113,7 +113,7 @@ async function standardizeProductCard(page: Page, source: ProductSource) {
 }
 
 async function standardizeInventoryGrid(page: Page, { products }: { products: number }) {
-  const { inventoryUI } = catalogLoc(page);
+  const { inventoryUI } = catalogLocators(page);
 
   await standardizeProductCard(page, { from: 'inventory', index: 0 });
 

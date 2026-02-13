@@ -1,3 +1,42 @@
+import { test, expect } from '@playwright/test';
+import { catalog, catalogLocators } from '../../helpers/catalog.helpers';
+import { VALID_USERS } from '../../data/users.data';
+import { toSnapshotName } from '../../utils/string.utils';
+
+const SCOPE = 'Cart';
+
+// TODO add login test cases? test on webkit?
+
+// Cases add product to cart, check sync? data? badge? local?
+
+// remove from cart and go back to... inventory, pdp? to chceck sync. how about data? badge? local?
+
+// visual chcking- add 1 clone to have 3 total?
+
+test.beforeEach(async ({ page }) => {
+  await test.step('⬜ Go to login page', async () => {
+    await page.goto('/inventory.html');
+  });
+});
+
+for (const persona of VALID_USERS) {
+  test.describe(`${persona.role}`, () => {
+    test.use({ storageState: persona.storageState });
+
+    test.skip(`${SCOPE}: test description`, async ({ page }) => {
+      const { productUI } = catalogLocators(page);
+
+      const setup = {};
+
+      await test.step('⬜ Arrange: prepare state', async () => {});
+
+      await test.step('🟦 Action: perform interaction', async () => {});
+
+      await expect.soft(page, '🟧 UI: verify outcome').toHaveURL('d');
+    });
+  });
+}
+
 /*
 import { test, expect } from '@playwright/test';
 import { getTranslation } from '../helpers/translationHelpers';
