@@ -4,7 +4,8 @@
     "paths": {
       "@data": ["data/index.ts"],
       "@helpers": ["helpers/index.ts"],
-      "@utils": ["utils/index.ts"]
+      "@utils": ["utils/index.ts"],
+      "@i18n": ["data/i18n/index.ts"]
     },
     "moduleResolution": "Node",
     "esModuleInterop": true,

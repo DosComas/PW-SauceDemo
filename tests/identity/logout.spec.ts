@@ -1,6 +1,7 @@
-import { test, expect, t } from '@utils';
+import { test, expect } from '@utils';
 import { accountLoc, doLogout, getSession } from '@helpers';
 import { VALID_USERS } from '@data';
+import { t } from '@i18n';
 
 const SCOPE = 'Identity';
 
@@ -25,7 +26,7 @@ for (const persona of VALID_USERS) {
         await page.goBack();
       });
 
-      await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toHaveText(t('auth.logoutInvError'));
+      await expect.soft(loginUI.errorMessage, '🟧 UI: Error message matches').toHaveText(t.identity.errors.restricted);
 
       await test.step('🟦 Reload the page', async () => {
         await page.reload();

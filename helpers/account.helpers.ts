@@ -1,5 +1,5 @@
 import { Page, BrowserContext } from '@playwright/test';
-import { t } from '@utils';
+import { t } from '@i18n';
 
 // --- TYPES ---
 // ...
@@ -8,17 +8,17 @@ import { t } from '@utils';
 export const accountLoc = (page: Page) => ({
   // --- Login Screen ---
   loginUI: {
-    usernameInput: page.getByPlaceholder(t('auth.username')),
-    passwordInput: page.getByPlaceholder(t('auth.password')),
-    loginButton: page.getByRole('button', { name: t('auth.login') }),
+    usernameInput: page.getByPlaceholder(t.identity.username),
+    passwordInput: page.getByPlaceholder(t.identity.password),
+    loginButton: page.getByRole('button', { name: t.identity.login }),
     errorMessage: page.getByTestId('error'),
     logoImage: page.locator('.login_logo'),
   },
 
   // --- Navigation Bar ---
   navBarUI: {
-    menuButton: page.getByRole('button', { name: t('navBar.openMenu') }),
-    logoutButton: page.getByRole('link', { name: t('auth.logout') }),
+    menuButton: page.getByRole('button', { name: t.layout.openMenu }),
+    logoutButton: page.getByRole('link', { name: t.identity.logout }),
   },
 });
 

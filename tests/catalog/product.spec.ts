@@ -50,16 +50,16 @@ for (const persona of VALID_USERS) {
       });
 
       await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 1`).toHaveText('1');
-      await expect.soft(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STORAGE_KEYS.cart, 1);
+      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
+      await expect(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STORAGE_KEYS.cart, 1);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'pdp' });
       });
 
       await expect.soft(productUI.addToCartButton(), '🟧 UI: Add button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge removed`).not.toBeVisible();
-      await expect.soft(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STORAGE_KEYS.cart, 0);
+      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Cart Badge removed`).not.toBeVisible();
+      await expect(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STORAGE_KEYS.cart, 0);
     });
 
     test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
@@ -83,8 +83,8 @@ for (const persona of VALID_USERS) {
       });
 
       await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Badge shows 3`).toHaveText('3');
-      await expect.soft(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STORAGE_KEYS.cart, 3);
+      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Cart Badge shows 3 items`).toHaveText('3');
+      await expect(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STORAGE_KEYS.cart, 3);
     });
 
     if (persona.isBaselineUser) {

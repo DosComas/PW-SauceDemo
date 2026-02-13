@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { TranslationKey } from './dictionary.data';
+import { t } from '@i18n'; // Import the translator to extract its types
 
 const VALID_USERNAME = process.env.VALID_USERNAME as string;
 const VALID_PASSWORD = process.env.VALID_PASSWORD as string;
@@ -12,8 +12,15 @@ interface UserPersona {
 }
 
 type TestUserData = {
-  valid: (UserPersona & { expectAuth: true; storageState: string; isBaselineUser: boolean })[];
-  invalid: (UserPersona & { expectAuth: false; expectedError: TranslationKey })[];
+  valid: (UserPersona & {
+    expectAuth: true;
+    storageState: string;
+    isBaselineUser: boolean;
+  })[];
+  invalid: (UserPersona & {
+    expectAuth: false;
+    expectedErrorKey: keyof typeof t.identity.errors;
+  })[];
 };
 
 const TEST_USERS: TestUserData = {
@@ -57,21 +64,21 @@ const TEST_USERS: TestUserData = {
       user: VALID_USERNAME,
       pass: 'wrong_sauce',
       expectAuth: false,
-      expectedError: 'auth.loginError',
+      expectedErrorKey: 'unauthorized',
     },
     {
       role: 'Invalid Username User 🎭',
       user: 'ghost_user',
       pass: VALID_PASSWORD,
       expectAuth: false,
-      expectedError: 'auth.loginError',
+      expectedErrorKey: 'unauthorized',
     },
     {
       role: 'Locked Out User 🔒',
       user: 'locked_out_user',
       pass: VALID_PASSWORD,
       expectAuth: false,
-      expectedError: 'auth.lookupError',
+      expectedErrorKey: 'lockedOut',
     },
   ],
 } as const;

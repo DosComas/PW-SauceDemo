@@ -1,6 +1,7 @@
-import { test, expect, t, toSnapshotName } from '@utils';
+import { test, expect, toSnapshotName } from '@utils';
 import { accountLoc, doLogin } from '@helpers';
 import { INVALID_USERS, ANONYMOUS_VISITOR } from '@data';
+import { t } from '@i18n';
 
 const SCOPE = 'Identity';
 
@@ -19,7 +20,9 @@ for (const persona of INVALID_USERS) {
         await doLogin(page, { user: persona.user, pass: persona.pass });
       });
 
-      await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toContainText(t(persona.expectedError));
+      await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toContainText(
+        t.identity.errors[persona.expectedErrorKey]
+      );
     });
   });
 }

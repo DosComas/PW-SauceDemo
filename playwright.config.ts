@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { CURRENT_ENV } from './data/environments.data';
-import { t } from './utils/i18n';
+import { t } from '@i18n';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -24,7 +24,7 @@ export default defineConfig({
     [
       'html',
       {
-        title: `${CURRENT_ENV.reportName} Report - ${t('locale')}`,
+        title: `${CURRENT_ENV.reportName} Report - ${t.meta.locale}`,
       },
     ],
   ],
@@ -33,7 +33,7 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: CURRENT_ENV.baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    locale: t('locale'),
+    locale: t.meta.locale,
     trace: 'on-first-retry',
     testIdAttribute: 'data-test',
     screenshot: 'only-on-failure',

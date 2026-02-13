@@ -48,10 +48,12 @@ export const expect = baseExpect.extend({
     let keyExists = false;
     let errorType: string | null = null;
 
+    // 1. Polling Phase
     const { pass } = await poll(
       async () => {
         const rawValue = await page.evaluate((k) => window.localStorage.getItem(k), key);
 
+        // Validation Logic
         if (rawValue === null) {
           keyExists = false;
           actualLength = null;
@@ -78,6 +80,7 @@ export const expect = baseExpect.extend({
       options?.timeout
     );
 
+    // 2. Reporting Phase
     const message = () => {
       const matcherHint = this.utils.matcherHint(assertionName, `page.localeStorage`, JSON.stringify(expected), {
         isNot: this.isNot,
@@ -102,16 +105,16 @@ export const expect = baseExpect.extend({
 
   async toBeSortedBy(locator: Locator, attribute: SortAttribute, order: SortOrder, options?: { timeout?: number }) {
     const assertionName = 'toBeSortedBy';
-
     const isDescending = order === 'desc';
     let actualValues: (string | number)[] = [];
 
+    // 1. Polling Phase
     const { pass } = await poll(
-      // Action: Just get the raw data
       async () => {
         actualValues = await locator.evaluateAll((elements, attr) => {
           return elements.map((el) => {
             if (attr === 'price') {
+              // Parse "$9.99" -> 9.99
               const text = el.querySelector('.inventory_item_price')?.textContent || '0';
               return parseFloat(text.replace('$', ''));
             }
@@ -120,11 +123,12 @@ export const expect = baseExpect.extend({
         }, attribute);
         return actualValues;
       },
-      // Condition: Does the data meet our sorting requirement?
-      (values) =>
-        values.every((val, i) => {
+      (values) => {
+        // Validation Logic
+        return values.every((val, i) => {
           if (i === 0) return true;
           const prev = values[i - 1];
+          // Number comparison or String comparison
           return typeof prev === 'number' && typeof val === 'number'
             ? isDescending
               ? prev >= val
@@ -132,21 +136,63 @@ export const expect = baseExpect.extend({
             : isDescending
               ? String(prev).localeCompare(String(val)) >= 0
               : String(prev).localeCompare(String(val)) <= 0;
-        }),
+        });
+      },
       options?.timeout
     );
 
+    // 2. Reporting Phase
     const message = () => {
       const matcherHint = this.utils.matcherHint(assertionName, 'locator', `'${attribute}', '${order}'`, {
         isNot: this.isNot,
       });
 
-      const valuesToShow = actualValues.length > 10 ? [...actualValues.slice(0, 10), '...'] : actualValues;
-
       const details: string[] = [];
       details.push(`Attribute: ${this.utils.printExpected(attribute)}`);
       details.push(`Order:     ${this.utils.printExpected(order)}`);
-      details.push(`Received:  ${this.utils.printReceived(valuesToShow)}`);
+
+      if (pass) {
+        // Pass case (only shown if .not is used)
+        details.push(`Received:  ${this.utils.printReceived(actualValues)}`);
+      } else {
+        // Fail case: Find and highlight the specific violation
+        let violationIndex = -1;
+        for (let i = 1; i < actualValues.length; i++) {
+          const prev = actualValues[i - 1];
+          const curr = actualValues[i];
+
+          const isCorrect =
+            typeof prev === 'number' && typeof curr === 'number'
+              ? isDescending
+                ? prev >= curr
+                : prev <= curr
+              : isDescending
+                ? String(prev).localeCompare(String(curr)) >= 0
+                : String(prev).localeCompare(String(curr)) <= 0;
+
+          if (!isCorrect) {
+            violationIndex = i;
+            break;
+          }
+        }
+
+        if (violationIndex !== -1) {
+          const prev = actualValues[violationIndex - 1];
+          const curr = actualValues[violationIndex];
+          const operator = isDescending ? '>=' : '<=';
+
+          details.push(
+            `Violation: ${this.utils.printReceived(prev)} ${operator} ${this.utils.printReceived(curr)} at index [${violationIndex - 1}→${violationIndex}]`
+          );
+        }
+
+        // Show relevant slice of the array
+        const sliceEnd = Math.min(violationIndex + 2, actualValues.length);
+        const relevantSlice = actualValues.slice(0, sliceEnd);
+        details.push(
+          `Received:  ${this.utils.printReceived(relevantSlice)}${actualValues.length > sliceEnd ? ' ...' : ''}`
+        );
+      }
 
       return matcherHint + '\n\n' + details.join('\n');
     };

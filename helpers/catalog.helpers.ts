@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
-import { t } from '@utils';
 import { VISUAL_MOCK } from '@data';
+import { t } from '@i18n';
 
 // --- TYPES ---
 type ProductSource = { from: 'inventory'; index: number } | { from: 'pdp' };
@@ -27,8 +27,8 @@ export const catalogLoc = (page: Page) => ({
     desc: (base: Page | Locator = page) => base.getByTestId('inventory-item-desc'),
     price: (base: Page | Locator = page) => base.getByTestId('inventory-item-price'),
     picture: (base: Page | Locator = page) => base.getByRole('img'),
-    addToCartButton: (base: Page | Locator = page) => base.getByRole('button', { name: t('product.addToCart') }),
-    removeButton: (base: Page | Locator = page) => base.getByRole('button', { name: t('product.remove') }),
+    addToCartButton: (base: Page | Locator = page) => base.getByRole('button', { name: t.catalog.addToCart }),
+    removeButton: (base: Page | Locator = page) => base.getByRole('button', { name: t.catalog.remove }),
     pdpImg: page.locator('.inventory_details_img'),
   },
 });
@@ -41,10 +41,12 @@ async function getProductScope(page: Page, source: ProductSource) {
 
   const count = await inventoryUI.productCards.count();
   if (count === 0) {
-    throw new Error(`Scraper Error: No products found on the ${source.from} page. UI might be empty.`);
+    throw new Error(`[catalog] Page Empty: No products were found on the ${source.from} page.`);
   }
   if (source.index >= count) {
-    throw new Error(`Index Out of Bounds: Requested product index ${source.index}, but only ${count} products exist.`);
+    throw new Error(
+      `[catalog] Index Out of Range: Requested product ${source.index}, but only ${count} exist on the page.`
+    );
   }
 
   return inventoryUI.productCards.nth(source.index);
@@ -65,7 +67,7 @@ export async function getProductData(page: Page, source: ProductSource) {
   const [name, desc, price] = rawData.map((val) => val.trim());
 
   if (!name || !desc || !price) {
-    throw new Error(`Scraper Error: Missing data on ${source.from} page.`);
+    throw new Error(`[catalog] Content Missing: One or more product fields are blank on the ${source.from} page.`);
   }
 
   return { name: name, desc: desc, price: price };
@@ -143,19 +145,3 @@ export const catalog = {
   standardizeProductCard,
   standardizeInventoryGrid,
 } as const;
-
-/*
-export async function addProductsToCart(page: Page, quantity: number) {
-  for (let i = 0; i < quantity; i++) {
-    await page
-      .getByRole('button', { name: await getTranslation('addToCart') })
-      .first()
-      .click();
-  }
-}
-
-export async function getItemsPrices(page: Page, dataTestId: string) {
-  const pricesText = await page.getByTestId(dataTestId).allTextContents();
-  return pricesText.map((price) => parseFloat(price.replace('$', '').trim()));
-}
-*/

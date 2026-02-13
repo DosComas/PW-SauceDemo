@@ -179,7 +179,7 @@ auto-inject emoji categories.
 
 ```typescript
 await expect.soft(page).toHaveStorageLength('cart', 3, '🟧 Data: Local storage has 3 items');
-await expect.soft(inventoryUI.cartBadge).toHaveText('3', '🟧 UI: Badge shows correct count');
+await expect.soft(inventoryUI.cartBadge).toHaveText('3', '🟧 UI: Cart Badge shows 3 items');
 await expect(page).toHaveScreenshot('inventory.png', '🟧 UI: Inventory layout visual check');
 ```
 

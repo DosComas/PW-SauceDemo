@@ -1,6 +1,7 @@
-import { test, expect, t, toSnapshotName } from '@utils';
+import { test, expect, toSnapshotName } from '@utils';
 import { catalog, catalogLoc } from '@helpers';
 import { VALID_USERS, STORAGE_KEYS } from '@data';
+import { t } from '@i18n';
 
 const SCOPE = 'Inventory';
 
@@ -10,36 +11,26 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-// TODO: add to readme, that the goal is to test the app regarless of current data
-
 for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    // TODO
-    const SORT_KEYS = ['nameAZ'] as const;
-    // ['nameAZ', 'nameZA', 'priceLowHigh', 'priceHighLow'] as const;
-    // use the key like this or with the label (t()) and flags (by: string | number, order: ascending | desending)
+    const SORT_CASES = [
+      { sortLabel: t.catalog.sort.nameAZ, attribute: 'name', order: 'desc' },
+      { sortLabel: t.catalog.sort.priceLowHigh, attribute: 'price', order: 'asc' },
+    ] as const;
 
-    SORT_KEYS.forEach((sortKey) => {
-      const sortLabel = t(`product.sort.${sortKey}`);
-
+    for (const { sortLabel, attribute, order } of SORT_CASES) {
       test(`${SCOPE}: Items follow ${sortLabel} order`, async ({ page }) => {
         const { inventoryUI } = catalogLoc(page);
 
-        const setup = {
-          productCards: inventoryUI.productCards,
-        };
-
         await test.step('🟦 Sort products', async () => {
           await inventoryUI.productSortDropdown.selectOption(sortLabel);
-          await page.waitForLoadState();
         });
 
-        await expect.soft(setup.productCards, '🟧 UI: good order').toBeSortedBy('name', 'asc');
+        await expect(inventoryUI.productCards, `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(attribute, order);
       });
-    });
-    // END
+    }
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
       const { inventoryUI, productUI } = catalogLoc(page);
@@ -62,7 +53,7 @@ for (const persona of VALID_USERS) {
 
       await expect.soft(productUI.removeButton(setup.firstProductLoc), '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(inventoryUI.cartBadge, '🟧 UI: Badge shows 3').toHaveText('3');
-      await expect.soft(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STORAGE_KEYS.cart, 3);
+      await expect(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STORAGE_KEYS.cart, 3);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'inventory', index: setup.firstProduct });
@@ -70,7 +61,7 @@ for (const persona of VALID_USERS) {
 
       await expect.soft(productUI.addToCartButton(setup.firstProductLoc), '🟧 UI: Add button visible').toBeVisible();
       await expect.soft(inventoryUI.cartBadge, '🟧 UI: Badge shows 2').toHaveText('2');
-      await expect.soft(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STORAGE_KEYS.cart, 2);
+      await expect(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STORAGE_KEYS.cart, 2);
     });
 
     if (persona.isBaselineUser) {
