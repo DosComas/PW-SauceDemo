@@ -58,6 +58,17 @@ const { inventoryUI, productUI } = catalogLoc(page);
 await catalog.addProductToCart(page, { from: 'inventory', index: 0 });
 ```
 
+## Locator Strategy
+
+**Aria locators have priority.** Use accessible selectors (`getByRole`, `getByLabel`, etc.) whenever possible. For
+dynamic text and localization, `dictionary.data.ts` provides centralized strings, enabling selectors to work across
+languages.
+
+```typescript
+// Simple aria-based locator with i18n text
+addToCartButton: page.getByRole('button', { name: t('product.addToCart') });
+```
+
 ## Project Structure
 
 ```
