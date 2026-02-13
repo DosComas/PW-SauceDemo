@@ -1,5 +1,5 @@
 import { test, expect, toSnapshotName } from '@utils';
-import { accountLoc, doLogin } from '@helpers';
+import { account, accountLoc } from '@helpers';
 import { INVALID_USERS, ANONYMOUS_VISITOR } from '@data';
 import { t } from '@i18n';
 
@@ -17,7 +17,7 @@ for (const persona of INVALID_USERS) {
       const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Log into the app', async () => {
-        await doLogin(page, { user: persona.user, pass: persona.pass });
+        await account.doLogin(page, { user: persona.user, pass: persona.pass });
       });
 
       await expect(loginUI.errorMessage, '🟧 UI: Error message matches').toContainText(

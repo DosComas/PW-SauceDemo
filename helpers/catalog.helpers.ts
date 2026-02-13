@@ -53,7 +53,7 @@ async function getProductScope(page: Page, source: ProductSource) {
 }
 
 // --- ACTIONS ---
-export async function getProductData(page: Page, source: ProductSource) {
+async function getProductData(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
   const scope = await getProductScope(page, source);
@@ -73,7 +73,7 @@ export async function getProductData(page: Page, source: ProductSource) {
   return { name: name, desc: desc, price: price };
 }
 
-export async function openProductDetails(page: Page, { index, via }: ProductClick) {
+async function openProductDetails(page: Page, { index, via }: ProductClick) {
   const { productUI } = catalogLoc(page);
 
   const scope = (await getProductScope(page, { from: 'inventory', index })) as Locator;
@@ -86,7 +86,7 @@ export async function openProductDetails(page: Page, { index, via }: ProductClic
   await clickTargetMap[via](scope).click();
 }
 
-export async function addProductToCart(page: Page, source: ProductSource) {
+async function addProductToCart(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
   const scope = await getProductScope(page, source);
@@ -94,7 +94,7 @@ export async function addProductToCart(page: Page, source: ProductSource) {
   await productUI.addToCartButton(scope).click();
 }
 
-export async function removeProductFromCart(page: Page, source: ProductSource) {
+async function removeProductFromCart(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
   const scope = await getProductScope(page, source);
@@ -102,7 +102,7 @@ export async function removeProductFromCart(page: Page, source: ProductSource) {
   await productUI.removeButton(scope).click();
 }
 
-export async function standardizeProductCard(page: Page, source: ProductSource) {
+async function standardizeProductCard(page: Page, source: ProductSource) {
   const { productUI } = catalogLoc(page);
 
   const scope = await getProductScope(page, source);
@@ -112,7 +112,7 @@ export async function standardizeProductCard(page: Page, source: ProductSource) 
   await productUI.price(scope).evaluate((el, price) => (el.textContent = price), VISUAL_MOCK.product.price);
 }
 
-export async function standardizeInventoryGrid(page: Page, { products }: { products: number }) {
+async function standardizeInventoryGrid(page: Page, { products }: { products: number }) {
   const { inventoryUI } = catalogLoc(page);
 
   await standardizeProductCard(page, { from: 'inventory', index: 0 });

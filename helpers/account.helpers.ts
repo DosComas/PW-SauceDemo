@@ -26,21 +26,20 @@ export const accountLoc = (page: Page) => ({
 // ...
 
 // --- ACTIONS ---
-
-export async function doLogin(page: Page, { user, pass }: { user: string; pass: string }) {
+async function doLogin(page: Page, { user, pass }: { user: string; pass: string }) {
   const { loginUI } = accountLoc(page);
   await loginUI.usernameInput.fill(user);
   await loginUI.passwordInput.fill(pass);
   await loginUI.loginButton.click();
 }
 
-export async function doLogout(page: Page) {
+async function doLogout(page: Page) {
   const { navBarUI } = accountLoc(page);
   await navBarUI.menuButton.click();
   await navBarUI.logoutButton.click();
 }
 
-export async function getSession(context: BrowserContext) {
+async function getSession(context: BrowserContext) {
   const cookies = await context.cookies();
   const sessionCookie = cookies.find((cookie) => cookie.name === 'session-username');
   return sessionCookie;

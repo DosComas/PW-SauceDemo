@@ -1,5 +1,5 @@
 import { test, expect } from '@utils';
-import { accountLoc, doLogout, getSession } from '@helpers';
+import { account, accountLoc } from '@helpers';
 import { VALID_USERS } from '@data';
 import { t } from '@i18n';
 
@@ -19,7 +19,7 @@ for (const persona of VALID_USERS) {
       const { loginUI } = accountLoc(page);
 
       await test.step('🟦 Logout', async () => {
-        await doLogout(page);
+        await account.doLogout(page);
       });
 
       await test.step('🟦 Navigate back', async () => {
@@ -32,7 +32,7 @@ for (const persona of VALID_USERS) {
         await page.reload();
       });
 
-      expect(await getSession(page.context()), '🟧 Data: Session cookies deleted').toBeUndefined();
+      expect(await account.getSession(page.context()), '🟧 Data: Session cookies deleted').toBeUndefined();
     });
   });
 }
