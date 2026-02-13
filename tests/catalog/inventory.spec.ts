@@ -16,8 +16,8 @@ for (const persona of VALID_USERS) {
     test.use({ storageState: persona.storageState });
 
     const SORT_CASES = [
-      { sortLabel: t.catalog.sort.nameAZ, attribute: 'name', order: 'desc' },
-      { sortLabel: t.catalog.sort.priceHighLow, attribute: 'price', order: 'asc' },
+      { sortLabel: t.catalog.sort.nameAZ, attribute: 'name', order: 'asc' },
+      { sortLabel: t.catalog.sort.priceHighLow, attribute: 'price', order: 'desc' },
     ] as const;
 
     for (const { sortLabel, attribute, order } of SORT_CASES) {
