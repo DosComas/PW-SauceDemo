@@ -1,5 +1,6 @@
 import { Page, BrowserContext } from '@playwright/test';
-import { pageHeader } from './shared/locators';
+import { sharedHeader } from './shared/locators';
+import { STATE_KEYS } from '@data';
 import { t } from '@i18n';
 
 // --- TYPES ---
@@ -14,14 +15,14 @@ export const identityLocators = (page: Page) => ({
   loginUI: {
     usernameInput: page.getByPlaceholder(t.identity.username),
     passwordInput: page.getByPlaceholder(t.identity.password),
-    loginButton: page.getByRole('button', { name: t.identity.login }),
-    errorMessage: page.getByTestId('error'),
-    logoImage: page.locator('.login_logo'),
+    loginBtn: page.getByRole('button', { name: t.identity.login }),
+    errorMsg: page.getByTestId('error'),
+    logoImg: page.locator('.login_logo'),
   },
 
   // HEADER: Global navigation and cart
   headerUI: {
-    ...pageHeader(page),
+    ...sharedHeader(page),
   },
 });
 
@@ -33,18 +34,18 @@ async function doLogin(page: Page, { user, pass }: LoginCredentials) {
   const { loginUI } = identityLocators(page);
   await loginUI.usernameInput.fill(user);
   await loginUI.passwordInput.fill(pass);
-  await loginUI.loginButton.click();
+  await loginUI.loginBtn.click();
 }
 
 async function doLogout(page: Page) {
   const { headerUI } = identityLocators(page);
-  await headerUI.menuButton.click();
-  await headerUI.logoutButton.click();
+  await headerUI.menuBtn.click();
+  await headerUI.logoutBtn.click();
 }
 
 async function getSession(context: BrowserContext) {
   const cookies = await context.cookies();
-  const sessionCookie = cookies.find((cookie) => cookie.name === 'session-username');
+  const sessionCookie = cookies.find((cookie) => cookie.name === STATE_KEYS.userSession);
   return sessionCookie;
 }
 

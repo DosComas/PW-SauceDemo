@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test';
-import { productCard, pageHeader } from './shared/locators';
+import { sharedProductCard, sharedHeader } from './shared/locators';
 import { validateProductIndex, injectProductText, ProductSource } from './shared/actions';
 import { VISUAL_MOCK } from '@data';
 
@@ -16,23 +16,25 @@ export const catalogLocators = (page: Page) => {
   return {
     // HEADER: Global navigation and cart
     headerUI: {
-      ...pageHeader(page),
+      ...sharedHeader(page),
     },
 
     // INVENTORY: The main product gallery
     inventoryUI: {
       cardsList: page.getByTestId('inventory-list'),
       allProductCards: allCards,
-      allProductCardImages: page.locator('.inventory_item_img').getByRole('img'),
+      allProductCardImgs: page.locator('.inventory_item_img').getByRole('img'),
       sortDropdown: page.getByTestId('product-sort-container'),
+      allProductPrices: sharedProductCard(page).price,
+      allProductNames: sharedProductCard(page).name,
       // Clarity helper: Get the product logic for a specific card
-      productCard: (index: number) => productCard(allCards.nth(index)),
+      productCard: (index: number) => sharedProductCard(allCards.nth(index)),
     },
 
     // PDP: The product detail page
     pdpUI: {
-      productCard: { ...productCard(page) },
-      backButton: page.getByTestId('back-to-products'),
+      productCard: { ...sharedProductCard(page) },
+      backToProductsBtn: page.getByTestId('back-to-products'),
     },
   };
 };
@@ -58,17 +60,17 @@ async function resolveProductUI(page: Page, source: ProductSource) {
 async function scrapeCatalogProduct(page: Page, source: ProductSource) {
   const product = await resolveProductUI(page, source);
 
-  const [name, desc, price, image] = await Promise.all([
+  const [name, desc, price, img] = await Promise.all([
     product.name.innerText(),
     product.desc.innerText(),
     product.price.innerText(),
-    product.image.getAttribute('src'),
+    product.img.getAttribute('src'),
   ]);
 
   const cleaned = [name, desc, price].map((val) => val.trim());
   const [cleanName, cleanDesc, cleanPrice] = cleaned;
 
-  if (!cleanName || !cleanDesc || !cleanPrice || !image) {
+  if (!cleanName || !cleanDesc || !cleanPrice || !img) {
     throw new Error(
       `[catalog] Content Missing: One or more product fields (including image) are blank on the ${source.from} page.`
     );
@@ -78,7 +80,7 @@ async function scrapeCatalogProduct(page: Page, source: ProductSource) {
     name: cleanName,
     desc: cleanDesc,
     price: cleanPrice,
-    image,
+    img,
   };
 }
 
@@ -87,7 +89,7 @@ async function openProductDetails(page: Page, { index, via }: ProductClick) {
 
   const clickTargetMap = {
     name: product.name,
-    img: product.image,
+    img: product.img,
   };
 
   await clickTargetMap[via].click();
@@ -96,13 +98,13 @@ async function openProductDetails(page: Page, { index, via }: ProductClick) {
 async function addProductToCart(page: Page, source: ProductSource) {
   const product = await resolveProductUI(page, source);
 
-  await product.addToCartButton.click();
+  await product.addToCartBtn.click();
 }
 
 async function removeProductFromCart(page: Page, source: ProductSource) {
   const product = await resolveProductUI(page, source);
 
-  await product.removeButton.click();
+  await product.removeBtn.click();
 }
 
 async function standardizeProductText(page: Page, source: ProductSource) {

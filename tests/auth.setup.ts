@@ -15,11 +15,11 @@ for (const persona of VALID_USERS) {
     });
 
     await setup.step('🟦 Open user menu', async () => {
-      await headerUI.menuButton.click();
+      await headerUI.menuBtn.click();
     });
 
-    await expect(headerUI.logoutButton, '🟧 UI: Logout button visible').toBeVisible();
-    await expect(page, '🟧 Data: Inventory URL active').toHaveURL(/.*inventory.html/);
+    await expect(headerUI.logoutBtn, '🟧 UI: Logout button visible').toBeVisible();
+    expect(await identity.getSession(page.context()), '🟧 Data: Session cookies present').toBeDefined();
 
     await setup.step('⬜ Save authentication state', async () => {
       await page.context().storageState({ path: persona.storageState });

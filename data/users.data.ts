@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
-import { t } from '@i18n'; // Import the translator to extract its types
+import { AUTH_CONFIG } from './identity.data';
+import { t } from '@i18n';
 
 const VALID_USERNAME = process.env.VALID_USERNAME as string;
 const VALID_PASSWORD = process.env.VALID_PASSWORD as string;
-const AUTH_DIR = '.auth';
 
 interface UserPersona {
   role: string;
@@ -30,7 +30,7 @@ const TEST_USERS: TestUserData = {
       user: VALID_USERNAME,
       pass: VALID_PASSWORD,
       expectAuth: true,
-      storageState: `${AUTH_DIR}/normal_user.json`,
+      storageState: `${AUTH_CONFIG.dir}/normal_user.json`,
       isBaselineUser: true,
     },
     {
@@ -38,7 +38,7 @@ const TEST_USERS: TestUserData = {
       user: 'problem_user',
       pass: VALID_PASSWORD,
       expectAuth: true,
-      storageState: `${AUTH_DIR}/problem_user.json`,
+      storageState: `${AUTH_CONFIG.dir}/problem_user.json`,
       isBaselineUser: false,
     },
     {
@@ -46,7 +46,7 @@ const TEST_USERS: TestUserData = {
       user: 'error_user',
       pass: VALID_PASSWORD,
       expectAuth: true,
-      storageState: `${AUTH_DIR}/error_user.json`,
+      storageState: `${AUTH_CONFIG.dir}/error_user.json`,
       isBaselineUser: false,
     },
     {
@@ -54,7 +54,7 @@ const TEST_USERS: TestUserData = {
       user: 'visual_user',
       pass: VALID_PASSWORD,
       expectAuth: true,
-      storageState: `${AUTH_DIR}/visual_user.json`,
+      storageState: `${AUTH_CONFIG.dir}/visual_user.json`,
       isBaselineUser: false,
     },
   ],
@@ -85,10 +85,7 @@ const TEST_USERS: TestUserData = {
 
 export const VALID_USERS = TEST_USERS.valid;
 export const INVALID_USERS = TEST_USERS.invalid;
-
-export const ANONYMOUS_VISITOR = {
-  role: 'Anonymous Visitor 🔍',
-} as const;
+export const BASELINE_USERS = VALID_USERS.filter((u) => u.isBaselineUser);
 
 export const createCheckoutData = () => ({
   firstName: faker.person.firstName(),

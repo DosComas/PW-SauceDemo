@@ -1,11 +1,16 @@
 import { expect as baseExpect, Page, Locator } from '@playwright/test';
 
 // --- TYPES ---
-export type SortAttribute = 'name' | 'price';
 export type SortOrder = 'asc' | 'desc';
+export type SortContent = 'price' | 'name';
 
 // --- PRIVATE UTILITIES ---
-async function poll<T>(
+
+/**
+ * A progressive polling utility that retries a callback until a condition is met.
+ * Handles transient UI errors and scales wait times to be efficient.
+ */
+async function pollUntil<T>(
   callback: () => Promise<T | null>,
   condition: (value: T) => boolean,
   timeout: number = 5000
@@ -49,7 +54,7 @@ export const expect = baseExpect.extend({
     let errorType: string | null = null;
 
     // 1. Polling Phase
-    const { pass } = await poll(
+    const { pass } = await pollUntil(
       async () => {
         const rawValue = await page.evaluate((k) => window.localStorage.getItem(k), key);
 
@@ -103,38 +108,57 @@ export const expect = baseExpect.extend({
     return { message, pass };
   },
 
-  async toBeSortedBy(locator: Locator, attribute: SortAttribute, order: SortOrder, options?: { timeout?: number }) {
+  async toBeSortedBy(
+    locator: Locator,
+    sortBy: { order: SortOrder; content: SortContent },
+    options?: { timeout?: number }
+  ) {
     const assertionName = 'toBeSortedBy';
-    const isDescending = order === 'desc';
-    let actualValues: (string | number)[] = [];
+    const isDescending = sortBy.order === 'desc';
 
     // 1. Polling Phase
-    const { pass } = await poll(
+    const { value: actualValues, pass } = await pollUntil(
+      // CALLBACK: Data Extraction
       async () => {
-        actualValues = await locator.evaluateAll((elements, attr) => {
-          return elements.map((el) => {
-            if (attr === 'price') {
-              const text = el.querySelector('.inventory_item_price')?.textContent || '0';
-              return parseFloat(text.replace('$', ''));
-            }
-            return el.querySelector('.inventory_item_name')?.textContent?.trim() || '';
-          });
-        }, attribute);
-        return actualValues;
+        const texts = await locator.allTextContents();
+
+        return texts.map((text, index) => {
+          const raw = text.trim();
+
+          // Case A: Name logic
+          if (sortBy.content === 'name') return raw;
+
+          // Case B: Price logic
+          const numericPart = raw.replace(/[^0-9.-]+/g, '');
+          const price = parseFloat(numericPart);
+
+          if (!numericPart || isNaN(price)) {
+            throw new Error(`Price parsing failed at index ${index}. Received: "${raw}"`);
+          }
+
+          return price;
+        });
       },
+
+      // CONDITION: Sort Validation
       (values) => {
-        if (values.length < 2) return true;
-        return values.every((val, i) => {
+        if (!values || values.length < 2) return true;
+
+        return values.every((curr, i) => {
           if (i === 0) return true;
           const prev = values[i - 1];
 
-          return typeof prev === 'number' && typeof val === 'number'
-            ? isDescending
-              ? prev >= val
-              : prev <= val
-            : isDescending
-              ? String(prev).localeCompare(String(val)) >= 0
-              : String(prev).localeCompare(String(val)) <= 0;
+          // Comparison Logic: Numbers vs Strings
+          const isOrdered =
+            typeof prev === 'number' && typeof curr === 'number'
+              ? isDescending
+                ? prev >= curr
+                : prev <= curr
+              : isDescending
+                ? String(prev).localeCompare(String(curr), undefined, { numeric: true }) >= 0
+                : String(prev).localeCompare(String(curr), undefined, { numeric: true }) <= 0;
+
+          return isOrdered;
         });
       },
       options?.timeout
@@ -159,7 +183,7 @@ export const expect = baseExpect.extend({
         return (
           matcherHint +
           '\n\n' +
-          `Expected: not sorted by ${attribute} ${order}\n` +
+          `Expected: not sorted by ${sortBy.content} ${sortBy.order}\n` +
           `Received: ${this.utils.printReceived(actualValues.slice(0, 3))}...`
         );
       }
@@ -185,7 +209,7 @@ export const expect = baseExpect.extend({
       return (
         matcherHint +
         '\n\n' +
-        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${attribute} ${order})\n` +
+        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${sortBy.content} ${sortBy.order})\n` +
         `Received: ${this.utils.printReceived(`${prev} ${actualOp} ${curr}`)} at index ${vIndex - 1}\n\n` +
         `Diff:\n${this.utils.diff(expectedValues, actualValues)}`
       );

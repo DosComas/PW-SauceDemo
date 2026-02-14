@@ -3,7 +3,7 @@ import { identity, identityLocators } from '@helpers';
 import { VALID_USERS } from '@data';
 import { t } from '@i18n';
 
-const SCOPE = 'Identity';
+const SCOPE = 'Logout';
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
@@ -22,11 +22,13 @@ for (const persona of VALID_USERS) {
         await identity.doLogout(page);
       });
 
+      await expect.soft(loginUI.loginBtn, '🟧 UI: Login button visible').toBeVisible();
+
       await test.step('🟦 Navigate back', async () => {
         await page.goBack();
       });
 
-      await expect.soft(loginUI.errorMessage, '🟧 UI: Error message matches').toHaveText(t.identity.errors.restricted);
+      await expect.soft(loginUI.errorMsg, '🟧 UI: Error message matches').toHaveText(t.identity.errors.restricted);
 
       await test.step('🟦 Reload the page', async () => {
         await page.reload();

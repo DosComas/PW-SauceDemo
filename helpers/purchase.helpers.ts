@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { validateProductIndex, injectProductText } from './shared/actions';
-import { productCard, pageHeader } from './shared/locators';
+import { sharedProductCard, sharedHeader } from './shared/locators';
 import { catalogLocators } from './catalog.helpers';
 import { VISUAL_MOCK } from '@data';
 
@@ -16,7 +16,7 @@ export const purchaseLocators = (page: Page) => {
       cartList: page.getByTestId('cart-list'),
       allItems: allCartItems,
       productItem: (index: number) => {
-        const { name, price, desc } = productCard(allCartItems.nth(index));
+        const { name, price, desc } = sharedProductCard(allCartItems.nth(index));
         return { name, price, desc };
       },
     },

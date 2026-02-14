@@ -1,30 +1,33 @@
-import { SortAttribute, SortOrder } from './matchers';
+import { SortOrder, SortContent } from './matchers';
 
 declare global {
   namespace PlaywrightTest {
     interface Matchers<R> {
       /**
-       * Asserts that a collection of elements is ordered by the specified attribute.
-       * Handles currency parsing for 'price' and alphanumeric comparison for 'name'.
+       * Asserts that a Locator's elements are ordered by the specified criteria.
+       * * Handles natural alphanumeric sorting for names and mathematical parsing for prices.
+       * * Retries via progressive polling to handle UI transitions and loading states.
        *
        * **Usage**
        *
        * ```js
-       * // Assert products are sorted by price descending
-       * await expect(inventoryUI.productCards).toBeSortedBy('price', 'desc');
+       * // Sort names A-Z (Using sring order)
+       * await expect(inventory.itemNames).toBeSorted({ content: 'name', order: 'asc' });
+       * * // Sort prices high-to-low (Using numeric order)
+       * await expect(inventory.itemPrices).toBeSorted({ content: 'price', order: 'desc' });
        * ```
        *
        */
-      toBeSortedBy(attribute: SortAttribute, order: SortOrder, options?: { timeout?: number }): Promise<R>;
+      toBeSorted(sortBy: { content: SortContent; order: SortOrder }, options: { timeout?: number }): Promise<R>;
 
       /**
-       * Asserts that a JSON array in LocalStorage matches the expected length.
-       * Retries until the key is found and the array count is correct.
+       * Asserts that a JSON array stored in LocalStorage has the expected number of items.
+       * * This is highly useful for state-based testing where the UI might not
+       * immediately reflect storage changes.
        *
        * **Usage**
        *
        * ```js
-       * // Assert the shopping cart in storage has 3 items
        * await expect(page).toHaveStorageLength('cart-contents', 3);
        * ```
        *
