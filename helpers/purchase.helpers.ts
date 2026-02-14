@@ -11,8 +11,8 @@ interface moduleSource {
 export const purchaseLocators = (page: Page) => ({
   cartUI: {
     container: page.getByTestId('module-container'),
-    cartProductsList: page.getByTestId('cart-list'),
-    cartProductItem: page.locator('.cart_item'),
+    cartList: page.getByTestId('cart-list'),
+    cartItem: page.locator('.cart_item'),
   },
 });
 
@@ -25,14 +25,14 @@ function getmoduleScope(page: Page, index = 0) {
 // --- ACTIONS ---
 async function standardizeCartList(page: Page, { products }: { products: number }) {
   const { cartUI } = purchaseLocators(page);
-  const { inventoryUI } = catalogLocators(page);
+  const { headerUI } = catalogLocators(page);
 
   await standardizeProductCard(page, { from: 'inventory', index: 0 });
 
-  const templateHandle = await cartUI.cartProductItem.first().elementHandle();
+  const templateHandle = await cartUI.cartList.first().elementHandle();
 
   // Perform the evaluation
-  await cartUI.cartProductsList.evaluate(
+  await cartUI.cartItem.evaluate(
     (list, { template, n }) => {
       if (!template) return;
 
@@ -49,8 +49,8 @@ async function standardizeCartList(page: Page, { products }: { products: number 
     { template: templateHandle, n: products }
   );
 
-  if (await inventoryUI.cartBadge.isVisible()) {
-    await inventoryUI.cartBadge.evaluate((el, n) => (el.textContent = n.toString()), products);
+  if (await headerUI.cartBadge.isVisible()) {
+    await headerUI.cartBadge.evaluate((el, n) => (el.textContent = n.toString()), products);
   }
 }
 

@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { productItem, pageHeader } from './shared.locators';
 import { VISUAL_MOCK } from '@data';
 import { t } from '@i18n';
 
@@ -10,8 +11,8 @@ type ProductClick = {
   via: 'name' | 'img';
 };
 
-// --- LOCATORS ---
-export const catalogLocators = (page: Page) => ({
+// --- LOCATORS legacy ---
+export const catalogLocatorsLegacy = (page: Page) => ({
   // --- Inventory Screen ---
   inventoryUI: {
     productSortDropdown: page.getByTestId('product-sort-container'),
@@ -34,104 +35,129 @@ export const catalogLocators = (page: Page) => ({
   },
 });
 
+// --- LOCATORS ---
+export const catalogLocators = (page: Page) => ({
+  // HEADER: Global navigation and cart
+  headerUI: {
+    ...pageHeader(page),
+  },
+
+  // INVENTORY: The main product gallery
+  inventoryUI: {
+    cardsList: page.getByTestId('inventory-list'),
+    allCards: page.getByTestId('inventory-item'),
+    allCardImages: page.locator('.inventory_item_img').getByRole('img'),
+    sortDropdown: page.getByTestId('product-sort-container'),
+    // Clarity helper: Get the product logic for a specific card
+    card: (index: number) => productItem(page.getByTestId('inventory-item').nth(index)),
+  },
+
+  // PDP: The product detail page
+  pdpUI: {
+    ...productItem(page),
+    backButton: page.getByTestId('back-to-products'),
+  },
+});
+
 // --- PRIVATE UTILITIES ---
 async function getProductScope(page: Page, source: ProductSource) {
-  const { inventoryUI } = catalogLocators(page);
+  const { inventoryUI, pdpUI } = catalogLocators(page);
 
-  if (source.from === 'pdp') return page;
+  // PDP Context
+  if (source.from === 'pdp') {
+    return pdpUI;
+  }
 
-  const count = await inventoryUI.productCards.count();
+  // Inventory Context
+  const count = await inventoryUI.allCards.count();
   if (count === 0) {
-    throw new Error(`[catalog] Page Empty: No products were found on the ${source.from} page.`);
+    throw new Error(`[catalog] Page Empty: No products found on Inventory.`);
   }
   if (source.index >= count) {
-    throw new Error(
-      `[catalog] Index Out of Range: Requested product ${source.index}, but only ${count} exist on the page.`
-    );
+    throw new Error(`[catalog] Index Out of Range: Requested ${source.index}, only ${count} items exist.`);
   }
 
-  return inventoryUI.productCards.nth(source.index);
+  // Return the pre-scoped object for that specific card
+  return inventoryUI.card(source.index);
 }
 
 // --- ACTIONS ---
 async function getProductData(page: Page, source: ProductSource) {
-  const { productUI } = catalogLocators(page);
+  const product = await getProductScope(page, source);
 
-  const scope = await getProductScope(page, source);
-
-  const rawData = await Promise.all([
-    productUI.name(scope).innerText(),
-    productUI.desc(scope).innerText(),
-    productUI.price(scope).innerText(),
+  const [name, description, price, image] = await Promise.all([
+    product.name.innerText(),
+    product.description.innerText(),
+    product.price.innerText(),
+    product.image.getAttribute('src'),
   ]);
 
-  const [name, desc, price] = rawData.map((val) => val.trim());
+  const cleaned = [name, description, price].map((val) => val.trim());
+  const [cleanName, cleanDescription, cleanPrice] = cleaned;
 
-  if (!name || !desc || !price) {
-    throw new Error(`[catalog] Content Missing: One or more product fields are blank on the ${source.from} page.`);
+  if (!cleanName || !cleanDescription || !cleanPrice || !image) {
+    throw new Error(
+      `[catalog] Content Missing: One or more product fields (including image) are blank on the ${source.from} page.`
+    );
   }
 
-  return { name: name, desc: desc, price: price };
+  return {
+    name: cleanName,
+    description: cleanDescription,
+    price: cleanPrice,
+    image: image,
+  };
 }
 
 async function openProductDetails(page: Page, { index, via }: ProductClick) {
-  const { productUI } = catalogLocators(page);
+  const product = await getProductScope(page, { from: 'inventory', index });
 
-  const scope = (await getProductScope(page, { from: 'inventory', index })) as Locator;
-
-  const clickTargetMap: Record<ProductClick['via'], (base: Locator) => Locator> = {
-    name: productUI.name,
-    img: productUI.picture,
+  const clickTargetMap = {
+    name: product.name,
+    img: product.image,
   };
 
-  await clickTargetMap[via](scope).click();
+  await clickTargetMap[via].click();
 }
 
 async function addProductToCart(page: Page, source: ProductSource) {
-  const { productUI } = catalogLocators(page);
+  const product = await getProductScope(page, source);
 
-  const scope = await getProductScope(page, source);
-
-  await productUI.addToCartButton(scope).click();
+  await product.addToCartButton.click();
 }
 
 async function removeProductFromCart(page: Page, source: ProductSource) {
-  const { productUI } = catalogLocators(page);
+  const product = await getProductScope(page, source);
 
-  const scope = await getProductScope(page, source);
-
-  await productUI.removeButton(scope).click();
+  await product.removeButton.click();
 }
 
 export async function standardizeProductCard(page: Page, source: ProductSource) {
-  const { productUI } = catalogLocators(page);
+  const product = await getProductScope(page, source);
 
-  const scope = await getProductScope(page, source);
-
-  await productUI.name(scope).evaluate((el, name) => (el.textContent = name), VISUAL_MOCK.product.name);
-  await productUI.desc(scope).evaluate((el, desc) => (el.textContent = desc), VISUAL_MOCK.product.desc);
-  await productUI.price(scope).evaluate((el, price) => (el.textContent = price), VISUAL_MOCK.product.price);
+  await product.name.evaluate((el, txt) => (el.textContent = txt), VISUAL_MOCK.product.name);
+  await product.description.evaluate((el, txt) => (el.textContent = txt), VISUAL_MOCK.product.description);
+  await product.price.evaluate((el, txt) => (el.textContent = txt), VISUAL_MOCK.product.price);
 }
 
 async function standardizeInventoryGrid(page: Page, { products }: { products: number }) {
   const { inventoryUI } = catalogLocators(page);
 
+  // Fix the first card visually
   await standardizeProductCard(page, { from: 'inventory', index: 0 });
 
-  // Pass the first card locator as an argument
-  await inventoryUI.productList.evaluate(
+  // Clone it
+  await inventoryUI.cardsList.evaluate(
     (listElement, { templateElement, n }) => {
-      // templateElement is now a REAL DOM node, not a locator string!
       const cleanClone = templateElement.cloneNode(true) as HTMLElement;
-
       listElement.innerHTML = '';
-
       for (let i = 0; i < n; i++) {
         listElement.appendChild(cleanClone.cloneNode(true));
       }
     },
     {
-      templateElement: await inventoryUI.productCards.first().elementHandle(),
+      // Access the raw card locator directly from inventoryUI for the handle
+      templateElement: await inventoryUI.allCards.first().elementHandle(),
       n: products,
     }
   );

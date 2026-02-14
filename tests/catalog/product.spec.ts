@@ -15,7 +15,7 @@ for (const persona of VALID_USERS) {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Content matches inventory data`, async ({ page }) => {
-      const { productUI } = catalogLocators(page);
+      const { pdpUI } = catalogLocators(page);
 
       const setup = {
         firstProduct: 0,
@@ -29,13 +29,14 @@ for (const persona of VALID_USERS) {
         await catalog.openProductDetails(page, { index: setup.firstProduct, via: 'name' });
       });
 
-      await expect.soft(productUI.name(), '🟧 UI: Product name matches').toHaveText(expectedProduct.name);
-      await expect.soft(productUI.desc(), '🟧 UI: Product description matches').toHaveText(expectedProduct.desc);
-      await expect.soft(productUI.price(), '🟧 UI: Product price matches').toHaveText(expectedProduct.price);
+      await expect.soft(pdpUI.name, '🟧 UI: Product name matches').toHaveText(expectedProduct.name);
+      await expect.soft(pdpUI.description, '🟧 UI: Product description matches').toHaveText(expectedProduct.description);
+      await expect.soft(pdpUI.price, '🟧 UI: Product price matches').toHaveText(expectedProduct.price);
+      await expect.soft(pdpUI.image, '🟧 UI: Product image source matches').toHaveAttribute('src', expectedProduct.image);
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { productUI, inventoryUI } = catalogLocators(page);
+      const { pdpUI, headerUI } = catalogLocators(page);
 
       const setup = {
         firstProduct: 0,
@@ -49,21 +50,21 @@ for (const persona of VALID_USERS) {
         await catalog.addProductToCart(page, { from: 'pdp' });
       });
 
-      await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
+      await expect.soft(pdpUI.removeButton, '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(headerUI.cartBadge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
       await expect(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STORAGE_KEYS.cart, 1);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'pdp' });
       });
 
-      await expect.soft(productUI.addToCartButton(), '🟧 UI: Add button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Cart Badge removed`).not.toBeVisible();
+      await expect.soft(pdpUI.addToCartButton, '🟧 UI: Add button visible').toBeVisible();
+      await expect.soft(headerUI.cartBadge, `🟧 UI: Cart Badge removed`).not.toBeVisible();
       await expect(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STORAGE_KEYS.cart, 0);
     });
 
     test(`${SCOPE}: State persistence from inventory`, async ({ page }) => {
-      const { productUI, inventoryUI } = catalogLocators(page);
+      const { pdpUI, headerUI } = catalogLocators(page);
 
       const setup = {
         productIndexes: [0, 1, 2],
@@ -82,14 +83,14 @@ for (const persona of VALID_USERS) {
         await catalog.openProductDetails(page, { index: setup.lastProduct, via: 'img' });
       });
 
-      await expect.soft(productUI.removeButton(), '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, `🟧 UI: Cart Badge shows 3 items`).toHaveText('3');
+      await expect.soft(pdpUI.removeButton, '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(headerUI.cartBadge, `🟧 UI: Cart Badge shows 3 items`).toHaveText('3');
       await expect(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STORAGE_KEYS.cart, 3);
     });
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { productUI } = catalogLocators(page);
+        const { pdpUI } = catalogLocators(page);
 
         const setup = {
           firstProduct: 0,
@@ -105,7 +106,7 @@ for (const persona of VALID_USERS) {
 
         await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot(
           `${toSnapshotName(persona.role)}-product.png`,
-          { mask: [productUI.pdpImg], fullPage: true }
+          { mask: [pdpUI.image], fullPage: true }
         );
       });
     }

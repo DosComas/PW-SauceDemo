@@ -25,15 +25,15 @@ for (const persona of VALID_USERS) {
         const { inventoryUI } = catalogLocators(page);
 
         await test.step('🟦 Sort products', async () => {
-          await inventoryUI.productSortDropdown.selectOption(sortLabel);
+          await inventoryUI.sortDropdown.selectOption(sortLabel);
         });
 
-        await expect(inventoryUI.productCards, `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(attribute, order);
+        await expect(inventoryUI.allCards, `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(attribute, order);
       });
     }
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { inventoryUI, productUI } = catalogLocators(page);
+      const { inventoryUI, pdpUI, headerUI } = catalogLocators(page);
 
       const setup = {
         productIndexes: [0, 1, 2],
@@ -41,7 +41,7 @@ for (const persona of VALID_USERS) {
           return this.productIndexes[0];
         },
         get firstProductLoc() {
-          return inventoryUI.productCards.nth(this.firstProduct);
+          return inventoryUI.allCards.nth(this.firstProduct);
         },
       };
 
@@ -51,16 +51,16 @@ for (const persona of VALID_USERS) {
         }
       });
 
-      await expect.soft(productUI.removeButton(setup.firstProductLoc), '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, '🟧 UI: Badge shows 3').toHaveText('3');
+      await expect.soft(inventoryUI.card(setup.firstProduct).removeButton, '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(headerUI.cartBadge, '🟧 UI: Badge shows 3').toHaveText('3');
       await expect(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STORAGE_KEYS.cart, 3);
 
       await test.step('🟦 Remove product from cart', async () => {
         await catalog.removeProductFromCart(page, { from: 'inventory', index: setup.firstProduct });
       });
 
-      await expect.soft(productUI.addToCartButton(setup.firstProductLoc), '🟧 UI: Add button visible').toBeVisible();
-      await expect.soft(inventoryUI.cartBadge, '🟧 UI: Badge shows 2').toHaveText('2');
+      await expect.soft(inventoryUI.card(setup.firstProduct).addToCartButton, '🟧 UI: Add button visible').toBeVisible();
+      await expect.soft(headerUI.cartBadge, '🟧 UI: Badge shows 2').toHaveText('2');
       await expect(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STORAGE_KEYS.cart, 2);
     });
 
@@ -74,7 +74,7 @@ for (const persona of VALID_USERS) {
 
         const inventoryImgs = await test.step('⬜ Standardize grid data', async () => {
           await catalog.standardizeInventoryGrid(page, { products: setup.productCount });
-          return await inventoryUI.inventoryImg.all();
+          return await inventoryUI.allCardImages.all();
         });
 
         await expect(page, '🟧 UI: Inventory layout visual check').toHaveScreenshot(

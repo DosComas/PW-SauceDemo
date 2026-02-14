@@ -1,4 +1,5 @@
 import { Page, BrowserContext } from '@playwright/test';
+import { pageHeader } from './shared.locators';
 import { t } from '@i18n';
 
 // --- TYPES ---
@@ -9,7 +10,7 @@ type LoginCredentials = {
 
 // --- LOCATORS ---
 export const identityLocators = (page: Page) => ({
-  // --- Login Screen ---
+  // LOGIN: The entry gateway
   loginUI: {
     usernameInput: page.getByPlaceholder(t.identity.username),
     passwordInput: page.getByPlaceholder(t.identity.password),
@@ -18,10 +19,9 @@ export const identityLocators = (page: Page) => ({
     logoImage: page.locator('.login_logo'),
   },
 
-  // --- Page Header ---
+  // HEADER: Global navigation and cart
   headerUI: {
-    menuButton: page.getByRole('button', { name: t.identity.header.openMenu }),
-    logoutButton: page.getByRole('link', { name: t.identity.header.logout }),
+    ...pageHeader(page),
   },
 });
 

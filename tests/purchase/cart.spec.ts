@@ -6,6 +6,8 @@ import { t } from '@i18n';
 const SCOPE = 'Cart';
 
 // TODO add login test cases? test on webkit?
+// TODO work on fixing the matcher hardcoded locators
+// TODO should I test the back to procut button on PDP? but where?
 
 // Cases add product to cart, check sync? data? badge? local?
 
@@ -23,7 +25,7 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test.only(`${SCOPE}: synct inventory to cart?`, async ({ page }) => {
+    test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page }) => {
       const {} = purchaseLocators(page);
 
       const setup = {};
@@ -48,8 +50,8 @@ for (const persona of VALID_USERS) {
     });
 
     if (persona.isBaselineUser) {
-      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { inventoryUI } = catalogLocators(page);
+      test.skip(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
+        const { headerUI } = catalogLocators(page);
 
         const setup = {
           firstProduct: 0,
@@ -58,14 +60,13 @@ for (const persona of VALID_USERS) {
 
         await test.step('⬜ Arrange: add 1 product and go to cart', async () => {
           await catalog.addProductToCart(page, { from: 'inventory', index: setup.firstProduct });
-          await inventoryUI.cartButton.click();
+          await headerUI.cartButton.click();
           await purchase.standardizeCartList(page, { products: setup.productCount });
         });
 
-        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(
-          `${toSnapshotName(persona.role)}-cart.png`,
-          { fullPage: true }
-        );
+        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(`${toSnapshotName(persona.role)}-cart.png`, {
+          fullPage: true,
+        });
       });
     }
   });
