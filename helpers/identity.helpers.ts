@@ -1,5 +1,5 @@
 import { Page, BrowserContext } from '@playwright/test';
-import { pageHeader } from './shared.locators';
+import { pageHeader } from './shared/locators';
 import { t } from '@i18n';
 
 // --- TYPES ---

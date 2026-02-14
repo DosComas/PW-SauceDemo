@@ -1,101 +1,74 @@
-import { Page, Locator } from '@playwright/test';
-import { productItem, pageHeader } from './shared.locators';
+import { Page } from '@playwright/test';
+import { productCard, pageHeader } from './shared/locators';
+import { validateProductIndex, injectProductText, ProductSource } from './shared/actions';
 import { VISUAL_MOCK } from '@data';
-import { t } from '@i18n';
 
 // --- TYPES ---
-type ProductSource = { from: 'inventory'; index: number } | { from: 'pdp' };
-
 type ProductClick = {
   index: number;
   via: 'name' | 'img';
 };
 
-// --- LOCATORS legacy ---
-export const catalogLocatorsLegacy = (page: Page) => ({
-  // --- Inventory Screen ---
-  inventoryUI: {
-    productSortDropdown: page.getByTestId('product-sort-container'),
-    productCards: page.getByTestId('inventory-item'),
-    productList: page.getByTestId('inventory-list'),
-    cartBadge: page.getByTestId('shopping-cart-badge'),
-    inventoryImg: page.locator('.inventory_item_img'),
-    cartButton: page.getByTestId('shopping-cart-link'),
-  },
-
-  // --- Product Cards ---
-  productUI: {
-    name: (base: Page | Locator = page) => base.getByTestId('inventory-item-name'),
-    desc: (base: Page | Locator = page) => base.getByTestId('inventory-item-desc'),
-    price: (base: Page | Locator = page) => base.getByTestId('inventory-item-price'),
-    picture: (base: Page | Locator = page) => base.getByRole('img'),
-    addToCartButton: (base: Page | Locator = page) => base.getByRole('button', { name: t.catalog.addToCart }),
-    removeButton: (base: Page | Locator = page) => base.getByRole('button', { name: t.catalog.remove }),
-    pdpImg: page.locator('.inventory_details_img'),
-  },
-});
-
 // --- LOCATORS ---
-export const catalogLocators = (page: Page) => ({
-  // HEADER: Global navigation and cart
-  headerUI: {
-    ...pageHeader(page),
-  },
+export const catalogLocators = (page: Page) => {
+  const allCards = page.getByTestId('inventory-item');
 
-  // INVENTORY: The main product gallery
-  inventoryUI: {
-    cardsList: page.getByTestId('inventory-list'),
-    allCards: page.getByTestId('inventory-item'),
-    allCardImages: page.locator('.inventory_item_img').getByRole('img'),
-    sortDropdown: page.getByTestId('product-sort-container'),
-    // Clarity helper: Get the product logic for a specific card
-    card: (index: number) => productItem(page.getByTestId('inventory-item').nth(index)),
-  },
+  return {
+    // HEADER: Global navigation and cart
+    headerUI: {
+      ...pageHeader(page),
+    },
 
-  // PDP: The product detail page
-  pdpUI: {
-    ...productItem(page),
-    backButton: page.getByTestId('back-to-products'),
-  },
-});
+    // INVENTORY: The main product gallery
+    inventoryUI: {
+      cardsList: page.getByTestId('inventory-list'),
+      allProductCards: allCards,
+      allProductCardImages: page.locator('.inventory_item_img').getByRole('img'),
+      sortDropdown: page.getByTestId('product-sort-container'),
+      // Clarity helper: Get the product logic for a specific card
+      productCard: (index: number) => productCard(allCards.nth(index)),
+    },
+
+    // PDP: The product detail page
+    pdpUI: {
+      productCard: { ...productCard(page) },
+      backButton: page.getByTestId('back-to-products'),
+    },
+  };
+};
 
 // --- PRIVATE UTILITIES ---
-async function getProductScope(page: Page, source: ProductSource) {
+
+/**
+ * Resolves the requested product based on context (PDP vs Inventory).
+ * Handles index validation and routing to ensure the UI component is ready.
+ */
+async function resolveProductUI(page: Page, source: ProductSource) {
   const { inventoryUI, pdpUI } = catalogLocators(page);
 
-  // PDP Context
   if (source.from === 'pdp') {
-    return pdpUI;
+    return pdpUI.productCard;
   }
 
-  // Inventory Context
-  const count = await inventoryUI.allCards.count();
-  if (count === 0) {
-    throw new Error(`[catalog] Page Empty: No products found on Inventory.`);
-  }
-  if (source.index >= count) {
-    throw new Error(`[catalog] Index Out of Range: Requested ${source.index}, only ${count} items exist.`);
-  }
-
-  // Return the pre-scoped object for that specific card
-  return inventoryUI.card(source.index);
+  await validateProductIndex(page, source);
+  return inventoryUI.productCard(source.index);
 }
 
 // --- ACTIONS ---
-async function getProductData(page: Page, source: ProductSource) {
-  const product = await getProductScope(page, source);
+async function scrapeCatalogProduct(page: Page, source: ProductSource) {
+  const product = await resolveProductUI(page, source);
 
-  const [name, description, price, image] = await Promise.all([
+  const [name, desc, price, image] = await Promise.all([
     product.name.innerText(),
-    product.description.innerText(),
+    product.desc.innerText(),
     product.price.innerText(),
     product.image.getAttribute('src'),
   ]);
 
-  const cleaned = [name, description, price].map((val) => val.trim());
-  const [cleanName, cleanDescription, cleanPrice] = cleaned;
+  const cleaned = [name, desc, price].map((val) => val.trim());
+  const [cleanName, cleanDesc, cleanPrice] = cleaned;
 
-  if (!cleanName || !cleanDescription || !cleanPrice || !image) {
+  if (!cleanName || !cleanDesc || !cleanPrice || !image) {
     throw new Error(
       `[catalog] Content Missing: One or more product fields (including image) are blank on the ${source.from} page.`
     );
@@ -103,14 +76,14 @@ async function getProductData(page: Page, source: ProductSource) {
 
   return {
     name: cleanName,
-    description: cleanDescription,
+    desc: cleanDesc,
     price: cleanPrice,
-    image: image,
+    image,
   };
 }
 
 async function openProductDetails(page: Page, { index, via }: ProductClick) {
-  const product = await getProductScope(page, { from: 'inventory', index });
+  const product = await resolveProductUI(page, { from: 'inventory', index });
 
   const clickTargetMap = {
     name: product.name,
@@ -121,30 +94,28 @@ async function openProductDetails(page: Page, { index, via }: ProductClick) {
 }
 
 async function addProductToCart(page: Page, source: ProductSource) {
-  const product = await getProductScope(page, source);
+  const product = await resolveProductUI(page, source);
 
   await product.addToCartButton.click();
 }
 
 async function removeProductFromCart(page: Page, source: ProductSource) {
-  const product = await getProductScope(page, source);
+  const product = await resolveProductUI(page, source);
 
   await product.removeButton.click();
 }
 
-export async function standardizeProductCard(page: Page, source: ProductSource) {
-  const product = await getProductScope(page, source);
+async function standardizeProductText(page: Page, source: ProductSource) {
+  const { name, price, desc } = await resolveProductUI(page, source);
 
-  await product.name.evaluate((el, txt) => (el.textContent = txt), VISUAL_MOCK.product.name);
-  await product.description.evaluate((el, txt) => (el.textContent = txt), VISUAL_MOCK.product.description);
-  await product.price.evaluate((el, txt) => (el.textContent = txt), VISUAL_MOCK.product.price);
+  await injectProductText({ name, price, desc }, VISUAL_MOCK.product);
 }
 
-async function standardizeInventoryGrid(page: Page, { products }: { products: number }) {
+async function standardizeInventoryGridText(page: Page, { gridSize }: { gridSize: number }) {
   const { inventoryUI } = catalogLocators(page);
 
   // Fix the first card visually
-  await standardizeProductCard(page, { from: 'inventory', index: 0 });
+  await standardizeProductText(page, { from: 'inventory', index: 0 });
 
   // Clone it
   await inventoryUI.cardsList.evaluate(
@@ -157,18 +128,18 @@ async function standardizeInventoryGrid(page: Page, { products }: { products: nu
     },
     {
       // Access the raw card locator directly from inventoryUI for the handle
-      templateElement: await inventoryUI.allCards.first().elementHandle(),
-      n: products,
+      templateElement: await inventoryUI.allProductCards.first().elementHandle(),
+      n: gridSize,
     }
   );
 }
 
 // --- MODULE INTERFACE ---
 export const catalog = {
-  getProductData,
+  scrapeCatalogProduct,
   openProductDetails,
   addProductToCart,
   removeProductFromCart,
-  standardizeProductCard,
-  standardizeInventoryGrid,
+  standardizeProductText,
+  standardizeInventoryGridText,
 } as const;

@@ -1,56 +1,83 @@
 import { Page, Locator } from '@playwright/test';
-import { standardizeProductCard, catalogLocators } from '../helpers/catalog.helpers';
-import { t } from '@i18n';
+import { validateProductIndex, injectProductText } from './shared/actions';
+import { productCard, pageHeader } from './shared/locators';
+import { catalogLocators } from './catalog.helpers';
+import { VISUAL_MOCK } from '@data';
 
 // --- TYPES ---
-interface moduleSource {
-  index?: number;
-}
 
 // --- LOCATORS ---
-export const purchaseLocators = (page: Page) => ({
-  cartUI: {
-    container: page.getByTestId('module-container'),
-    cartList: page.getByTestId('cart-list'),
-    cartItem: page.locator('.cart_item'),
-  },
-});
+export const purchaseLocators = (page: Page) => {
+  const allCartItems = page.locator('.cart_item');
+
+  return {
+    // CART: The manage cart page
+    cartUI: {
+      cartList: page.getByTestId('cart-list'),
+      allItems: allCartItems,
+      productItem: (index: number) => {
+        const { name, price, desc } = productCard(allCartItems.nth(index));
+        return { name, price, desc };
+      },
+    },
+  };
+};
 
 // --- PRIVATE UTILITIES ---
-function getmoduleScope(page: Page, index = 0) {
+
+/**
+ * Resolves the requested product based on context (PDP vs Inventory).
+ * Handles index validation and routing to ensure the UI component is ready.
+ */
+async function resolveItemUI(page: Page, { index }: { index: number }) {
   const { cartUI } = purchaseLocators(page);
-  return cartUI.container.nth(index);
+
+  await validateProductIndex(page, { from: 'cart', index });
+
+  return cartUI.productItem(index);
+}
+
+async function standardizeItemText(page: Page, { index }) {
+  const { name, price, desc } = await resolveItemUI(page, { index });
+
+  await injectProductText({ name, price, desc }, VISUAL_MOCK.product);
 }
 
 // --- ACTIONS ---
-async function standardizeCartList(page: Page, { products }: { products: number }) {
+async function standardizeCartList(page: Page, { listSize }: { listSize: number }) {
   const { cartUI } = purchaseLocators(page);
   const { headerUI } = catalogLocators(page);
 
-  await standardizeProductCard(page, { from: 'inventory', index: 0 });
+  // 1. Standardize the first real item text
+  await standardizeItemText(page, { index: 0 });
 
-  const templateHandle = await cartUI.cartList.first().elementHandle();
+  const firstItem = cartUI.allItems.first();
+  const templateHandle = await firstItem.elementHandle();
 
-  // Perform the evaluation
-  await cartUI.cartItem.evaluate(
-    (list, { template, n }) => {
+  // 2. Surgical update using the parent container
+  await firstItem.locator('..').evaluate(
+    (container, { template, n }) => {
       if (!template) return;
 
-      const cleanClone = template.cloneNode(true) as HTMLElement;
+      // Identify the "Header" elements (anything before the first item)
+      const children = Array.from(container.children);
+      const templateIndex = children.indexOf(template);
 
-      // Identify the item class (e.g., .cart_item) to remove siblings surgically
-      const itemClass = `.${template.className.split(' ').join('.')}`;
-      list.querySelectorAll(itemClass).forEach((el) => el.remove());
+      // Remove the template and all siblings that follow it
+      children.slice(templateIndex).forEach((el) => el.remove());
 
+      // Append the new standardized clones
+      const cleanClone = template.cloneNode(true);
       for (let i = 0; i < n; i++) {
-        list.appendChild(cleanClone.cloneNode(true));
+        container.appendChild(cleanClone.cloneNode(true));
       }
     },
-    { template: templateHandle, n: products }
+    { template: templateHandle, n: listSize }
   );
 
+  // 3. Update Badge
   if (await headerUI.cartBadge.isVisible()) {
-    await headerUI.cartBadge.evaluate((el, n) => (el.textContent = n.toString()), products);
+    await headerUI.cartBadge.evaluate((el, val) => (el.textContent = val.toString()), listSize);
   }
 }
 

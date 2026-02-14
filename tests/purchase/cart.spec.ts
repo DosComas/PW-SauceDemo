@@ -9,6 +9,7 @@ const SCOPE = 'Cart';
 // TODO work on fixing the matcher hardcoded locators
 // TODO should I test the back to procut button on PDP? but where?
 
+// CASES?:
 // Cases add product to cart, check sync? data? badge? local?
 
 // remove from cart and go back to... inventory, pdp? to chceck sync. how about data? badge? local?
@@ -50,23 +51,26 @@ for (const persona of VALID_USERS) {
     });
 
     if (persona.isBaselineUser) {
-      test.skip(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
         const { headerUI } = catalogLocators(page);
 
         const setup = {
           firstProduct: 0,
-          productCount: 3,
+          listSize: 3,
         };
 
         await test.step('⬜ Arrange: add 1 product and go to cart', async () => {
           await catalog.addProductToCart(page, { from: 'inventory', index: setup.firstProduct });
           await headerUI.cartButton.click();
-          await purchase.standardizeCartList(page, { products: setup.productCount });
+          await purchase.standardizeCartList(page, { listSize: setup.listSize });
         });
 
-        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(`${toSnapshotName(persona.role)}-cart.png`, {
-          fullPage: true,
-        });
+        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(
+          `${toSnapshotName(persona.role)}-cart.png`,
+          {
+            fullPage: true,
+          }
+        );
       });
     }
   });

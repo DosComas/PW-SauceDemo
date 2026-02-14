@@ -1,10 +1,10 @@
 import { Page, Locator } from '@playwright/test';
 import { t } from '@i18n';
 
-export const productItem = (base: Page | Locator) => ({
+export const productCard = (base: Page | Locator) => ({
   name: base.getByTestId('inventory-item-name'),
   price: base.getByTestId('inventory-item-price'),
-  description: base.getByTestId('inventory-item-desc'),
+  desc: base.getByTestId('inventory-item-desc'),
   addToCartButton: base.getByRole('button', { name: t.catalog.addToCart }),
   removeButton: base.getByRole('button', { name: t.catalog.remove }),
   image: base.locator('.inventory_item_img, .inventory_details_img_container').getByRole('img'),

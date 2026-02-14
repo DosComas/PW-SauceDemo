@@ -28,12 +28,12 @@ for (const persona of VALID_USERS) {
           await inventoryUI.sortDropdown.selectOption(sortLabel);
         });
 
-        await expect(inventoryUI.allCards, `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(attribute, order);
+        await expect(inventoryUI.allProductCards, `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(attribute, order);
       });
     }
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { inventoryUI, pdpUI, headerUI } = catalogLocators(page);
+      const { inventoryUI, headerUI } = catalogLocators(page);
 
       const setup = {
         productIndexes: [0, 1, 2],
@@ -41,7 +41,7 @@ for (const persona of VALID_USERS) {
           return this.productIndexes[0];
         },
         get firstProductLoc() {
-          return inventoryUI.allCards.nth(this.firstProduct);
+          return inventoryUI.allProductCards.nth(this.firstProduct);
         },
       };
 
@@ -51,7 +51,9 @@ for (const persona of VALID_USERS) {
         }
       });
 
-      await expect.soft(inventoryUI.card(setup.firstProduct).removeButton, '🟧 UI: Remove button visible').toBeVisible();
+      await expect
+        .soft(inventoryUI.productCard(setup.firstProduct).removeButton, '🟧 UI: Remove button visible')
+        .toBeVisible();
       await expect.soft(headerUI.cartBadge, '🟧 UI: Badge shows 3').toHaveText('3');
       await expect(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STORAGE_KEYS.cart, 3);
 
@@ -59,7 +61,9 @@ for (const persona of VALID_USERS) {
         await catalog.removeProductFromCart(page, { from: 'inventory', index: setup.firstProduct });
       });
 
-      await expect.soft(inventoryUI.card(setup.firstProduct).addToCartButton, '🟧 UI: Add button visible').toBeVisible();
+      await expect
+        .soft(inventoryUI.productCard(setup.firstProduct).addToCartButton, '🟧 UI: Add button visible')
+        .toBeVisible();
       await expect.soft(headerUI.cartBadge, '🟧 UI: Badge shows 2').toHaveText('2');
       await expect(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STORAGE_KEYS.cart, 2);
     });
@@ -69,17 +73,17 @@ for (const persona of VALID_USERS) {
         const { inventoryUI } = catalogLocators(page);
 
         const setup = {
-          productCount: 5,
+          gridSize: 5,
         };
 
-        const inventoryImgs = await test.step('⬜ Standardize grid data', async () => {
-          await catalog.standardizeInventoryGrid(page, { products: setup.productCount });
-          return await inventoryUI.allCardImages.all();
+        const inventoryImages = await test.step('⬜ Standardize grid data', async () => {
+          await catalog.standardizeInventoryGridText(page, { gridSize: setup.gridSize });
+          return await inventoryUI.allProductCardImages.all();
         });
 
         await expect(page, '🟧 UI: Inventory layout visual check').toHaveScreenshot(
           `${toSnapshotName(persona.role)}-inventory.png`,
-          { mask: inventoryImgs, fullPage: true }
+          { mask: inventoryImages, fullPage: true }
         );
       });
     }
