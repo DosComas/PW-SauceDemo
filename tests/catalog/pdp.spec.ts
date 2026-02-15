@@ -1,5 +1,4 @@
 import { test, expect } from '@fixtures';
-import { toSnapshotName } from '@utils';
 import { ACCESS_USERS, STATE_KEYS } from '@data';
 
 const SCOPE = 'PDP';
@@ -14,7 +13,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const persona of ACCESS_USERS) {
-  test.describe(`${persona.role}`, () => {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Content matches inventory data`, async ({ loc, action }) => {
@@ -89,10 +88,10 @@ for (const persona of ACCESS_USERS) {
           await action.pdp.normalize();
         });
 
-        await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot(
-          `${toSnapshotName(persona.role)}-product.png`,
-          { mask: [loc.pdp.card.img], fullPage: true }
-        );
+        await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot({
+          mask: [loc.pdp.card.img],
+          fullPage: true,
+        });
       });
     }
   });

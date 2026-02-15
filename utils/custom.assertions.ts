@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 
 // --- TYPES ---
 export type ToBeSortedByOptions = { order: 'asc' | 'desc'; content: 'price' | 'name' };

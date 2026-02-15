@@ -33,11 +33,11 @@ export default defineConfig({
     baseURL: CURRENT_ENV.baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     locale: t.meta.locale,
-    trace: 'on-first-retry',
     testIdAttribute: 'data-test',
+    trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
-  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}{ext}',
+  snapshotPathTemplate: `{testDir}/__snapshots__/{testFilePath}/{projectName}-${t.meta.locale}-{arg}{ext}`,
 
   /* Configure projects for major browsers */
   projects: [

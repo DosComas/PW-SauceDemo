@@ -1,4 +1,4 @@
-import { ToBeSortedByOptions } from './matchers';
+import { type ToBeSortedByOptions } from './custom.assertions';
 
 declare global {
   namespace PlaywrightTest {
@@ -18,7 +18,7 @@ declare global {
        * ```
        *
        */
-      toBeSorted(sortBy: ToBeSortedByOptions, options: { timeout?: number }): Promise<R>;
+      toBeSortedBy(sortBy: ToBeSortedByOptions, options?: { timeout?: number }): Promise<R>;
 
       /**
        * Asserts that a JSON array stored in LocalStorage has the expected number of items.

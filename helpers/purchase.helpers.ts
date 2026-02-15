@@ -1,6 +1,6 @@
-import { Page, Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { sharedProductCard, sharedHeader } from './shared/locators';
-import { ensureIndexExists, injectProductText, UIContext } from './shared/actions';
+import { ensureIndexExists, injectProductText, type UIContext } from './shared/actions';
 import { VISUAL_MOCK } from '@data';
 
 // --- TYPES ---

@@ -1,5 +1,4 @@
 import { test, expect } from '@fixtures';
-import { toSnapshotName } from '@utils';
 import { t, DENIED_USERS, BASELINE_USERS } from '@data';
 
 const SCOPE = 'Login';
@@ -10,8 +9,22 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+for (const persona of DENIED_USERS) {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
+    test(`${SCOPE}: Reject invalid credentials`, async ({ loc, action }) => {
+      await test.step('🟦 Log into the app', async () => {
+        await action.login.submit({ user: persona.user, pass: persona.pass });
+      });
+
+      await expect(loc.login.errorMsg, '🟧 UI: Error message matches').toContainText(
+        t.identity.errors[persona.expectedErrorKey]
+      );
+    });
+  });
+}
+
 for (const persona of BASELINE_USERS) {
-  test.describe(`${persona.role}`, () => {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test(`${SCOPE}: Accept valid credentials`, async ({ loc, action, session }) => {
       await test.step('🟦 Log in to app', async () => {
         await action.login.submit({ user: persona.user, pass: persona.pass });
@@ -28,24 +41,7 @@ for (const persona of BASELINE_USERS) {
         await loc.login.loginBtn.waitFor({ state: 'visible' });
       });
 
-      await expect(page, '🟧 UI: Login layout visual check').toHaveScreenshot(
-        `${toSnapshotName(persona.role)}-login.png`,
-        { fullPage: true }
-      );
+      await expect(page, '🟧 UI: Login layout visual check').toHaveScreenshot({ fullPage: true });
     });
   });
-
-  for (const persona of DENIED_USERS) {
-    test.describe(`${persona.role}`, () => {
-      test(`${SCOPE}: Reject invalid credentials`, async ({ loc, action }) => {
-        await test.step('🟦 Log into the app', async () => {
-          await action.login.submit({ user: persona.user, pass: persona.pass });
-        });
-
-        await expect(loc.login.errorMsg, '🟧 UI: Error message matches').toContainText(
-          t.identity.errors[persona.expectedErrorKey]
-        );
-      });
-    });
-  }
 }

@@ -1,12 +1,12 @@
-import { Page, Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { sharedProductCard, sharedHeader } from './shared/locators';
-import { ensureIndexExists, injectProductText, UIContext } from './shared/actions';
+import { type UIContext, ensureIndexExists, injectProductText } from './shared/actions';
 import { VISUAL_MOCK, SortLabels } from '@data';
 
 // --- TYPES ---
 type CatalogContext = Exclude<UIContext, 'Cart'>;
 type ProductCard = { name: Locator; desc: Locator; price: Locator; img: Locator };
-type ProductGridSchema = { list: Locator; cards: Locator; card: (index: number) => ProductCard };
+type ProductGridSchema = { list: Locator; allCards: Locator; card: (index: number) => ProductCard };
 export type SortableKeys = keyof ReturnType<typeof catalogLocators>['plp']['all'];
 
 // --- LOCATORS ---
@@ -18,8 +18,8 @@ const catalogLocators = (page: Page) => {
     plp: {
       title: page.getByTestId('title'),
       list: page.getByTestId('inventory-list'),
-      cards: allCards,
-      imgs: page.locator('.inventory_item_img').getByRole('img'),
+      allCards: allCards,
+      allImgs: page.locator('.inventory_item_img').getByRole('img'),
       sort: page.getByTestId('product-sort-container'),
       all: {
         prices: sharedProductCard(page).price,
@@ -60,7 +60,7 @@ async function scrapeProductData({ name, desc, price, img }: ProductCard, label:
 async function populateUniformGrid(plp: ProductGridSchema, gridSize: number) {
   const firstProduct = 0;
 
-  await ensureIndexExists(plp.cards, firstProduct, 'PLP');
+  await ensureIndexExists(plp.allCards, firstProduct, 'PLP');
 
   const { name, price, desc } = plp.card(firstProduct);
 
@@ -75,7 +75,7 @@ async function populateUniformGrid(plp: ProductGridSchema, gridSize: number) {
       }
     },
     {
-      templateElement: await plp.cards.first().elementHandle(),
+      templateElement: await plp.allCards.first().elementHandle(),
       n: gridSize,
     }
   );
@@ -90,21 +90,21 @@ export const catalog = (page: Page) => {
     action: {
       plp: {
         scrape: async ({ index }: { index: number }) => {
-          await ensureIndexExists(loc.plp.cards, index, 'PLP');
+          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
           return scrapeProductData(loc.plp.card(index), 'PLP');
         },
         open: async ({ index, via }: { index: number; via: 'name' | 'img' }) => {
-          await ensureIndexExists(loc.plp.cards, index, 'PLP');
+          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
           const card = loc.plp.card(index);
           const target = via === 'img' ? card.img : card.name;
           await target.click();
         },
         add: async ({ index }: { index: number }) => {
-          await ensureIndexExists(loc.plp.cards, index, 'PLP');
+          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
           await loc.plp.card(index).addBtn.click();
         },
         remove: async ({ index }: { index: number }) => {
-          await ensureIndexExists(loc.plp.cards, index, 'PLP');
+          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
           await loc.plp.card(index).removeBtn.click();
         },
         sort: async ({ label }: { label: SortLabels }) => {

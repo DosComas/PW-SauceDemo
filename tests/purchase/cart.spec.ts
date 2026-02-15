@@ -1,23 +1,9 @@
 import { test, expect } from '@fixtures';
-import { toSnapshotName } from '@utils';
 import { t, ACCESS_USERS } from '@data';
 
 import { standardizeCartList } from '../../helpers/purchase.helpers';
 
 const SCOPE = 'Cart';
-
-// TODO add scrips to run each user
-// TODO make snippets great again & add doc strings
-
-// TODO are matcher over-engineered? how about the dictionary?
-
-// TODO identity, 2 files should there only be 1? domian something methodology
-
-// TODO make toSnapshotName better
-
-// TODO config, projects name, can be better?
-
-// TODO toSnapshotName import and object with things like that inside???
 
 // CASES?:
 // Cases add product to cart, check sync? data? badge? local?
@@ -36,7 +22,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const persona of ACCESS_USERS) {
-  test.describe(`${persona.role}`, () => {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
     // TODO
@@ -70,12 +56,7 @@ for (const persona of ACCESS_USERS) {
           await standardizeCartList(page, { size: listSize });
         });
 
-        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(
-          `${toSnapshotName(persona.role)}-cart.png`,
-          {
-            fullPage: true,
-          }
-        );
+        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot({ fullPage: true });
       });
     }
   });

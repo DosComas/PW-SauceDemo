@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const persona of ACCESS_USERS) {
-  test.describe(`${persona.role}`, () => {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Secure logout and session destruction`, async ({ page, loc, action, session }) => {

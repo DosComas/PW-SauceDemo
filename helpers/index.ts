@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import { catalog } from './catalog.helpers';
 import { identity } from './identity.helpers';
 

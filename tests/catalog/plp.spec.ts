@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
-import { toSnapshotName, ToBeSortedByOptions } from '@utils';
-import { t, ACCESS_USERS, STATE_KEYS, SortLabels } from '@data';
-import { SortableKeys } from '@helpers';
+import { type ToBeSortedByOptions } from '@utils';
+import { type SortLabels, t, ACCESS_USERS, STATE_KEYS } from '@data';
+import { type SortableKeys } from '@helpers';
 
 type SortCase = { sortLabel: SortLabels; locatorKey: SortableKeys; sortBy: ToBeSortedByOptions };
 
@@ -22,7 +22,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const persona of ACCESS_USERS) {
-  test.describe(`${persona.role}`, () => {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
     SORT_CASES.forEach(({ sortLabel, locatorKey, sortBy }) => {
@@ -59,13 +59,10 @@ for (const persona of ACCESS_USERS) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
         const imgs = await test.step('⬜ Standardize grid data', async () => {
           await action.plp.populateGrid({ size: gridSize });
-          return await loc.plp.imgs.all();
+          return await loc.plp.allImgs.all();
         });
 
-        await expect(page, '🟧 UI: Inventory layout visual check').toHaveScreenshot(
-          `${toSnapshotName(persona.role)}-inventory.png`,
-          { mask: imgs, fullPage: true }
-        );
+        await expect(page, '🟧 UI: Inventory layout visual check').toHaveScreenshot({ mask: imgs, fullPage: true });
       });
     }
   });

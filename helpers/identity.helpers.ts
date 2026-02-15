@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import { sharedHeader } from './shared/locators';
 import { t, STATE_KEYS } from '@data';
 
