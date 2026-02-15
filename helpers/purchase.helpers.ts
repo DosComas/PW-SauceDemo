@@ -70,7 +70,7 @@ export async function standardizeCartList(page: Page, { size }: { size: number }
         container.appendChild(cleanClone.cloneNode(true));
       }
     },
-    { template: templateHandle, n: size }
+    { template: templateHandle, n: size },
   );
 
   // 3. Update Badge

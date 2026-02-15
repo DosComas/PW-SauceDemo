@@ -3,8 +3,8 @@ import { ACCESS_USERS, STATE_KEYS } from '@data';
 
 const SCOPE = 'PDP';
 
-const CATALOG_CONTEXT = { firstProduct: 0, productIndexes: [0, 1, 2], middleProduc: 1 } as const;
-const { firstProduct, productIndexes, middleProduc } = CATALOG_CONTEXT;
+const CATALOG_CONTEXT = { firstProduct: 0, productIndexes: [0, 1, 2], middleProduct: 1 } as const;
+const { firstProduct, productIndexes, middleProduct } = CATALOG_CONTEXT;
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
@@ -58,7 +58,7 @@ for (const persona of ACCESS_USERS) {
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await action.plp.open({ index: middleProduc, via: 'img' });
+        await action.plp.open({ index: middleProduct, via: 'img' });
       });
 
       await expect.soft(loc.pdp.card.removeBtn, '🟧 UI: Remove button visible').toBeVisible();

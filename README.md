@@ -139,7 +139,7 @@ const { pass, value } = await poll(
   (value) => {
     /* validation logic */
   },
-  5000 // timeout in ms
+  5000, // timeout in ms
 );
 ```
 

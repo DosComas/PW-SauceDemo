@@ -12,7 +12,7 @@ export type ToBeSortedByOptions = { order: 'asc' | 'desc'; content: 'price' | 'n
 async function pollUntil<T>(
   callback: () => Promise<T | null>,
   condition: (value: T) => boolean,
-  timeout: number = 5000
+  timeout: number = 5000,
 ): Promise<{ value: T | null; pass: boolean }> {
   const start = Date.now();
   let currentWait = 100;
@@ -81,7 +81,7 @@ export const customMatchers = {
         return actualLength;
       },
       (value) => value === expected,
-      options?.timeout
+      options?.timeout,
     );
 
     // 2. Reporting Phase
@@ -156,7 +156,7 @@ export const customMatchers = {
           return isOrdered;
         });
       },
-      options?.timeout
+      options?.timeout,
     );
 
     // 2. Reporting Phase

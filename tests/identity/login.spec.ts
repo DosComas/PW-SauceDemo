@@ -17,7 +17,7 @@ for (const persona of DENIED_USERS) {
       });
 
       await expect(loc.login.errorMsg, '🟧 UI: Error message matches').toContainText(
-        t.identity.errors[persona.expectedErrorKey]
+        t.identity.errors[persona.expectedErrorKey],
       );
     });
   });

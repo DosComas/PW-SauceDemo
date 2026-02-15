@@ -77,7 +77,7 @@ async function populateUniformGrid(plp: ProductGridSchema, gridSize: number) {
     {
       templateElement: await plp.allCards.first().elementHandle(),
       n: gridSize,
-    }
+    },
   );
 }
 
