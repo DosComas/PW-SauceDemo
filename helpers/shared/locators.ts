@@ -1,11 +1,11 @@
 import { Page, Locator } from '@playwright/test';
-import { t } from '@i18n';
+import { t } from '@data';
 
 export const sharedProductCard = (base: Page | Locator) => ({
   name: base.getByTestId('inventory-item-name'),
   price: base.getByTestId('inventory-item-price'),
   desc: base.getByTestId('inventory-item-desc'),
-  addToCartBtn: base.getByRole('button', { name: t.catalog.addToCart }),
+  addBtn: base.getByRole('button', { name: t.catalog.addToCart }),
   removeBtn: base.getByRole('button', { name: t.catalog.remove }),
   img: base.locator('.inventory_item_img, .inventory_details_img_container').getByRole('img'),
 });
@@ -13,6 +13,6 @@ export const sharedProductCard = (base: Page | Locator) => ({
 export const sharedHeader = (page: Page) => ({
   cartBadge: page.getByTestId('shopping-cart-badge'),
   cartBtn: page.getByTestId('shopping-cart-link'),
-  menuBtn: page.getByRole('button', { name: 'Open Menu' }),
+  menuBtn: page.getByRole('button', { name: t.header.openMenu }),
   logoutBtn: page.getByTestId('logout-sidebar-link'),
 });

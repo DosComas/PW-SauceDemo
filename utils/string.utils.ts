@@ -1,4 +1,4 @@
-import { t } from '@i18n';
+import { t } from '@data';
 
 export const toSnapshotName = (role: string): string => {
   return `${t.meta.locale}-${role

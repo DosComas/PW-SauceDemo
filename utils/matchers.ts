@@ -1,4 +1,4 @@
-import { expect as baseExpect, Page, Locator } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 // --- TYPES ---
 export type SortOrder = 'asc' | 'desc';
@@ -45,7 +45,7 @@ async function pollUntil<T>(
 }
 
 // --- MATCHERS ---
-export const expect = baseExpect.extend({
+export const customMatchers = {
   async toHaveStorageLength(page: Page, key: string, expected: number, options?: { timeout?: number }) {
     const assertionName = 'toHaveStorageLength';
 
@@ -217,4 +217,4 @@ export const expect = baseExpect.extend({
 
     return { message, pass };
   },
-});
+};

@@ -9,10 +9,6 @@ export const en = {
     username: 'Username',
     password: 'Password',
     login: 'Login',
-    header: {
-      logout: 'Logout',
-      openMenu: 'Open Menu',
-    },
     errors: {
       unauthorized: 'Epic sadface: Username and password do not match any user in this service',
       lockedOut: 'Epic sadface: Sorry, this user has been locked out.',
@@ -30,9 +26,16 @@ export const en = {
       priceLowHigh: 'Price (low to high)',
       priceHighLow: 'Price (high to low)',
     },
+    title: 'Products',
   },
 
-  /** Purchase Domain: Cart & Checkout flow */
+  /** Header Domain: Page Header */
+  header: {
+    logout: 'Logout',
+    openMenu: 'Open Menu',
+  },
+
+  /** Purchase Domain: Cart & Checkout */
   purchase: {
     cart: {
       checkout: 'Checkout',

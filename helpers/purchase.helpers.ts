@@ -1,7 +1,6 @@
 import { Page, Locator } from '@playwright/test';
-import { validateProductIndex, injectProductText } from './shared/actions';
 import { sharedProductCard, sharedHeader } from './shared/locators';
-import { catalogLocators } from './catalog.helpers';
+import { ensureIndexExists, injectProductText, UIContext } from './shared/actions';
 import { VISUAL_MOCK } from '@data';
 
 // --- TYPES ---
@@ -11,11 +10,11 @@ export const purchaseLocators = (page: Page) => {
   const allCartItems = page.locator('.cart_item');
 
   return {
-    // CART: The manage cart page
-    cartUI: {
-      cartList: page.getByTestId('cart-list'),
-      allItems: allCartItems,
-      productItem: (index: number) => {
+    header: { ...sharedHeader(page) },
+    cart: {
+      list: page.getByTestId('cart-list'),
+      items: allCartItems,
+      item: (index: number) => {
         const { name, price, desc } = sharedProductCard(allCartItems.nth(index));
         return { name, price, desc };
       },
@@ -30,11 +29,11 @@ export const purchaseLocators = (page: Page) => {
  * Handles index validation and routing to ensure the UI component is ready.
  */
 async function resolveItemUI(page: Page, { index }: { index: number }) {
-  const { cartUI } = purchaseLocators(page);
+  const { cart } = purchaseLocators(page);
 
-  await validateProductIndex(page, { from: 'cart', index });
+  await ensureIndexExists(cart.items, index, 'Cart');
 
-  return cartUI.productItem(index);
+  return cart.item(index);
 }
 
 async function standardizeItemText(page: Page, { index }) {
@@ -44,14 +43,13 @@ async function standardizeItemText(page: Page, { index }) {
 }
 
 // --- ACTIONS ---
-async function standardizeCartList(page: Page, { listSize }: { listSize: number }) {
-  const { cartUI } = purchaseLocators(page);
-  const { headerUI } = catalogLocators(page);
+export async function standardizeCartList(page: Page, { size }: { size: number }) {
+  const { cart, header } = purchaseLocators(page);
 
   // 1. Standardize the first real item text
   await standardizeItemText(page, { index: 0 });
 
-  const firstItem = cartUI.allItems.first();
+  const firstItem = cart.items.first();
   const templateHandle = await firstItem.elementHandle();
 
   // 2. Surgical update using the parent container
@@ -72,16 +70,16 @@ async function standardizeCartList(page: Page, { listSize }: { listSize: number 
         container.appendChild(cleanClone.cloneNode(true));
       }
     },
-    { template: templateHandle, n: listSize }
+    { template: templateHandle, n: size }
   );
 
   // 3. Update Badge
-  if (await headerUI.cartBadge.isVisible()) {
-    await headerUI.cartBadge.evaluate((el, val) => (el.textContent = val.toString()), listSize);
+  if (await header.cartBadge.isVisible()) {
+    await header.cartBadge.evaluate((el, val) => (el.textContent = val.toString()), size);
   }
 }
 
-// --- MODULE INTERFACE ---
+// --- DOMAIN INTERFACE ---
 export const purchase = {
   standardizeCartList,
 } as const;

@@ -1,7 +1,6 @@
-import { test, expect } from '@utils';
-import { identity, identityLocators } from '@helpers';
-import { VALID_USERS } from '@data';
-import { t } from '@i18n';
+import { test, expect } from '@fixtures';
+import { createApp } from '@helpers';
+import { t, VALID_USERS } from '@data';
 
 const SCOPE = 'Logout';
 
@@ -15,26 +14,24 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    test(`${SCOPE}: Secure logout and session destruction`, async ({ page }) => {
-      const { loginUI } = identityLocators(page);
-
+    test(`${SCOPE}: Secure logout and session destruction`, async ({ page, loc, action, session }) => {
       await test.step('🟦 Logout', async () => {
-        await identity.doLogout(page);
+        await action.header.logout();
       });
 
-      await expect.soft(loginUI.loginBtn, '🟧 UI: Login button visible').toBeVisible();
+      await expect.soft(loc.login.loginBtn, '🟧 UI: Login button visible').toBeVisible();
 
       await test.step('🟦 Navigate back', async () => {
         await page.goBack();
       });
 
-      await expect.soft(loginUI.errorMsg, '🟧 UI: Error message matches').toHaveText(t.identity.errors.restricted);
+      await expect.soft(loc.login.errorMsg, '🟧 UI: Error message matches').toHaveText(t.identity.errors.restricted);
 
       await test.step('🟦 Reload the page', async () => {
         await page.reload();
       });
 
-      expect(await identity.getSession(page.context()), '🟧 Data: Session cookies deleted').toBeUndefined();
+      expect(await session.getCookie(), '🟧 Data: Session cookies deleted').toBeUndefined();
     });
   });
 }

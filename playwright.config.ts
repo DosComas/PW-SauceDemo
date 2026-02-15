@@ -1,6 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { CURRENT_ENV } from './data/environments.data';
-import { t } from '@i18n';
+import { t, CURRENT_ENV } from '@data';
 import dotenv from 'dotenv';
 import path from 'path';
 

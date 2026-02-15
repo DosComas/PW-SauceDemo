@@ -2,10 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@fixtures": ["fixtures/index.ts"],
       "@data": ["data/index.ts"],
       "@helpers": ["helpers/index.ts"],
-      "@utils": ["utils/index.ts"],
-      "@i18n": ["data/i18n/index.ts"]
+      "@utils": ["utils/index.ts"]
     },
     "moduleResolution": "Node",
     "esModuleInterop": true,

@@ -1,57 +1,48 @@
-import { Page, BrowserContext } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { sharedHeader } from './shared/locators';
-import { STATE_KEYS } from '@data';
-import { t } from '@i18n';
-
-// --- TYPES ---
-type LoginCredentials = {
-  user: string;
-  pass: string;
-};
+import { t, STATE_KEYS } from '@data';
 
 // --- LOCATORS ---
-export const identityLocators = (page: Page) => ({
-  // LOGIN: The entry gateway
-  loginUI: {
-    usernameInput: page.getByPlaceholder(t.identity.username),
-    passwordInput: page.getByPlaceholder(t.identity.password),
+const identityLocators = (page: Page) => ({
+  login: {
+    nameInput: page.getByPlaceholder(t.identity.username),
+    passInput: page.getByPlaceholder(t.identity.password),
     loginBtn: page.getByRole('button', { name: t.identity.login }),
     errorMsg: page.getByTestId('error'),
     logoImg: page.locator('.login_logo'),
   },
 
-  // HEADER: Global navigation and cart
-  headerUI: {
+  header: {
     ...sharedHeader(page),
   },
 });
 
-// --- PRIVATE UTILITIES ---
-// ...
+// --- DOMAIN INTERFACE ---
+export const identity = (page: Page) => {
+  const loc = identityLocators(page);
 
-// --- ACTIONS ---
-async function doLogin(page: Page, { user, pass }: LoginCredentials) {
-  const { loginUI } = identityLocators(page);
-  await loginUI.usernameInput.fill(user);
-  await loginUI.passwordInput.fill(pass);
-  await loginUI.loginBtn.click();
-}
-
-async function doLogout(page: Page) {
-  const { headerUI } = identityLocators(page);
-  await headerUI.menuBtn.click();
-  await headerUI.logoutBtn.click();
-}
-
-async function getSession(context: BrowserContext) {
-  const cookies = await context.cookies();
-  const sessionCookie = cookies.find((cookie) => cookie.name === STATE_KEYS.userSession);
-  return sessionCookie;
-}
-
-// --- MODULE INTERFACE ---
-export const identity = {
-  doLogin,
-  doLogout,
-  getSession,
-} as const;
+  return {
+    loc,
+    action: {
+      login: {
+        submit: async ({ user, pass }: { user: string; pass: string }) => {
+          await loc.login.nameInput.fill(user);
+          await loc.login.passInput.fill(pass);
+          await loc.login.loginBtn.click();
+        },
+      },
+      header: {
+        logout: async () => {
+          await loc.header.menuBtn.click();
+          await loc.header.logoutBtn.click();
+        },
+      },
+    },
+    session: {
+      getCookie: async () => {
+        const cookies = await page.context().cookies();
+        return cookies.find((c) => c.name === STATE_KEYS.userSession);
+      },
+    },
+  };
+};

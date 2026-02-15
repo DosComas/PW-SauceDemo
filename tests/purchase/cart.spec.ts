@@ -1,13 +1,16 @@
-import { test, expect, toSnapshotName } from '@utils';
-import { purchase, catalog, purchaseLocators, catalogLocators } from '@helpers';
-import { VALID_USERS } from '@data';
-import { t } from '@i18n';
+import { test, expect } from '@fixtures';
+import { toSnapshotName } from '@utils';
+import { t, VALID_USERS } from '@data';
+
+import { standardizeCartList } from '../../helpers/purchase.helpers';
 
 const SCOPE = 'Cart';
 
 // TODO add login test cases? test on webkit?
 // TODO add scrips to run each user
 // TODO make snippets great again & add doc strings
+
+// TODO are matcher over-engineered? how about the dictionary?
 
 // CASES?:
 // Cases add product to cart, check sync? data? badge? local?
@@ -26,10 +29,15 @@ for (const persona of VALID_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    // TODO
-    test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page }) => {
-      const {} = purchaseLocators(page);
+    const CATALOG_CONTEXT = {
+      firstProduct: 0,
+      listSize: 3,
+    } as const;
 
+    const { firstProduct, listSize } = CATALOG_CONTEXT;
+
+    // TODO
+    test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page, loc, action }) => {
       const setup = {};
 
       await test.step('⬜ Arrange: prepare state', async () => {});
@@ -40,9 +48,7 @@ for (const persona of VALID_USERS) {
     });
 
     // TODO
-    test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page }) => {
-      const {} = purchaseLocators(page);
-
+    test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page, loc, action }) => {
       const setup = {};
 
       await test.step('⬜ Arrange: prepare state', async () => {});
@@ -54,18 +60,11 @@ for (const persona of VALID_USERS) {
     // END
 
     if (persona.isBaselineUser) {
-      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { headerUI } = catalogLocators(page);
-
-        const setup = {
-          firstProduct: 0,
-          listSize: 3,
-        };
-
-        await test.step('⬜ Arrange: add 1 product and go to cart', async () => {
-          await catalog.addProductToCart(page, { from: 'inventory', index: setup.firstProduct });
-          await headerUI.cartBtn.click();
-          await purchase.standardizeCartList(page, { listSize: setup.listSize });
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
+        await test.step('⬜ Add a product and go to cart', async () => {
+          await action.plp.add({ index: firstProduct });
+          await loc.header.cartBtn.click();
+          await standardizeCartList(page, { size: listSize });
         });
 
         await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot(
