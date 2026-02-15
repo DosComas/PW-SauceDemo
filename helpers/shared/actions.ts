@@ -3,6 +3,7 @@ import { ProductTextFields } from '@data';
 
 // --- TYPES ---
 export type UIContext = 'PLP' | 'PDP' | 'Cart';
+export type ProductTextLocators = { name: Locator; desc: Locator; price: Locator };
 
 // --- ACTIONS ---
 
@@ -25,10 +26,7 @@ export async function ensureIndexExists(locator: Locator, index: number, label: 
  * Generic utility to inject specific text into product locators.
  * Highly reusable across different pages and test types.
  */
-export async function injectProductText(
-  locators: { name: Locator; desc: Locator; price: Locator },
-  data: ProductTextFields
-) {
+export async function injectProductText(locators: ProductTextLocators, data: ProductTextFields) {
   const mapping = [
     { loc: locators.name, val: data.name },
     { loc: locators.desc, val: data.desc },

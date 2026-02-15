@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { t } from '@i18n';
+import { t } from '@data';
 import path from 'path';
 
 const AUTH_DIR = './playwright/.auth';
@@ -14,21 +14,21 @@ interface UserPersona {
 }
 
 type TestUserData = {
-  valid: (UserPersona & {
+  access: (UserPersona & {
     expectAuth: true;
     storageState: string;
     isBaselineUser: boolean;
   })[];
-  invalid: (UserPersona & {
+  denied: (UserPersona & {
     expectAuth: false;
     expectedErrorKey: keyof typeof t.identity.errors;
   })[];
 };
 
 const TEST_USERS: TestUserData = {
-  valid: [
+  access: [
     {
-      role: 'Normal User 👤',
+      role: 'Normal User',
       user: VALID_USERNAME,
       pass: VALID_PASSWORD,
       expectAuth: true,
@@ -36,7 +36,7 @@ const TEST_USERS: TestUserData = {
       isBaselineUser: true,
     },
     {
-      role: 'Problem User ⚠️',
+      role: 'Problem User @⚠️',
       user: 'problem_user',
       pass: VALID_PASSWORD,
       expectAuth: true,
@@ -44,7 +44,7 @@ const TEST_USERS: TestUserData = {
       isBaselineUser: false,
     },
     {
-      role: 'Error User 💣',
+      role: 'Error User @💣',
       user: 'error_user',
       pass: VALID_PASSWORD,
       expectAuth: true,
@@ -52,7 +52,7 @@ const TEST_USERS: TestUserData = {
       isBaselineUser: false,
     },
     {
-      role: 'Visual User 👁️',
+      role: 'Visual User @🎨',
       user: 'visual_user',
       pass: VALID_PASSWORD,
       expectAuth: true,
@@ -60,23 +60,23 @@ const TEST_USERS: TestUserData = {
       isBaselineUser: false,
     },
   ],
-  invalid: [
+  denied: [
     {
-      role: 'Invalid Password User 🔑',
+      role: 'Invalid Password User @🔑',
       user: VALID_USERNAME,
       pass: 'wrong_sauce',
       expectAuth: false,
       expectedErrorKey: 'unauthorized',
     },
     {
-      role: 'Invalid Username User 🎭',
+      role: 'Invalid Username User @🎭',
       user: 'ghost_user',
       pass: VALID_PASSWORD,
       expectAuth: false,
       expectedErrorKey: 'unauthorized',
     },
     {
-      role: 'Locked Out User 🔒',
+      role: 'Locked Out User @🔒',
       user: 'locked_out_user',
       pass: VALID_PASSWORD,
       expectAuth: false,
@@ -85,9 +85,9 @@ const TEST_USERS: TestUserData = {
   ],
 } as const;
 
-export const VALID_USERS = TEST_USERS.valid;
-export const INVALID_USERS = TEST_USERS.invalid;
-export const BASELINE_USERS = VALID_USERS.filter((u) => u.isBaselineUser);
+export const ACCESS_USERS = TEST_USERS.access;
+export const DENIED_USERS = TEST_USERS.denied;
+export const BASELINE_USERS = ACCESS_USERS.filter((u) => u.isBaselineUser);
 
 export const createCheckoutData = () => ({
   firstName: faker.person.firstName(),

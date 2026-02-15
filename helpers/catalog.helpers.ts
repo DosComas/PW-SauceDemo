@@ -5,8 +5,9 @@ import { VISUAL_MOCK, SortLabels } from '@data';
 
 // --- TYPES ---
 type CatalogContext = Exclude<UIContext, 'Cart'>;
-type ProductCard = { name: Locator; desc: Locator; price: Locator; img: Locator; addBtn: Locator; removeBtn: Locator };
-type PLPLocators = { list: Locator; cards: Locator; card: (index: number) => ProductCard };
+type ProductCard = { name: Locator; desc: Locator; price: Locator; img: Locator };
+type ProductGridSchema = { list: Locator; cards: Locator; card: (index: number) => ProductCard };
+export type SortableKeys = keyof ReturnType<typeof catalogLocators>['plp']['all'];
 
 // --- LOCATORS ---
 const catalogLocators = (page: Page) => {
@@ -20,8 +21,10 @@ const catalogLocators = (page: Page) => {
       cards: allCards,
       imgs: page.locator('.inventory_item_img').getByRole('img'),
       sort: page.getByTestId('product-sort-container'),
-      prices: sharedProductCard(page).price,
-      names: sharedProductCard(page).name,
+      all: {
+        prices: sharedProductCard(page).price,
+        names: sharedProductCard(page).name,
+      },
       card: (index: number) => sharedProductCard(allCards.nth(index)),
     },
     pdp: {
@@ -54,7 +57,7 @@ async function scrapeProductData({ name, desc, price, img }: ProductCard, label:
   };
 }
 
-async function populateUniformGrid(plp: PLPLocators, gridSize: number) {
+async function populateUniformGrid(plp: ProductGridSchema, gridSize: number) {
   const firstProduct = 0;
 
   await ensureIndexExists(plp.cards, firstProduct, 'PLP');
@@ -104,8 +107,8 @@ export const catalog = (page: Page) => {
           await ensureIndexExists(loc.plp.cards, index, 'PLP');
           await loc.plp.card(index).removeBtn.click();
         },
-        sort: async ({ sortLabel }: { sortLabel: SortLabels }) => {
-          await loc.plp.sort.selectOption(sortLabel);
+        sort: async ({ label }: { label: SortLabels }) => {
+          await loc.plp.sort.selectOption(label);
         },
         populateGrid: ({ size }: { size: number }) => populateUniformGrid(loc.plp, size),
       },

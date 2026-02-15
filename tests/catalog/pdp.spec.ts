@@ -1,9 +1,11 @@
 import { test, expect } from '@fixtures';
 import { toSnapshotName } from '@utils';
-import { createApp } from '@helpers';
-import { VALID_USERS, STATE_KEYS } from '@data';
+import { ACCESS_USERS, STATE_KEYS } from '@data';
 
 const SCOPE = 'PDP';
+
+const CATALOG_CONTEXT = { firstProduct: 0, productIndexes: [0, 1, 2], middleProduc: 1 } as const;
+const { firstProduct, productIndexes, middleProduc } = CATALOG_CONTEXT;
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
@@ -11,23 +13,11 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of VALID_USERS) {
+for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 
-    const CATALOG_CONTEXT = {
-      firstProduct: 0,
-      productIndexes: [0, 1, 2],
-      get lastProduct() {
-        return this.productIndexes[this.productIndexes.length - 1];
-      },
-    } as const;
-
-    const { firstProduct, productIndexes, lastProduct } = CATALOG_CONTEXT;
-
-    test(`${SCOPE}: Content matches inventory data`, async ({ page }) => {
-      const { loc, action } = createApp(page);
-
+    test(`${SCOPE}: Content matches inventory data`, async ({ loc, action }) => {
       const product = await test.step('⬜ Scrape product data', async () => {
         return await action.plp.scrape({ index: firstProduct });
       });
@@ -42,9 +32,7 @@ for (const persona of VALID_USERS) {
       await expect(loc.pdp.card.img, '🟧 UI: Product image source matches').toHaveAttribute('src', product.img);
     });
 
-    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page }) => {
-      const { loc, action } = createApp(page);
-
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
       await test.step('🟦 Navigate to PDP and add product', async () => {
         await action.plp.open({ index: firstProduct, via: 'img' });
         await action.pdp.add();
@@ -63,9 +51,7 @@ for (const persona of VALID_USERS) {
       await expect(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STATE_KEYS.cart, 0);
     });
 
-    test(`${SCOPE}: State persistence on PDP entry`, async ({ page }) => {
-      const { loc, action } = createApp(page);
-
+    test(`${SCOPE}: State persistence on PDP entry`, async ({ page, loc, action }) => {
       await test.step('⬜ Add products to cart on inventory', async () => {
         for (const productIndex of productIndexes) {
           await action.plp.add({ index: productIndex });
@@ -73,7 +59,7 @@ for (const persona of VALID_USERS) {
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
-        await action.plp.open({ index: lastProduct, via: 'img' });
+        await action.plp.open({ index: middleProduc, via: 'img' });
       });
 
       await expect.soft(loc.pdp.card.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
@@ -81,9 +67,7 @@ for (const persona of VALID_USERS) {
       await expect(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STATE_KEYS.cart, 3);
     });
 
-    test(`${SCOPE}: State persistence on Inventory return`, async ({ page }) => {
-      const { loc, action } = createApp(page);
-
+    test(`${SCOPE}: State persistence on Inventory return`, async ({ page, loc, action }) => {
       await test.step('⬜ Navigate to PDP', async () => {
         await action.plp.open({ index: firstProduct, via: 'name' });
       });
@@ -99,9 +83,7 @@ for (const persona of VALID_USERS) {
     });
 
     if (persona.isBaselineUser) {
-      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page }) => {
-        const { loc, action } = createApp(page);
-
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
         await test.step('⬜ Navigate to PDP and standardize data', async () => {
           await action.plp.open({ index: firstProduct, via: 'name' });
           await action.pdp.normalize();

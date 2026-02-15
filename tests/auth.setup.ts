@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@fixtures';
-import { t, VALID_USERS } from '@data';
+import { t, ACCESS_USERS } from '@data';
 
-for (const persona of VALID_USERS) {
+for (const persona of ACCESS_USERS) {
   setup(`Authenticate as ${persona.role}`, async ({ page, loc, action, session }) => {
     await setup.step('⬜ Go to login page', async () => {
       await page.goto('/');

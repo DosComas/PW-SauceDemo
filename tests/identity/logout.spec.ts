@@ -1,6 +1,5 @@
 import { test, expect } from '@fixtures';
-import { createApp } from '@helpers';
-import { t, VALID_USERS } from '@data';
+import { t, ACCESS_USERS } from '@data';
 
 const SCOPE = 'Logout';
 
@@ -10,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of VALID_USERS) {
+for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
 

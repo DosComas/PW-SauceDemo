@@ -1,8 +1,14 @@
 {
-  "name": "pw-fuctional",
-  "version": "1.0.0",
+  "name": "pw-sauce-demo",
+  "version": "0.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test:all": "npx playwright test",
+    "test:base": "npx playwright test -g \"👤\" --project=Chrome",
+    "test:access": "npx playwright test -g '👤|⚠️|💣|👁️'",
+    "test:denied": "npx playwright test -g '🔑|🎭|🔒'",
+    "report": "npx playwright show-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

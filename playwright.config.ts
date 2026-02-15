@@ -23,7 +23,7 @@ export default defineConfig({
     [
       'html',
       {
-        title: `${CURRENT_ENV.environment} Report - ${t.meta.locale}`,
+        title: `${CURRENT_ENV.environment} Report [${t.meta.locale}]`,
       },
     ],
   ],

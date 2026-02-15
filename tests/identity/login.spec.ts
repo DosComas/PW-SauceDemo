@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { toSnapshotName } from '@utils';
-import { createApp } from '@helpers';
-import { t, INVALID_USERS, BASELINE_USERS } from '@data';
+import { t, DENIED_USERS, BASELINE_USERS } from '@data';
 
 const SCOPE = 'Login';
 
@@ -36,7 +35,7 @@ for (const persona of BASELINE_USERS) {
     });
   });
 
-  for (const persona of INVALID_USERS) {
+  for (const persona of DENIED_USERS) {
     test.describe(`${persona.role}`, () => {
       test(`${SCOPE}: Reject invalid credentials`, async ({ loc, action }) => {
         await test.step('🟦 Log into the app', async () => {

@@ -1,8 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 
 // --- TYPES ---
-export type SortOrder = 'asc' | 'desc';
-export type SortContent = 'price' | 'name';
+export type ToBeSortedByOptions = { order: 'asc' | 'desc'; content: 'price' | 'name' };
 
 // --- PRIVATE UTILITIES ---
 
@@ -108,11 +107,7 @@ export const customMatchers = {
     return { message, pass };
   },
 
-  async toBeSortedBy(
-    locator: Locator,
-    sortBy: { order: SortOrder; content: SortContent },
-    options?: { timeout?: number }
-  ) {
+  async toBeSortedBy(locator: Locator, sortBy: ToBeSortedByOptions, options?: { timeout?: number }) {
     const assertionName = 'toBeSortedBy';
     const isDescending = sortBy.order === 'desc';
 

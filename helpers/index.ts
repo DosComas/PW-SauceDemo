@@ -20,3 +20,5 @@ export const createApp = (page: Page) => {
     },
   };
 };
+
+export { SortableKeys } from './catalog.helpers';

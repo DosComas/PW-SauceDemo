@@ -1,16 +1,23 @@
 import { test, expect } from '@fixtures';
 import { toSnapshotName } from '@utils';
-import { t, VALID_USERS } from '@data';
+import { t, ACCESS_USERS } from '@data';
 
 import { standardizeCartList } from '../../helpers/purchase.helpers';
 
 const SCOPE = 'Cart';
 
-// TODO add login test cases? test on webkit?
 // TODO add scrips to run each user
 // TODO make snippets great again & add doc strings
 
 // TODO are matcher over-engineered? how about the dictionary?
+
+// TODO identity, 2 files should there only be 1? domian something methodology
+
+// TODO make toSnapshotName better
+
+// TODO config, projects name, can be better?
+
+// TODO toSnapshotName import and object with things like that inside???
 
 // CASES?:
 // Cases add product to cart, check sync? data? badge? local?
@@ -19,22 +26,18 @@ const SCOPE = 'Cart';
 
 // visual chcking- add 1 clone to have 3 total?
 
+const CATALOG_CONTEXT = { firstProduct: 0, listSize: 3 } as const;
+const { firstProduct, listSize } = CATALOG_CONTEXT;
+
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to login page', async () => {
     await page.goto('/inventory.html');
   });
 });
 
-for (const persona of VALID_USERS) {
+for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
-
-    const CATALOG_CONTEXT = {
-      firstProduct: 0,
-      listSize: 3,
-    } as const;
-
-    const { firstProduct, listSize } = CATALOG_CONTEXT;
 
     // TODO
     test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page, loc, action }) => {

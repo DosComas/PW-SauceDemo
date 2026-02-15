@@ -1,17 +1,19 @@
 import { test, expect } from '@fixtures';
-import { toSnapshotName } from '@utils';
-import { t, VALID_USERS, STATE_KEYS, SortLabels } from '@data';
+import { toSnapshotName, ToBeSortedByOptions } from '@utils';
+import { t, ACCESS_USERS, STATE_KEYS, SortLabels } from '@data';
+import { SortableKeys } from '@helpers';
 
-type SortCase = {
-  sortLabel: SortLabels;
-  locatorKey: 'names' | 'prices';
-  sortBy: {
-    content: 'name' | 'price';
-    order: 'asc' | 'desc';
-  };
-};
+type SortCase = { sortLabel: SortLabels; locatorKey: SortableKeys; sortBy: ToBeSortedByOptions };
 
 const SCOPE = 'PLP';
+
+const CATALOG_CONTEXT = { firstProduct: 0, productIndexes: [0, 1, 2], gridSize: 5 } as const;
+const { firstProduct, productIndexes, gridSize } = CATALOG_CONTEXT;
+
+const SORT_CASES: SortCase[] = [
+  { sortLabel: t.catalog.sort.nameAZ, locatorKey: 'names', sortBy: { content: 'name', order: 'asc' } },
+  { sortLabel: t.catalog.sort.priceHighLow, locatorKey: 'prices', sortBy: { content: 'price', order: 'desc' } },
+];
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory page', async () => {
@@ -19,38 +21,17 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of VALID_USERS) {
+for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, () => {
     test.use({ storageState: persona.storageState });
-
-    const CATALOG_CONTEXT = {
-      firstProduct: 0,
-      productIndexes: [0, 1, 2],
-      gridSize: 5,
-    } as const;
-
-    const { firstProduct, productIndexes, gridSize } = CATALOG_CONTEXT;
-
-    const SORT_CASES: SortCase[] = [
-      {
-        sortLabel: t.catalog.sort.nameAZ,
-        locatorKey: 'names',
-        sortBy: { content: 'name', order: 'asc' },
-      },
-      {
-        sortLabel: t.catalog.sort.priceHighLow,
-        locatorKey: 'prices',
-        sortBy: { content: 'price', order: 'desc' },
-      },
-    ];
 
     SORT_CASES.forEach(({ sortLabel, locatorKey, sortBy }) => {
       test(`${SCOPE}: Items follow ${sortLabel} order`, async ({ loc, action }) => {
         await test.step('🟦 Sort products', async () => {
-          await action.plp.sort({ sortLabel });
+          await action.plp.sort({ label: sortLabel });
         });
 
-        await expect(loc.plp[locatorKey], `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(sortBy);
+        await expect(loc.plp.all[locatorKey], `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(sortBy);
       });
     });
 
