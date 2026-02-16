@@ -24,13 +24,13 @@ for (const persona of ACCESS_USERS) {
         await page.goBack();
       });
 
-      await expect.soft(loc.login.errorMsg, '🟧 UI: Error message matches').toHaveText(t.identity.errors.restricted);
+      await expect.soft(loc.login.errorMsg, '🟧 UI: Error message matches').toHaveText(t.login.errors.restricted);
 
       await test.step('🟦 Reload the page', async () => {
         await page.reload();
       });
 
-      expect(await session.getCookie(), '🟧 Data: Session cookies deleted').toBeUndefined();
+      expect(await session.userSession(), '🟧 Data: Session cookies deleted').toBeUndefined();
     });
   });
 }

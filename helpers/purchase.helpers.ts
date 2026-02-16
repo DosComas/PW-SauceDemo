@@ -1,118 +1,54 @@
 import { type Page, type Locator } from '@playwright/test';
-import { sharedProductCard, sharedHeader } from './shared/locators';
-import { ensureIndexExists, injectProductText, type UIContext } from './shared/actions';
+import { type Header, _appHeader, _appItem } from './common/app.locators';
+import { _ensureIndexExists, _injectItemText, _injectClones } from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
 
-// --- TYPES ---
+// TYPES
 
-// --- LOCATORS ---
+// LOCATORS
+
 export const purchaseLocators = (page: Page) => {
-  const allCartItems = page.locator('.cart_item');
+  const _cartItems = page.locator('.cart_item');
 
   return {
-    header: { ...sharedHeader(page) },
     cart: {
       list: page.getByTestId('cart-list'),
-      items: allCartItems,
+      items: {
+        all: _cartItems,
+      },
       item: (index: number) => {
-        const { name, price, desc } = sharedProductCard(allCartItems.nth(index));
-        return { name, price, desc };
+        const { name, desc, price } = _appItem(_cartItems.nth(index));
+        return { name, desc, price };
       },
     },
   };
 };
 
-// --- PRIVATE UTILITIES ---
+// DOMAIN ACTIONS
 
-/**
- * Resolves the requested product based on context (PDP vs Inventory).
- * Handles index validation and routing to ensure the UI component is ready.
- */
-async function resolveItemUI(page: Page, { index }: { index: number }) {
-  const { cart } = purchaseLocators(page);
-
-  await ensureIndexExists(cart.items, index, 'Cart');
-
-  return cart.item(index);
+export async function _injectBadgeNum(badgeLoc: Locator, count: number) {
+  if (await badgeLoc.isVisible()) {
+    await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
+  }
 }
 
-async function standardizeItemText(page: Page, { index }: { index: number }) {
-  const { name, price, desc } = await resolveItemUI(page, { index });
+// DOMAIN INTERFACE
 
-  await injectProductText({ name, price, desc }, VISUAL_MOCK.product);
-}
+export const purchase = (page: Page, headerLocs: Header) => {
+  const loc = purchaseLocators(page);
 
-// --- ACTIONS ---
-export async function standardizeCartList(page: Page, { size }: { size: number }) {
-  const { cart, header } = purchaseLocators(page);
-
-  // 1. Standardize the first real item text
-  await standardizeItemText(page, { index: 0 });
-
-  const firstItem = cart.items.first();
-  const templateHandle = await firstItem.elementHandle();
-
-  // 2. Surgical update using the parent container
-  await firstItem.locator('..').evaluate(
-    (container, { template, n }) => {
-      if (!template) return;
-
-      // Identify the "Header" elements (anything before the first item)
-      const children = Array.from(container.children);
-      const templateIndex = children.indexOf(template);
-
-      // Remove the template and all siblings that follow it
-      children.slice(templateIndex).forEach((el) => el.remove());
-
-      // Append the new standardized clones
-      const cleanClone = template.cloneNode(true);
-      for (let i = 0; i < n; i++) {
-        container.appendChild(cleanClone.cloneNode(true));
-      }
+  return {
+    loc,
+    action: {
+      cart: {
+        mockList: async ({ size }: { size: number }) => {
+          const blueprint = loc.cart.items.all.first();
+          await _ensureIndexExists(blueprint, 0);
+          await _injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
+          await _injectClones(loc.cart.list, blueprint, size);
+          await _injectBadgeNum(headerLocs.cartBadge, size);
+        },
+      },
     },
-    { template: templateHandle, n: size },
-  );
-
-  // 3. Update Badge
-  if (await header.cartBadge.isVisible()) {
-    await header.cartBadge.evaluate((el, val) => (el.textContent = val.toString()), size);
-  }
-}
-
-// --- DOMAIN INTERFACE ---
-export const purchase = {
-  standardizeCartList,
-} as const;
-
-/*
-
-export async function getAmount(page: Page, dataTestId: string) {
-  const text = await page.getByTestId(dataTestId).textContent();
-  return text ? parseFloat(text.replace(/[^\d.]/g, '')) : 'No amount found';
-}
-
-export async function gotoCheckout(page: Page) {
-  await page.getByTestId('shopping-cart-link').click();
-  await page.getByRole('button', { name: await getTranslation('checkout') }).click();
-}
-
-export async function submitCheckoutInfo(
-  page: Page,
-  firstName?: string,
-  lastName?: string,
-  zip?: string
-) {
-  if (firstName) {
-    await page.getByPlaceholder(await getTranslation('firstName')).fill(firstName);
-  }
-  if (lastName) {
-    await page.getByPlaceholder(await getTranslation('lastName')).fill(lastName);
-  }
-  if (zip) {
-    await page.getByPlaceholder(await getTranslation('zipPostalCode')).fill(zip);
-  }
-
-  await page.getByRole('button', { name: await getTranslation('continue') }).click();
-}
-
-*/
+  };
+};

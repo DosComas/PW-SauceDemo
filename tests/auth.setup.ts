@@ -11,9 +11,9 @@ for (const persona of ACCESS_USERS) {
       await action.login.submit({ user: persona.user, pass: persona.pass });
     });
 
-    await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.catalog.title);
+    await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
     await expect(loc.header.cartBtn, '🟧 UI: Cart icon visible').toBeVisible();
-    expect(await session.getCookie(), '🟧 Data: Session cookies present').toBeTruthy();
+    expect(await session.userSession(), '🟧 Data: Session cookies present').toBeTruthy();
 
     await setup.step('⬜ Save authentication state', async () => {
       await page.context().storageState({ path: persona.storageState });

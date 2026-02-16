@@ -1,28 +1,30 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
 import { customMatchers } from '@utils';
-import { createApp } from '@helpers';
-
-type App = ReturnType<typeof createApp>;
+import { type App, createApp } from '@helpers';
 
 export const expect = baseExpect.extend(customMatchers);
 
-export const test = base.extend<{
+interface MyFixtures {
+  _app: App;
   loc: App['loc'];
   action: App['action'];
   session: App['session'];
-}>({
-  loc: async ({ page }, use) => {
-    const { loc } = createApp(page);
-    await use(loc);
+}
+
+export const test = base.extend<MyFixtures>({
+  _app: async ({ page }, use) => {
+    await use(createApp(page));
   },
 
-  action: async ({ page }, use) => {
-    const { action } = createApp(page);
-    await use(action);
+  loc: async ({ _app }, use) => {
+    await use(_app.loc);
   },
 
-  session: async ({ page }, use) => {
-    const { session } = createApp(page);
-    await use(session);
+  action: async ({ _app }, use) => {
+    await use(_app.action);
+  },
+
+  session: async ({ _app }, use) => {
+    await use(_app.session);
   },
 });

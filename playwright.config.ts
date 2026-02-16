@@ -42,36 +42,35 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'setup',
+      name: 'Auth',
       use: {
         ...devices['Desktop Chrome'],
-        channel: 'chrome',
       },
-      testMatch: /.*\.setup\.ts/,
+      testMatch: 'auth.setup.ts',
     },
 
     /* Test against desktop viewports. */
     {
       name: 'Chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-      dependencies: ['setup'],
+      dependencies: ['Auth'],
     },
     {
-      name: 'Webkit',
+      name: 'Safari',
       use: { ...devices['Desktop Safari'] },
-      dependencies: ['setup'],
+      dependencies: ['Auth'],
     },
 
     /* Test against mobile viewports. */
     {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-      dependencies: ['setup'],
+      name: 'Android',
+      use: { ...devices['Pixel 7'] },
+      dependencies: ['Auth'],
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-      dependencies: ['setup'],
+      name: 'iPhone',
+      use: { ...devices['iPhone 14'] },
+      dependencies: ['Auth'],
     },
   ],
 

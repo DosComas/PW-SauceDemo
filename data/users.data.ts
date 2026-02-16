@@ -22,7 +22,7 @@ type TestUserData = {
   })[];
   denied: (UserPersona & {
     expectAuth: false;
-    expectedErrorKey: keyof typeof t.identity.errors;
+    expectedErrorKey: keyof typeof t.login.errors;
   })[];
 };
 

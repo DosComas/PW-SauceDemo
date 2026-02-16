@@ -5,7 +5,7 @@ const DICTIONARY = { en };
 type Language = keyof typeof DICTIONARY;
 type LanguageData = typeof en;
 
-export type SortLabels = LanguageData['catalog']['sort'][keyof LanguageData['catalog']['sort']];
+export type SortLabels = LanguageData['plp']['sort'][keyof LanguageData['plp']['sort']];
 
 const currentLang = (process.env.LANGUAGE as Language) || 'en';
 const baseBundle = DICTIONARY[currentLang] || DICTIONARY.en;

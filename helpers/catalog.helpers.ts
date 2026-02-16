@@ -1,87 +1,85 @@
 import { type Page, type Locator } from '@playwright/test';
-import { sharedProductCard, sharedHeader } from './shared/locators';
-import { type UIContext, ensureIndexExists, injectProductText } from './shared/actions';
+import { _appItem } from './common/app.locators';
+import { type ItemTextLocators, _ensureIndexExists, _injectItemText, _injectClones } from './common/app.actions';
 import { VISUAL_MOCK, SortLabels } from '@data';
 
-// --- TYPES ---
-type CatalogContext = Exclude<UIContext, 'Cart'>;
-type ProductCard = { name: Locator; desc: Locator; price: Locator; img: Locator };
-type ProductGridSchema = { list: Locator; allCards: Locator; card: (index: number) => ProductCard };
-export type SortableKeys = keyof ReturnType<typeof catalogLocators>['plp']['all'];
+// TYPES
 
-// --- LOCATORS ---
+export type ItemSortAttribute = Pick<ReturnType<typeof catalogLocators>['plp']['items'], 'names' | 'prices'>;
+
+// LOCATORS
+
 const catalogLocators = (page: Page) => {
-  const allCards = page.getByTestId('inventory-item');
+  const _plpItems = page.getByTestId('inventory-item');
+  const _getImg = (root: Locator | Page) => root.locator('.inventory_item_img').getByRole('img');
 
   return {
-    header: { ...sharedHeader(page) },
     plp: {
       title: page.getByTestId('title'),
       list: page.getByTestId('inventory-list'),
-      allCards: allCards,
-      allImgs: page.locator('.inventory_item_img').getByRole('img'),
       sort: page.getByTestId('product-sort-container'),
-      all: {
-        prices: sharedProductCard(page).price,
-        names: sharedProductCard(page).name,
+      items: {
+        all: _plpItems,
+        prices: _plpItems.locator(_appItem(page).price),
+        names: _plpItems.locator(_appItem(page).name),
+        imgs: _plpItems.locator(_getImg(page)),
       },
-      card: (index: number) => sharedProductCard(allCards.nth(index)),
+      item: (index: number) => {
+        const root = _plpItems.nth(index);
+        return {
+          ..._appItem(root),
+          img: _getImg(root),
+        };
+      },
     },
     pdp: {
-      card: { ...sharedProductCard(page) },
+      item: {
+        ..._appItem(page),
+        img: page.locator('.inventory_details_img_container').getByRole('img'),
+      },
       backBtn: page.getByTestId('back-to-products'),
     },
   };
 };
 
-// --- DOMAIN ACTIONS ---
-async function scrapeProductData({ name, desc, price, img }: ProductCard, label: CatalogContext) {
-  const [rawName, rawDesc, rawPrice, imgSrc] = await Promise.all([
-    name.innerText(),
-    desc.innerText(),
-    price.innerText(),
-    img.getAttribute('src'),
-  ]);
+// DOMAIN ACTIONS
 
-  const [cleanName, cleanDesc, cleanPrice] = [rawName, rawDesc, rawPrice].map((val) => val.trim());
+async function _scrapeItemData(itemLoc: ItemTextLocators & { img: Locator }) {
+  const data = {
+    name: (await itemLoc.name.innerText()).trim(),
+    desc: (await itemLoc.desc.innerText()).trim(),
+    price: (await itemLoc.price.innerText()).trim(),
+    imgSrc: (await itemLoc.img.getAttribute('src')) || '',
+  };
 
-  if (!cleanName || !cleanDesc || !cleanPrice || !imgSrc) {
-    throw new Error(`[${label}] Content Missing: One or more product fields are blank.`);
+  const missingKeys = Object.keys(data).filter((key) => !data[key as keyof typeof data]);
+  if (missingKeys.length > 0) {
+    throw new Error(`[_scrapeItemData] Item content missing fields: ${missingKeys.join(', ')}`);
   }
 
-  return {
-    name: cleanName,
-    desc: cleanDesc,
-    price: cleanPrice,
-    img: imgSrc,
-  };
+  return data;
 }
 
-async function populateUniformGrid(plp: ProductGridSchema, gridSize: number) {
-  const firstProduct = 0;
+async function _injectGridItems(gridLoc: Locator, blueprintLoc: Locator, gridSize: number) {
+  const handle = await blueprintLoc.elementHandle();
+  if (!handle) throw new Error(`[_injectGridItems] Blueprint handle is null. Locator: "${blueprintLoc.toString()}"`);
 
-  await ensureIndexExists(plp.allCards, firstProduct, 'PLP');
+  await gridLoc.evaluate(
+    (container, { blueprintNode, n }) => {
+      // Identify anything before the first item
+      const cleanItem = blueprintNode.cloneNode(true);
+      container.innerHTML = '';
 
-  const { name, price, desc } = plp.card(firstProduct);
-
-  await injectProductText({ name, price, desc }, VISUAL_MOCK.product);
-
-  await plp.list.evaluate(
-    (listElement: Element, { templateElement, n }: { templateElement: any; n: number }) => {
-      const cleanClone = templateElement.cloneNode(true);
-      listElement.innerHTML = '';
       for (let i = 0; i < n; i++) {
-        listElement.appendChild(cleanClone.cloneNode(true));
+        container.appendChild(cleanItem.cloneNode(true));
       }
     },
-    {
-      templateElement: await plp.allCards.first().elementHandle(),
-      n: gridSize,
-    },
+    { blueprintNode: handle, n: gridSize },
   );
 }
 
-// --- DOMAIN INTERFACE ---
+// DOMAIN INTERFACE
+
 export const catalog = (page: Page) => {
   const loc = catalogLocators(page);
 
@@ -90,34 +88,39 @@ export const catalog = (page: Page) => {
     action: {
       plp: {
         scrape: async ({ index }: { index: number }) => {
-          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
-          return scrapeProductData(loc.plp.card(index), 'PLP');
+          await _ensureIndexExists(loc.plp.items.all, index);
+          return _scrapeItemData(loc.plp.item(index));
         },
         open: async ({ index, via }: { index: number; via: 'name' | 'img' }) => {
-          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
-          const card = loc.plp.card(index);
-          const target = via === 'img' ? card.img : card.name;
+          await _ensureIndexExists(loc.plp.items.all, index);
+          const item = loc.plp.item(index);
+          const target = via === 'img' ? item.img : item.name;
           await target.click();
         },
         add: async ({ index }: { index: number }) => {
-          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
-          await loc.plp.card(index).addBtn.click();
+          await _ensureIndexExists(loc.plp.items.all, index);
+          await loc.plp.item(index).addBtn.click();
         },
         remove: async ({ index }: { index: number }) => {
-          await ensureIndexExists(loc.plp.allCards, index, 'PLP');
-          await loc.plp.card(index).removeBtn.click();
+          await _ensureIndexExists(loc.plp.items.all, index);
+          await loc.plp.item(index).removeBtn.click();
         },
         sort: async ({ label }: { label: SortLabels }) => {
           await loc.plp.sort.selectOption(label);
         },
-        populateGrid: ({ size }: { size: number }) => populateUniformGrid(loc.plp, size),
+        mockGrid: async ({ size }: { size: number }) => {
+          const blueprint = loc.plp.items.all.first();
+          await _ensureIndexExists(blueprint, 0);
+          await _injectItemText(loc.plp.item(0), VISUAL_MOCK.product);
+          await _injectClones(loc.plp.list, blueprint, size);
+        },
       },
       pdp: {
-        scrape: () => scrapeProductData(loc.pdp.card, 'PDP'),
-        normalize: () => injectProductText(loc.pdp.card, VISUAL_MOCK.product),
-        add: () => loc.pdp.card.addBtn.click(),
-        remove: () => loc.pdp.card.removeBtn.click(),
-        back: () => loc.pdp.backBtn.click(),
+        scrape: async () => await _scrapeItemData(loc.pdp.item),
+        mockItem: async () => await _injectItemText(loc.pdp.item, VISUAL_MOCK.product),
+        add: async () => await loc.pdp.item.addBtn.click(),
+        remove: async () => await loc.pdp.item.removeBtn.click(),
+        back: async () => await loc.pdp.backBtn.click(),
       },
     },
   };

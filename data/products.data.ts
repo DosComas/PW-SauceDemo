@@ -1,10 +1,10 @@
-export type ProductTextFields = {
+export type ItemTextFields = {
   name: string;
   desc: string;
   price: string;
 };
 
-export const VISUAL_MOCK: { product: ProductTextFields } = {
+export const VISUAL_MOCK: { product: ItemTextFields } = {
   product: {
     name: 'Standardized Product',
     price: '$99.99',

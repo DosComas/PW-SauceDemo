@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { t, ACCESS_USERS } from '@data';
-
-import { standardizeCartList } from '../../helpers/purchase.helpers';
+import { ac } from '@faker-js/faker/dist/airline-Dz1uGqgJ';
 
 const SCOPE = 'Cart';
 
@@ -12,11 +11,11 @@ const SCOPE = 'Cart';
 
 // visual chcking- add 1 clone to have 3 total?
 
-const CATALOG_CONTEXT = { firstProduct: 0, listSize: 3 } as const;
-const { firstProduct, listSize } = CATALOG_CONTEXT;
+const CATALOG_CONTEXT = { firstItem: 0, listSize: 3 } as const;
+const { firstItem, listSize } = CATALOG_CONTEXT;
 
 test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to login page', async () => {
+  await test.step('⬜ Go to inventory page', async () => {
     await page.goto('/inventory.html');
   });
 });
@@ -50,10 +49,10 @@ for (const persona of ACCESS_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
-        await test.step('⬜ Add a product and go to cart', async () => {
-          await action.plp.add({ index: firstProduct });
+        await test.step('⬜ Add a item and go to cart', async () => {
+          await action.plp.add({ index: firstItem });
           await loc.header.cartBtn.click();
-          await standardizeCartList(page, { size: listSize });
+          await action.cart.mockList({ size: listSize });
         });
 
         await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot({ fullPage: true });

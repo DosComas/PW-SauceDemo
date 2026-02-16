@@ -17,7 +17,7 @@ for (const persona of DENIED_USERS) {
       });
 
       await expect(loc.login.errorMsg, '🟧 UI: Error message matches').toContainText(
-        t.identity.errors[persona.expectedErrorKey],
+        t.login.errors[persona.expectedErrorKey],
       );
     });
   });
@@ -30,9 +30,9 @@ for (const persona of BASELINE_USERS) {
         await action.login.submit({ user: persona.user, pass: persona.pass });
       });
 
-      await expect.soft(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.catalog.title);
+      await expect.soft(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
       await expect.soft(loc.header.cartBtn, '🟧 UI: Cart icon visible').toBeVisible();
-      expect(await session.getCookie(), '🟧 Data: Session cookies present').toBeTruthy();
+      expect(await session.userSession(), '🟧 Data: Session cookies present').toBeTruthy();
     });
 
     test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc }) => {

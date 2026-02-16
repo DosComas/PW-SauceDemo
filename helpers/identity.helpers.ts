@@ -1,24 +1,20 @@
 import { type Page } from '@playwright/test';
-import { sharedHeader } from './shared/locators';
+import { type Header } from './common/app.locators';
 import { t, STATE_KEYS } from '@data';
 
-// --- LOCATORS ---
+// LOCATORS
 const identityLocators = (page: Page) => ({
   login: {
-    nameInput: page.getByPlaceholder(t.identity.username),
-    passInput: page.getByPlaceholder(t.identity.password),
-    loginBtn: page.getByRole('button', { name: t.identity.login }),
+    nameInput: page.getByPlaceholder(t.login.username),
+    passInput: page.getByPlaceholder(t.login.password),
+    loginBtn: page.getByRole('button', { name: t.login.button }),
     errorMsg: page.getByTestId('error'),
     logoImg: page.locator('.login_logo'),
   },
-
-  header: {
-    ...sharedHeader(page),
-  },
 });
 
-// --- DOMAIN INTERFACE ---
-export const identity = (page: Page) => {
+// DOMAIN INTERFACE
+export const identity = (page: Page, headerLocs: Header) => {
   const loc = identityLocators(page);
 
   return {
@@ -33,13 +29,13 @@ export const identity = (page: Page) => {
       },
       header: {
         logout: async () => {
-          await loc.header.menuBtn.click();
-          await loc.header.logoutBtn.click();
+          await headerLocs.menuBtn.click();
+          await headerLocs.logoutBtn.click();
         },
       },
     },
     session: {
-      getCookie: async () => {
+      userSession: async () => {
         const cookies = await page.context().cookies();
         return cookies.find((c) => c.name === STATE_KEYS.userSession);
       },

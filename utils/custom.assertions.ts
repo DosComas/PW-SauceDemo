@@ -1,19 +1,7 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator, type ExpectMatcherState } from '@playwright/test';
 
 // --- TYPES ---
-export type ToBeSortedByOptions = { order: 'asc' | 'desc'; content: 'price' | 'name' };
-
-// Interface to satisfy strict mode for 'this' context in matchers
-type MatcherContext = {
-  utils: {
-    matcherHint: (name: string, received: any, expected: any, options?: any) => string;
-    printExpected: (val: any) => string;
-    printReceived: (val: any) => string;
-    diff: (a: any, b: any) => string;
-  };
-  isNot: boolean;
-  promise: string;
-};
+export type SortCriteria = { by: 'price' | 'name'; order: 'asc' | 'desc' };
 
 // --- PRIVATE UTILITIES ---
 
@@ -56,7 +44,7 @@ async function pollUntil<T>(
 // --- MATCHERS ---
 export const customMatchers = {
   async toHaveStorageLength(
-    this: MatcherContext, // Fixes 'this' implicitly has any type
+    this: ExpectMatcherState,
     page: Page,
     key: string,
     expected: number,
@@ -123,14 +111,9 @@ export const customMatchers = {
     return { message, pass };
   },
 
-  async toBeSortedBy(
-    this: MatcherContext, // Fixes 'this' implicitly has any type
-    locator: Locator,
-    sortBy: ToBeSortedByOptions,
-    options?: { timeout?: number },
-  ) {
+  async toBeSortedBy(this: ExpectMatcherState, locator: Locator, sort: SortCriteria, options?: { timeout?: number }) {
     const assertionName = 'toBeSortedBy';
-    const isDescending = sortBy.order === 'desc';
+    const isDescending = sort.order === 'desc';
 
     // 1. Polling Phase
     const { value: actualValues, pass } = await pollUntil(
@@ -142,7 +125,7 @@ export const customMatchers = {
           const raw = text.trim();
 
           // Case A: Name logic (String)
-          if (sortBy.content === 'name') return raw;
+          if (sort.by === 'name') return raw;
 
           // Case B: Price logic (Number)
           const numericPart = raw.replace(/[^0-9.-]+/g, '');
@@ -203,7 +186,7 @@ export const customMatchers = {
         return (
           matcherHint +
           '\n\n' +
-          `Expected: not sorted by ${sortBy.content} ${sortBy.order}\n` +
+          `Expected: not sorted by ${sort.by} ${sort.order}\n` +
           `Received: ${this.utils.printReceived(safeValues.slice(0, 3))}...`
         );
       }
@@ -234,7 +217,7 @@ export const customMatchers = {
       return (
         matcherHint +
         '\n\n' +
-        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${sortBy.content} ${sortBy.order})\n` +
+        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${sort.by} ${sort.order})\n` +
         `Received: ${this.utils.printReceived(`${prev} ${actualOp} ${curr}`)} at index ${vIndex - 1}\n\n` +
         `Diff:\n${this.utils.diff(expectedValues, safeValues)}`
       );

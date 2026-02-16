@@ -1,18 +1,23 @@
+import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { type ToBeSortedByOptions } from '@utils';
+import { type SortCriteria } from '@utils';
 import { type SortLabels, t, ACCESS_USERS, STATE_KEYS } from '@data';
-import { type SortableKeys } from '@helpers';
+import { type ItemSortAttribute } from '@helpers';
 
-type SortCase = { sortLabel: SortLabels; locatorKey: SortableKeys; sortBy: ToBeSortedByOptions };
+type SortCase = {
+  sortBy: SortLabels;
+  attribute: (items: ItemSortAttribute) => Locator;
+  expected: SortCriteria;
+};
 
 const SCOPE = 'PLP';
 
-const CATALOG_CONTEXT = { firstProduct: 0, productIndexes: [0, 1, 2], gridSize: 5 } as const;
-const { firstProduct, productIndexes, gridSize } = CATALOG_CONTEXT;
+const PLP_CONTEXT = { firstItem: 0, itemIndexes: [0, 1, 2], gridSize: 5 } as const;
+const { firstItem, itemIndexes, gridSize } = PLP_CONTEXT;
 
 const SORT_CASES: SortCase[] = [
-  { sortLabel: t.catalog.sort.nameAZ, locatorKey: 'names', sortBy: { content: 'name', order: 'asc' } },
-  { sortLabel: t.catalog.sort.priceHighLow, locatorKey: 'prices', sortBy: { content: 'price', order: 'desc' } },
+  { sortBy: t.plp.sort.az, attribute: (items) => items.names, expected: { by: 'name', order: 'asc' } },
+  { sortBy: t.plp.sort.hiLo, attribute: (items) => items.prices, expected: { by: 'price', order: 'desc' } },
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -25,44 +30,44 @@ for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
-    SORT_CASES.forEach(({ sortLabel, locatorKey, sortBy }) => {
-      test(`${SCOPE}: Items follow ${sortLabel} order`, async ({ loc, action }) => {
-        await test.step('🟦 Sort products', async () => {
-          await action.plp.sort({ label: sortLabel });
+    SORT_CASES.forEach(({ sortBy, attribute, expected }) => {
+      test(`${SCOPE}: Items follow ${sortBy} order`, async ({ loc, action }) => {
+        await test.step('🟦 Sort items', async () => {
+          await action.plp.sort({ label: sortBy });
         });
 
-        await expect(loc.plp.all[locatorKey], `🟧 UI: Sorted by ${sortLabel}`).toBeSortedBy(sortBy);
+        await expect(attribute(loc.plp.items), `🟧 UI: Sorted by ${sortBy}`).toBeSortedBy(expected);
       });
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
-      await test.step('🟦 Add products to cart', async () => {
-        for (const productIndex of productIndexes) {
+      await test.step('🟦 Add items to cart', async () => {
+        for (const productIndex of itemIndexes) {
           await action.plp.add({ index: productIndex });
         }
       });
 
-      await expect.soft(loc.plp.card(firstProduct).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(loc.plp.item(firstItem).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(loc.header.cartBadge, '🟧 UI: Badge shows 3').toHaveText('3');
       await expect(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STATE_KEYS.cart, 3);
 
-      await test.step('🟦 Remove product from cart', async () => {
-        await action.plp.remove({ index: firstProduct });
+      await test.step('🟦 Remove item from cart', async () => {
+        await action.plp.remove({ index: firstItem });
       });
 
-      await expect.soft(loc.plp.card(firstProduct).addBtn, '🟧 UI: Add button visible').toBeVisible();
+      await expect.soft(loc.plp.item(firstItem).addBtn, '🟧 UI: Add button visible').toBeVisible();
       await expect.soft(loc.header.cartBadge, '🟧 UI: Badge shows 2').toHaveText('2');
       await expect(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STATE_KEYS.cart, 2);
     });
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
-        const imgs = await test.step('⬜ Standardize grid data', async () => {
-          await action.plp.populateGrid({ size: gridSize });
-          return await loc.plp.allImgs.all();
+        const imgs = await test.step('⬜ Mock grid', async () => {
+          await action.plp.mockGrid({ size: gridSize });
+          return await loc.plp.items.imgs.all();
         });
 
-        await expect(page, '🟧 UI: Inventory layout visual check').toHaveScreenshot({ mask: imgs, fullPage: true });
+        await expect(page, '🟧 UI: PLP layout visual check').toHaveScreenshot({ mask: imgs, fullPage: true });
       });
     }
   });
