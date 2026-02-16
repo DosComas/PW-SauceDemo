@@ -13,9 +13,9 @@ export const en = {
   },
   footer: {
     social: {
-      twitter: 'Twitter',
-      facebook: 'Facebook',
-      linkedin: 'LinkedIn',
+      twitter: { label: 'Twitter', url: 'https://twitter.com/saucelabs' },
+      facebook: { label: 'Facebook', url: 'https://facebook.com/saucelabs' },
+      linkedin: { label: 'LinkedIn', url: 'https://www.linkedin.com/company/sauce-labs/' },
     },
   },
 

@@ -4,6 +4,9 @@ import { account } from './account.helpers';
 import { catalog } from './catalog.helpers';
 import { purchase } from './purchase.helpers';
 
+export type App = ReturnType<typeof createApp>;
+export { type ItemSortAttribute } from './catalog.helpers';
+
 export const createApp = (page: Page) => {
   const headerLocs = _appHeader(page);
   const footerLocs = _appFooter(page);
@@ -15,6 +18,7 @@ export const createApp = (page: Page) => {
   return {
     loc: {
       header: headerLocs,
+      footer: footerLocs,
       ...accountObj.loc,
       ...catalogObj.loc,
       ...purchaseObj.loc,
@@ -29,6 +33,3 @@ export const createApp = (page: Page) => {
     },
   };
 };
-
-export type App = ReturnType<typeof createApp>;
-export { ItemSortAttribute } from './catalog.helpers';

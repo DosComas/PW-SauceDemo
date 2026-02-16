@@ -1,5 +1,7 @@
 import { Page, Locator } from '@playwright/test';
-import { t } from '@data';
+import { type SocialPlatform, t } from '@data';
+
+export type Header = ReturnType<typeof _appHeader>;
 
 export const _appItem = (root: Page | Locator) => ({
   name: root.getByTestId('inventory-item-name'),
@@ -22,7 +24,5 @@ export const _appFooter = (page: Page) => ({
     twitter: page.getByTestId('social-twitter'),
     facebook: page.getByTestId('social-facebook'),
     linkedin: page.getByTestId('social-linkedin'),
-  },
+  } satisfies Record<SocialPlatform, Locator>,
 });
-
-export type Header = ReturnType<typeof _appHeader>;

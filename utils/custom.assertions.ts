@@ -2,7 +2,8 @@ import { type Page, type Locator, type ExpectMatcherState } from '@playwright/te
 import { StateKey } from '@data';
 
 // --- TYPES ---
-export type SortCriteria = { by: 'price' | 'name'; order: 'asc' | 'desc' };
+export type SortByField = 'price' | 'name';
+export type SortOrder = 'asc' | 'desc';
 
 // --- PRIVATE UTILITIES ---
 
@@ -112,9 +113,15 @@ export const customMatchers = {
     return { message, pass };
   },
 
-  async toBeSortedBy(this: ExpectMatcherState, locator: Locator, sort: SortCriteria, options?: { timeout?: number }) {
+  async toBeSortedBy(
+    this: ExpectMatcherState,
+    locator: Locator,
+    by: SortByField,
+    order: SortOrder,
+    options?: { timeout?: number },
+  ) {
     const assertionName = 'toBeSortedBy';
-    const isDescending = sort.order === 'desc';
+    const isDescending = order === 'desc';
 
     // Polling Phase
     const { value: actualValues, pass } = await pollUntil(
@@ -126,7 +133,7 @@ export const customMatchers = {
           const raw = text.trim();
 
           // Case A: Name logic (String)
-          if (sort.by === 'name') return raw;
+          if (by === 'name') return raw;
 
           // Case B: Price logic (Number)
           const numericPart = raw.replace(/[^0-9.-]+/g, '');
@@ -187,7 +194,7 @@ export const customMatchers = {
         return (
           matcherHint +
           '\n\n' +
-          `Expected: not sorted by ${sort.by} ${sort.order}\n` +
+          `Expected: not sorted by ${by} ${order}\n` +
           `Received: ${this.utils.printReceived(safeValues.slice(0, 3))}...`
         );
       }
@@ -218,7 +225,7 @@ export const customMatchers = {
       return (
         matcherHint +
         '\n\n' +
-        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${sort.by} ${sort.order})\n` +
+        `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${by} ${order})\n` +
         `Received: ${this.utils.printReceived(`${prev} ${actualOp} ${curr}`)} at index ${vIndex - 1}\n\n` +
         `Diff:\n${this.utils.diff(expectedValues, safeValues)}`
       );

@@ -1,13 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { type SortCriteria } from '@utils';
+import { type SortByField, type SortOrder } from '@utils';
 import { type SortLabels, t, ACCESS_USERS, STATE_KEYS } from '@data';
 import { type ItemSortAttribute } from '@helpers';
 
 type SortCase = {
   sortBy: SortLabels;
   attribute: (items: ItemSortAttribute) => Locator;
-  expected: SortCriteria;
+  expected: { by: SortByField; order: SortOrder };
 };
 
 const SCOPE = 'PLP';
@@ -36,7 +36,7 @@ for (const persona of ACCESS_USERS) {
           await action.plp.sort({ label: sortBy });
         });
 
-        await expect(attribute(loc.plp.items), `🟧 UI: Sorted by ${sortBy}`).toBeSortedBy(expected);
+        await expect(attribute(loc.plp.items), `🟧 UI: Sorted by ${sortBy}`).toBeSortedBy(expected.by, expected.order);
       });
     });
 

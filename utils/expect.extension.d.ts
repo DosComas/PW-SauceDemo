@@ -1,4 +1,4 @@
-import { type ToBeSortedByOptions } from './custom.assertions';
+import { type SortByField, SortOrder } from './custom.assertions';
 import { StateKey } from '@data';
 
 declare global {
@@ -13,13 +13,13 @@ declare global {
        *
        * ```js
        * // Sort names A-Z (Using sring order)
-       * await expect(loc.plp.items.names).toBeSorted({ content: 'name', order: 'asc' });
-       * * // Sort prices high-to-low (Using numeric order)
-       * await expect(loc.plp.items.prices).toBeSorted({ content: 'price', order: 'desc' });
+       * await expect(loc.plp.items.names).toBeSorted('name', 'asc');
+       * // Sort prices high-to-low (Using numeric order)
+       * await expect(loc.plp.items.prices).toBeSorted('price', 'desc');
        * ```
        *
        */
-      toBeSortedBy(sortBy: ToBeSortedByOptions, options?: { timeout?: number }): Promise<R>;
+      toBeSortedBy(by: SortByField, order: SortOrder, options?: { timeout?: number }): Promise<R>;
 
       /**
        * Asserts that a JSON array stored in LocalStorage has the expected number of items.

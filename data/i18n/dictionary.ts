@@ -6,6 +6,8 @@ type Language = keyof typeof DICTIONARY;
 type LanguageData = typeof en;
 
 export type SortLabels = LanguageData['plp']['sort'][keyof LanguageData['plp']['sort']];
+export type SocialPlatform = keyof LanguageData['footer']['social'];
+export type SocialPlatformData = LanguageData['footer']['social'][SocialPlatform];
 
 const currentLang = (process.env.LANGUAGE as Language) || 'en';
 const baseBundle = DICTIONARY[currentLang] || DICTIONARY.en;
