@@ -3,19 +3,18 @@ import { type Header } from './common/app.locators';
 import { t, STATE_KEYS } from '@data';
 
 // LOCATORS
-const identityLocators = (page: Page) => ({
+const accountLocators = (page: Page) => ({
   login: {
     nameInput: page.getByPlaceholder(t.login.username),
     passInput: page.getByPlaceholder(t.login.password),
     loginBtn: page.getByRole('button', { name: t.login.button }),
     errorMsg: page.getByTestId('error'),
-    logoImg: page.locator('.login_logo'),
   },
 });
 
 // DOMAIN INTERFACE
-export const identity = (page: Page, headerLocs: Header) => {
-  const loc = identityLocators(page);
+export const account = (page: Page, headerLocs: Header) => {
+  const loc = accountLocators(page);
 
   return {
     loc,

@@ -1,4 +1,5 @@
 import { type ToBeSortedByOptions } from './custom.assertions';
+import { StateKey } from '@data';
 
 declare global {
   namespace PlaywrightTest {
@@ -12,9 +13,9 @@ declare global {
        *
        * ```js
        * // Sort names A-Z (Using sring order)
-       * await expect(inventory.itemNames).toBeSorted({ content: 'name', order: 'asc' });
+       * await expect(loc.plp.items.names).toBeSorted({ content: 'name', order: 'asc' });
        * * // Sort prices high-to-low (Using numeric order)
-       * await expect(inventory.itemPrices).toBeSorted({ content: 'price', order: 'desc' });
+       * await expect(loc.plp.items.prices).toBeSorted({ content: 'price', order: 'desc' });
        * ```
        *
        */
@@ -32,7 +33,7 @@ declare global {
        * ```
        *
        */
-      toHaveStorageLength(key: string, expected: number, options?: { timeout?: number }): Promise<R>;
+      toHaveStorageLength(key: StateKey, expected: number, options?: { timeout?: number }): Promise<R>;
     }
   }
 }

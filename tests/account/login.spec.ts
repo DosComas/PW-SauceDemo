@@ -37,8 +37,8 @@ for (const persona of BASELINE_USERS) {
 
     test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc }) => {
       await test.step('⬜ Wait for logo and login button', async () => {
-        await loc.login.logoImg.waitFor({ state: 'visible' });
-        await loc.login.loginBtn.waitFor({ state: 'visible' });
+        await loc.header.appLogo.waitFor();
+        await loc.login.loginBtn.waitFor();
       });
 
       await expect(page, '🟧 UI: Login layout visual check').toHaveScreenshot({ fullPage: true });

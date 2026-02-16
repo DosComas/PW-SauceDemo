@@ -41,6 +41,7 @@ export const purchase = (page: Page, headerLocs: Header) => {
     loc,
     action: {
       cart: {
+        open: async () => await headerLocs.cartBtn.click(),
         mockList: async ({ size }: { size: number }) => {
           const blueprint = loc.cart.items.all.first();
           await _ensureIndexExists(blueprint, 0);

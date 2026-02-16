@@ -11,11 +11,9 @@ export async function _ensureIndexExists(loc: Locator, index: number) {
   await loc.first().waitFor();
 
   const count = await loc.count();
-
   if (count === 0) {
     throw new Error(`[_ensureIndexExists] Page empty, no items found`);
   }
-
   if (index >= count) {
     throw new Error(`[_ensureIndexExists] Index out of bounds, requested: ${index}, actual: ${count}`);
   }
@@ -33,9 +31,8 @@ export async function _injectItemText(itemLoc: ItemTextLocators, data: ItemTextF
 
 export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator, count: number) {
   const handle = await blueprintLoc.elementHandle();
-
   if (!handle) {
-    throw new Error(`[_injectClones] Blueprint handle is null. Locator: "${blueprintLoc.toString()}"`);
+    throw new Error(`[_injectClones] Blueprint handle is null, locator: "${blueprintLoc.toString()}"`);
   }
 
   await containerLoc.evaluate(

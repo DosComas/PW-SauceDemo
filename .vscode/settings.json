@@ -12,19 +12,21 @@
     "**/__snapshots__/**": false,
     "**/test-results/**": true,
     "**/playwright-report/**": true,
-    "**/node_modules/**": true,
-    "**/.git/**": true
+    "**/node_modules/**": true
   },
 
   "search.exclude": {
     "**/__snapshots__/**": true,
     "**/test-results/**": true,
-    "**/playwright-report/**": true
+    "**/playwright-report/**": true,
+    "**/node_modules/**": true
   },
 
   "files.watcherExclude": {
     "**/__snapshots__/**": true,
     "**/test-results/**": true,
-    "**/playwright-report/**": true
+    "**/playwright-report/**": true,
+    "**/node_modules/**": true,
+    "**/.git/**": true
   }
 }

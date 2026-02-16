@@ -1,6 +1,5 @@
 import { test, expect } from '@fixtures';
 import { t, ACCESS_USERS } from '@data';
-import { ac } from '@faker-js/faker/dist/airline-Dz1uGqgJ';
 
 const SCOPE = 'Cart';
 
@@ -8,8 +7,7 @@ const SCOPE = 'Cart';
 // Cases add product to cart, check sync? data? badge? local?
 
 // remove from cart and go back to... inventory, pdp? to chceck sync. how about data? badge? local?
-
-// visual chcking- add 1 clone to have 3 total?
+// -- go to pdp, scrape, go back, check item and cart
 
 const CATALOG_CONTEXT = { firstItem: 0, listSize: 3 } as const;
 const { firstItem, listSize } = CATALOG_CONTEXT;
@@ -26,8 +24,6 @@ for (const persona of ACCESS_USERS) {
 
     // TODO
     test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page, loc, action }) => {
-      const setup = {};
-
       await test.step('⬜ Arrange: prepare state', async () => {});
 
       await test.step('🟦 Action: perform interaction', async () => {});
@@ -37,8 +33,6 @@ for (const persona of ACCESS_USERS) {
 
     // TODO
     test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page, loc, action }) => {
-      const setup = {};
-
       await test.step('⬜ Arrange: prepare state', async () => {});
 
       await test.step('🟦 Action: perform interaction', async () => {});
@@ -51,7 +45,7 @@ for (const persona of ACCESS_USERS) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
         await test.step('⬜ Add a item and go to cart', async () => {
           await action.plp.add({ index: firstItem });
-          await loc.header.cartBtn.click();
+          await action.cart.open();
           await action.cart.mockList({ size: listSize });
         });
 

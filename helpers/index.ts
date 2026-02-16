@@ -1,29 +1,31 @@
 import { type Page } from '@playwright/test';
-import { _appHeader } from './common/app.locators';
-import { identity } from './identity.helpers';
+import { _appHeader, _appFooter } from './common/app.locators';
+import { account } from './account.helpers';
 import { catalog } from './catalog.helpers';
 import { purchase } from './purchase.helpers';
 
 export const createApp = (page: Page) => {
   const headerLocs = _appHeader(page);
+  const footerLocs = _appFooter(page);
+
   const catalogObj = catalog(page);
-  const identityObj = identity(page, headerLocs);
+  const accountObj = account(page, headerLocs);
   const purchaseObj = purchase(page, headerLocs);
 
   return {
     loc: {
       header: headerLocs,
-      ...identityObj.loc,
+      ...accountObj.loc,
       ...catalogObj.loc,
       ...purchaseObj.loc,
     },
     action: {
-      ...identityObj.action,
+      ...accountObj.action,
       ...catalogObj.action,
       ...purchaseObj.action,
     },
     session: {
-      ...identityObj.session,
+      ...accountObj.session,
     },
   };
 };

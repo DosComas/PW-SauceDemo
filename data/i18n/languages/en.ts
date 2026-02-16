@@ -9,6 +9,14 @@ export const en = {
   header: {
     logout: 'Logout',
     openMenu: 'Open Menu',
+    about: 'About',
+  },
+  footer: {
+    social: {
+      twitter: 'Twitter',
+      facebook: 'Facebook',
+      linkedin: 'LinkedIn',
+    },
   },
 
   /** Authentication: User credentials and login-specific validation messages */

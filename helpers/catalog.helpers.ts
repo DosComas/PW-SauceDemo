@@ -20,9 +20,9 @@ const catalogLocators = (page: Page) => {
       sort: page.getByTestId('product-sort-container'),
       items: {
         all: _plpItems,
-        prices: _plpItems.locator(_appItem(page).price),
-        names: _plpItems.locator(_appItem(page).name),
-        imgs: _plpItems.locator(_getImg(page)),
+        prices: _appItem(page).price,
+        names: _appItem(page).name,
+        imgs: _getImg(page),
       },
       item: (index: number) => {
         const root = _plpItems.nth(index);
@@ -45,37 +45,19 @@ const catalogLocators = (page: Page) => {
 // DOMAIN ACTIONS
 
 async function _scrapeItemData(itemLoc: ItemTextLocators & { img: Locator }) {
-  const data = {
+  const values = {
     name: (await itemLoc.name.innerText()).trim(),
     desc: (await itemLoc.desc.innerText()).trim(),
     price: (await itemLoc.price.innerText()).trim(),
     imgSrc: (await itemLoc.img.getAttribute('src')) || '',
   };
 
-  const missingKeys = Object.keys(data).filter((key) => !data[key as keyof typeof data]);
+  const missingKeys = Object.keys(values).filter((key) => !values[key as keyof typeof values]);
   if (missingKeys.length > 0) {
-    throw new Error(`[_scrapeItemData] Item content missing fields: ${missingKeys.join(', ')}`);
+    throw new Error(`[_scrapeItemData] Item content missing values: ${missingKeys.join(', ')}`);
   }
 
-  return data;
-}
-
-async function _injectGridItems(gridLoc: Locator, blueprintLoc: Locator, gridSize: number) {
-  const handle = await blueprintLoc.elementHandle();
-  if (!handle) throw new Error(`[_injectGridItems] Blueprint handle is null. Locator: "${blueprintLoc.toString()}"`);
-
-  await gridLoc.evaluate(
-    (container, { blueprintNode, n }) => {
-      // Identify anything before the first item
-      const cleanItem = blueprintNode.cloneNode(true);
-      container.innerHTML = '';
-
-      for (let i = 0; i < n; i++) {
-        container.appendChild(cleanItem.cloneNode(true));
-      }
-    },
-    { blueprintNode: handle, n: gridSize },
-  );
+  return values;
 }
 
 // DOMAIN INTERFACE

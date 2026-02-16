@@ -10,10 +10,6 @@ export type SortLabels = LanguageData['plp']['sort'][keyof LanguageData['plp']['
 const currentLang = (process.env.LANGUAGE as Language) || 'en';
 const baseBundle = DICTIONARY[currentLang] || DICTIONARY.en;
 
-/**
- * The 't' proxy provides type-safe, runtime-checked access to translations.
- * It will throw an explicit error if a key is missing.
- */
 export const t = new Proxy(baseBundle, {
   get(target, prop: string): any {
     const bundle = target as Record<string, any>;
@@ -23,7 +19,7 @@ export const t = new Proxy(baseBundle, {
     const value = bundle[prop];
 
     if (!(prop in bundle)) {
-      throw new Error(`[i18n] Translation Key Missing: "${prop}" does not exist in the current dictionary.`);
+      throw new Error(`[i18n] Translation key missing, key: "${prop}", dictionary: "${currentLang}"`);
     }
 
     if (value !== null && typeof value === 'object') {

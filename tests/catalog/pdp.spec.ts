@@ -16,7 +16,7 @@ for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
-    test(`${SCOPE}: Content matches inventory data`, async ({ loc, action }) => {
+    test(`${SCOPE}: Content matches PLP data`, async ({ loc, action }) => {
       const item = await test.step('⬜ Scrape Item data', async () => {
         return await action.plp.scrape({ index: firstItem });
       });

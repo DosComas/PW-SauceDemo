@@ -1,4 +1,5 @@
 import { type Page, type Locator, type ExpectMatcherState } from '@playwright/test';
+import { StateKey } from '@data';
 
 // --- TYPES ---
 export type SortCriteria = { by: 'price' | 'name'; order: 'asc' | 'desc' };
@@ -46,7 +47,7 @@ export const customMatchers = {
   async toHaveStorageLength(
     this: ExpectMatcherState,
     page: Page,
-    key: string,
+    key: StateKey,
     expected: number,
     options?: { timeout?: number },
   ) {
@@ -56,7 +57,7 @@ export const customMatchers = {
     let keyExists = false;
     let errorType: string | null = null;
 
-    // 1. Polling Phase
+    // Polling Phase
     const { pass } = await pollUntil(
       async () => {
         const rawValue = await page.evaluate((k) => window.localStorage.getItem(k), key);
@@ -88,7 +89,7 @@ export const customMatchers = {
       options?.timeout,
     );
 
-    // 2. Reporting Phase
+    // Reporting Phase
     const message = () => {
       const matcherHint = this.utils.matcherHint(assertionName, `page.localStorage`, JSON.stringify(expected), {
         isNot: this.isNot,
@@ -115,7 +116,7 @@ export const customMatchers = {
     const assertionName = 'toBeSortedBy';
     const isDescending = sort.order === 'desc';
 
-    // 1. Polling Phase
+    // Polling Phase
     const { value: actualValues, pass } = await pollUntil(
       // CALLBACK: Data Extraction
       async () => {
@@ -164,7 +165,7 @@ export const customMatchers = {
       options?.timeout,
     );
 
-    // 2. Reporting Phase
+    // Reporting Phase
     const message = () => {
       const matcherHint = this.utils.matcherHint(assertionName, 'locator', undefined, {
         isNot: this.isNot,

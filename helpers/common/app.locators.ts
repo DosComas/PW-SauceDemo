@@ -10,10 +10,19 @@ export const _appItem = (root: Page | Locator) => ({
 });
 
 export const _appHeader = (page: Page) => ({
-  cartBadge: page.getByTestId('shopping-cart-badge'),
-  cartBtn: page.getByTestId('shopping-cart-link'),
   menuBtn: page.getByRole('button', { name: t.header.openMenu }),
   logoutBtn: page.getByTestId('logout-sidebar-link'),
+  appLogo: page.locator('.login_logo').filter({ hasText: t.meta.storeName }),
+  cartBtn: page.getByTestId('shopping-cart-link'),
+  cartBadge: page.getByTestId('shopping-cart-badge'),
+});
+
+export const _appFooter = (page: Page) => ({
+  social: {
+    twitter: page.getByTestId('social-twitter'),
+    facebook: page.getByTestId('social-facebook'),
+    linkedin: page.getByTestId('social-linkedin'),
+  },
 });
 
 export type Header = ReturnType<typeof _appHeader>;
