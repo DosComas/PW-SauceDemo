@@ -16,11 +16,13 @@ const baseBundle = DICTIONARY[currentLang] || DICTIONARY.en;
  */
 export const t = new Proxy(baseBundle, {
   get(target, prop: string): any {
-    if (typeof prop === 'symbol' || prop === 'then') return target[prop];
+    const bundle = target as Record<string, any>;
 
-    const value = target[prop];
+    if (typeof prop === 'symbol' || prop === 'then') return bundle[prop];
 
-    if (!(prop in target)) {
+    const value = bundle[prop];
+
+    if (!(prop in bundle)) {
       throw new Error(`[i18n] Translation Key Missing: "${prop}" does not exist in the current dictionary.`);
     }
 

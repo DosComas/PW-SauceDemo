@@ -1,7 +1,19 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
 // --- TYPES ---
 export type ToBeSortedByOptions = { order: 'asc' | 'desc'; content: 'price' | 'name' };
+
+// Interface to satisfy strict mode for 'this' context in matchers
+type MatcherContext = {
+  utils: {
+    matcherHint: (name: string, received: any, expected: any, options?: any) => string;
+    printExpected: (val: any) => string;
+    printReceived: (val: any) => string;
+    diff: (a: any, b: any) => string;
+  };
+  isNot: boolean;
+  promise: string;
+};
 
 // --- PRIVATE UTILITIES ---
 
@@ -27,14 +39,12 @@ async function pollUntil<T>(
         return { value, pass: true };
       }
     } catch (error) {
-      // Transient errors are expected during polling (stale elements, timing issues).
-      // Silently continue and retry—the UI may be in a loading or transitional state.
+      // Transient errors are expected during polling.
     }
 
-    // Progressive Polling: 100ms → 250ms → 500ms → 1000ms
+    // Progressive Polling: 100ms -> 250ms -> 500ms -> 1000ms
     await new Promise((res) => setTimeout(res, currentWait));
 
-    // Step up the wait time: 100 -> 250 -> 500 -> 1000
     if (currentWait < 1000) {
       currentWait = currentWait < 250 ? 250 : currentWait < 500 ? 500 : 1000;
     }
@@ -45,7 +55,13 @@ async function pollUntil<T>(
 
 // --- MATCHERS ---
 export const customMatchers = {
-  async toHaveStorageLength(page: Page, key: string, expected: number, options?: { timeout?: number }) {
+  async toHaveStorageLength(
+    this: MatcherContext, // Fixes 'this' implicitly has any type
+    page: Page,
+    key: string,
+    expected: number,
+    options?: { timeout?: number },
+  ) {
     const assertionName = 'toHaveStorageLength';
 
     let actualLength: number | null = null;
@@ -86,7 +102,7 @@ export const customMatchers = {
 
     // 2. Reporting Phase
     const message = () => {
-      const matcherHint = this.utils.matcherHint(assertionName, `page.localeStorage`, JSON.stringify(expected), {
+      const matcherHint = this.utils.matcherHint(assertionName, `page.localStorage`, JSON.stringify(expected), {
         isNot: this.isNot,
       });
 
@@ -107,7 +123,12 @@ export const customMatchers = {
     return { message, pass };
   },
 
-  async toBeSortedBy(locator: Locator, sortBy: ToBeSortedByOptions, options?: { timeout?: number }) {
+  async toBeSortedBy(
+    this: MatcherContext, // Fixes 'this' implicitly has any type
+    locator: Locator,
+    sortBy: ToBeSortedByOptions,
+    options?: { timeout?: number },
+  ) {
     const assertionName = 'toBeSortedBy';
     const isDescending = sortBy.order === 'desc';
 
@@ -120,14 +141,15 @@ export const customMatchers = {
         return texts.map((text, index) => {
           const raw = text.trim();
 
-          // Case A: Name logic
+          // Case A: Name logic (String)
           if (sortBy.content === 'name') return raw;
 
-          // Case B: Price logic
+          // Case B: Price logic (Number)
           const numericPart = raw.replace(/[^0-9.-]+/g, '');
           const price = parseFloat(numericPart);
 
           if (!numericPart || isNaN(price)) {
+            // Throwing here triggers a retry in pollUntil
             throw new Error(`Price parsing failed at index ${index}. Received: "${raw}"`);
           }
 
@@ -166,7 +188,10 @@ export const customMatchers = {
         promise: this.promise,
       });
 
-      const expectedValues = [...actualValues].sort((a, b) => {
+      // Guard against null if polling completely failed/timed out
+      const safeValues = actualValues || [];
+
+      const expectedValues = [...safeValues].sort((a, b) => {
         const isNum = typeof a === 'number' && typeof b === 'number';
         if (isDescending) {
           return isNum ? (b as number) - (a as number) : String(b).localeCompare(String(a));
@@ -179,14 +204,14 @@ export const customMatchers = {
           matcherHint +
           '\n\n' +
           `Expected: not sorted by ${sortBy.content} ${sortBy.order}\n` +
-          `Received: ${this.utils.printReceived(actualValues.slice(0, 3))}...`
+          `Received: ${this.utils.printReceived(safeValues.slice(0, 3))}...`
         );
       }
 
       // Find the violation
-      const vIndex = actualValues.findIndex((val, i) => {
+      const vIndex = safeValues.findIndex((val, i) => {
         if (i === 0) return false;
-        const prev = actualValues[i - 1];
+        const prev = safeValues[i - 1];
         return typeof prev === 'number' && typeof val === 'number'
           ? isDescending
             ? prev < val
@@ -196,8 +221,13 @@ export const customMatchers = {
             : String(prev).localeCompare(String(val)) > 0;
       });
 
-      const prev = actualValues[vIndex - 1];
-      const curr = actualValues[vIndex];
+      // Handle edge case where no violation is found but pass is false (e.g., empty list)
+      if (vIndex === -1) {
+        return `${matcherHint}\n\nError: Polling timed out or received empty data.`;
+      }
+
+      const prev = safeValues[vIndex - 1];
+      const curr = safeValues[vIndex];
       const expectedOp = isDescending ? '≥' : '≤';
       const actualOp = isDescending ? '<' : '>';
 
@@ -206,7 +236,7 @@ export const customMatchers = {
         '\n\n' +
         `Expected: ${this.utils.printExpected(`${prev} ${expectedOp} ${curr}`)} (${sortBy.content} ${sortBy.order})\n` +
         `Received: ${this.utils.printReceived(`${prev} ${actualOp} ${curr}`)} at index ${vIndex - 1}\n\n` +
-        `Diff:\n${this.utils.diff(expectedValues, actualValues)}`
+        `Diff:\n${this.utils.diff(expectedValues, safeValues)}`
       );
     };
 

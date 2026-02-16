@@ -36,7 +36,7 @@ async function resolveItemUI(page: Page, { index }: { index: number }) {
   return cart.item(index);
 }
 
-async function standardizeItemText(page: Page, { index }) {
+async function standardizeItemText(page: Page, { index }: { index: number }) {
   const { name, price, desc } = await resolveItemUI(page, { index });
 
   await injectProductText({ name, price, desc }, VISUAL_MOCK.product);
