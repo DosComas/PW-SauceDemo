@@ -1,6 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
-import { type Header, _itemLocs } from './common/app.locators';
-import { _ensureIndexExists, _injectItemText, _injectClones } from './common/app.actions';
+import { type Header, _getItem } from './common/app.locators';
+import { _ensureIndexes, _injectItemText, _injectClones } from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
 
 // TYPES
@@ -8,16 +8,17 @@ import { VISUAL_MOCK } from '@data';
 // LOCATORS
 
 export const purchaseLocators = (page: Page) => {
-  const _cartItems = page.locator('.cart_item');
+  const _cards = page.locator('.cart_item');
 
   return {
     cart: {
       list: page.getByTestId('cart-list'),
       items: {
-        all: _cartItems,
+        cards: _cards,
       },
       item: (index: number) => {
-        const { name, desc, price } = _itemLocs(_cartItems.nth(index));
+        const root = _cards.nth(index);
+        const { name, desc, price } = _getItem(root.nth(index));
         return { name, desc, price };
       },
     },
@@ -43,8 +44,7 @@ export const purchase = (page: Page, headerLocs: Header) => {
       cart: {
         open: async () => await headerLocs.cart.openBtn.click(),
         mockList: async ({ size }: { size: number }) => {
-          const blueprint = loc.cart.items.all.first();
-          await _ensureIndexExists(blueprint, 0);
+          const blueprint = loc.cart.items.cards.first();
           await _injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
           await _injectClones(loc.cart.list, blueprint, size);
           await _injectBadgeNum(headerLocs.cart.badge, size);

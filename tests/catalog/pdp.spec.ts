@@ -3,8 +3,8 @@ import { ACCESS_USERS, STATE_KEYS } from '@data';
 
 const SCOPE = 'PDP';
 
-const PDP_CONTEXT = { firstItem: 0, itemIndexes: [0, 1, 2], middleItem: 1 } as const;
-const { firstItem, itemIndexes, middleItem } = PDP_CONTEXT;
+const PDP_CONTEXT = { firstItem: 0, middleItem: 1, itemIndexes: [0, 1, 2] } as const;
+const { firstItem, middleItem, itemIndexes } = PDP_CONTEXT;
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory', async () => {
@@ -17,7 +17,7 @@ for (const persona of ACCESS_USERS) {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Content matches PLP data`, async ({ loc, action }) => {
-      const item = await test.step('⬜ Scrape Item data', async () => {
+      const expected = await test.step('⬜ Scrape Item data', async () => {
         return await action.plp.scrape({ index: firstItem });
       });
 
@@ -25,10 +25,10 @@ for (const persona of ACCESS_USERS) {
         await action.plp.open({ index: firstItem, via: 'name' });
       });
 
-      await expect.soft(loc.pdp.item.name, '🟧 UI: Item name matches').toHaveText(item.name);
-      await expect.soft(loc.pdp.item.desc, '🟧 UI: Item description matches').toHaveText(item.desc);
-      await expect.soft(loc.pdp.item.price, '🟧 UI: Item price matches').toHaveText(item.price);
-      await expect(loc.pdp.item.img, '🟧 UI: Item image source matches').toHaveAttribute('src', item.imgSrc);
+      await expect.soft(loc.pdp.item.name, '🟧 UI: Item name matches').toHaveText(expected.name);
+      await expect.soft(loc.pdp.item.desc, '🟧 UI: Item description matches').toHaveText(expected.desc);
+      await expect.soft(loc.pdp.item.price, '🟧 UI: Item price matches').toHaveText(expected.price);
+      await expect(loc.pdp.item.img, '🟧 UI: Item image source matches').toHaveAttribute('src', expected.imgSrc);
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
@@ -52,8 +52,8 @@ for (const persona of ACCESS_USERS) {
 
     test(`${SCOPE}: State persistence on PDP entry`, async ({ page, loc, action }) => {
       await test.step('⬜ Add items to cart on inventory', async () => {
-        for (const productIndex of itemIndexes) {
-          await action.plp.add({ index: productIndex });
+        for (const index of itemIndexes) {
+          await action.plp.add({ index });
         }
       });
 

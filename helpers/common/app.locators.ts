@@ -1,9 +1,9 @@
 import { Page, Locator } from '@playwright/test';
 import { type SocialPlatform, t } from '@data';
 
-export type Header = ReturnType<typeof _headerLocs>;
+export type Header = ReturnType<typeof _getHeader>;
 
-export const _itemLocs = (root: Page | Locator) => ({
+export const _getItem = (root: Page | Locator) => ({
   name: root.getByTestId('inventory-item-name'),
   price: root.getByTestId('inventory-item-price'),
   desc: root.getByTestId('inventory-item-desc'),
@@ -11,7 +11,7 @@ export const _itemLocs = (root: Page | Locator) => ({
   removeBtn: root.getByRole('button', { name: t.item.remove }),
 });
 
-export const _headerLocs = (page: Page) => ({
+export const _getHeader = (page: Page) => ({
   appLogo: page.locator('.login_logo').filter({ hasText: t.meta.storeName }),
   menu: {
     openBtn: page.getByRole('button', { name: t.menu.openMenu }),
@@ -24,7 +24,7 @@ export const _headerLocs = (page: Page) => ({
   },
 });
 
-export const _footerLocs = (page: Page) => {
+export const _getFooter = (page: Page) => {
   const _social = page.locator('.social');
 
   return {

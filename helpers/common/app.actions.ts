@@ -3,23 +3,39 @@ import { ItemTextFields } from '@data';
 
 // TYPES
 
+export type IndexInput = number | readonly number[];
 export type ItemTextLocators = { name: Locator; desc: Locator; price: Locator };
 
 // COMMON ACTIONS
 
-export async function _ensureIndexExists(loc: Locator, index: number) {
-  await loc.first().waitFor();
+export async function _ensureIndexes(loc: Locator, input: IndexInput) {
+  const list = Array.isArray(input) ? input : [input];
+  if (list.length === 0) {
+    return [];
+  }
 
+  const min = Math.min(...list);
+  if (min < 0) {
+    throw new Error(`[_resolveIndexes] Negative indexes are not supported: ${min}`);
+  }
+
+  await loc.first().waitFor();
   const count = await loc.count();
   if (count === 0) {
-    throw new Error(`[_ensureIndexExists] Page empty, no items found`);
+    throw new Error(`[_resolveIndexes] Page empty, no items found`);
   }
-  if (index >= count) {
-    throw new Error(`[_ensureIndexExists] Index out of bounds, requested: ${index}, actual: ${count}`);
+
+  const max = Math.max(...list);
+  if (max >= count) {
+    throw new Error(`[_resolveIndexes] Index out of bounds, requested: ${max}, available: ${count - 1}`);
   }
+
+  return list;
 }
 
 export async function _injectItemText(itemLoc: ItemTextLocators, data: ItemTextFields) {
+  await itemLoc.name.waitFor();
+
   const mapping = [
     { loc: itemLoc.name, val: data.name },
     { loc: itemLoc.desc, val: data.desc },
