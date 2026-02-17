@@ -31,7 +31,7 @@ for (const persona of BASELINE_USERS) {
       });
 
       await expect.soft(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
-      await expect.soft(loc.header.cartBtn, '🟧 UI: Cart icon visible').toBeVisible();
+      await expect.soft(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
       expect(await session.userSession(), '🟧 Data: Session cookies present').toBeTruthy();
     });
 

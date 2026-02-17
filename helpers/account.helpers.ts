@@ -16,7 +16,7 @@ const accountLocators = (page: Page) => ({
 
 export const account = (page: Page, headerLocs: Header) => {
   const loc = accountLocators(page);
-  const _openMenu = async () => await headerLocs.menuBtn.click();
+  const _openMenu = async () => await headerLocs.menu.openBtn.click();
 
   return {
     loc,
@@ -31,7 +31,7 @@ export const account = (page: Page, headerLocs: Header) => {
       menu: {
         logout: async () => {
           await _openMenu();
-          await headerLocs.logoutBtn.click();
+          await headerLocs.menu.logoutBtn.click();
         },
         open: async () => _openMenu(),
       },

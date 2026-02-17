@@ -12,7 +12,7 @@ for (const persona of ACCESS_USERS) {
     });
 
     await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
-    await expect(loc.header.cartBtn, '🟧 UI: Cart icon visible').toBeVisible();
+    await expect(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
     expect(await session.userSession(), '🟧 Data: Session cookies present').toBeTruthy();
 
     await setup.step('⬜ Save authentication state', async () => {

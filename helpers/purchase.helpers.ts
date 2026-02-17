@@ -41,13 +41,13 @@ export const purchase = (page: Page, headerLocs: Header) => {
     loc,
     action: {
       cart: {
-        open: async () => await headerLocs.cartBtn.click(),
+        open: async () => await headerLocs.cart.openBtn.click(),
         mockList: async ({ size }: { size: number }) => {
           const blueprint = loc.cart.items.all.first();
           await _ensureIndexExists(blueprint, 0);
           await _injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
           await _injectClones(loc.cart.list, blueprint, size);
-          await _injectBadgeNum(headerLocs.cartBadge, size);
+          await _injectBadgeNum(headerLocs.cart.badge, size);
         },
       },
     },

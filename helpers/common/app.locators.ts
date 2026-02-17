@@ -12,12 +12,16 @@ export const _itemLocs = (root: Page | Locator) => ({
 });
 
 export const _headerLocs = (page: Page) => ({
-  menuBtn: page.getByRole('button', { name: t.header.openMenu }),
-  logoutBtn: page.getByRole('link', { name: t.header.logout }),
-  aboutBtn: page.getByRole('link', { name: t.header.about }),
   appLogo: page.locator('.login_logo').filter({ hasText: t.meta.storeName }),
-  cartBtn: page.getByTestId('shopping-cart-link'),
-  cartBadge: page.getByTestId('shopping-cart-badge'),
+  menu: {
+    openBtn: page.getByRole('button', { name: t.menu.openMenu }),
+    logoutBtn: page.getByRole('link', { name: t.menu.logout }),
+    aboutBtn: page.getByRole('link', { name: t.menu.about.label }),
+  },
+  cart: {
+    openBtn: page.getByTestId('shopping-cart-link'),
+    badge: page.getByTestId('shopping-cart-badge'),
+  },
 });
 
 export const _footerLocs = (page: Page) => {

@@ -23,7 +23,7 @@ for (const persona of ACCESS_USERS) {
     test.use({ storageState: persona.storageState });
 
     // TODO
-    test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page, loc, action }) => {
+    test.skip(`${SCOPE}: synct inventory to cart?`, async ({ page }) => {
       await test.step('⬜ Arrange: prepare state', async () => {});
 
       await test.step('🟦 Action: perform interaction', async () => {});
@@ -32,7 +32,7 @@ for (const persona of ACCESS_USERS) {
     });
 
     // TODO
-    test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page, loc, action }) => {
+    test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page }) => {
       await test.step('⬜ Arrange: prepare state', async () => {});
 
       await test.step('🟦 Action: perform interaction', async () => {});
@@ -42,10 +42,13 @@ for (const persona of ACCESS_USERS) {
     // END
 
     if (persona.isBaselineUser) {
-      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
-        await test.step('⬜ Add a item and go to cart', async () => {
+      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, action }) => {
+        await test.step('⬜ Add an item and go to cart', async () => {
           await action.plp.add({ index: firstItem });
           await action.cart.open();
+        });
+
+        await test.step('⬜ Mock List', async () => {
           await action.cart.mockList({ size: listSize });
         });
 

@@ -21,7 +21,7 @@ for (const persona of BASELINE_USERS) {
       for (const [platform, expected] of SOCIAL_LINKS) {
         const socialLoc = loc.footer.social[platform];
 
-        await expect.soft(socialLoc, `🟧 UI: ${expected.label} pens in a new tab`).toHaveAttribute('target', '_blank');
+        await expect.soft(socialLoc, `🟧 UI: ${expected.label} opens in a new tab`).toHaveAttribute('target', '_blank');
         await expect.soft(socialLoc, `🟧 Data: ${expected.label} matches URL`).toHaveAttribute('href', expected.url);
       }
     });
@@ -31,8 +31,8 @@ for (const persona of BASELINE_USERS) {
         await action.menu.open();
       });
 
-      await expect.soft(loc.header.aboutBtn, '🟧 UI: About button visible').toBeVisible();
-      await expect(loc.header.aboutBtn, `🟧 Data: ${ABOUT_DATA.label} matches URL`).toHaveAttribute(
+      await expect.soft(loc.header.menu.aboutBtn, '🟧 UI: About button visible').toBeVisible();
+      await expect(loc.header.menu.aboutBtn, `🟧 Data: ${ABOUT_DATA.label} matches URL`).toHaveAttribute(
         'href',
         ABOUT_DATA.url,
       );

@@ -38,7 +38,7 @@ for (const persona of ACCESS_USERS) {
       });
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(loc.header.cartBadge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
       await expect(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STATE_KEYS.cart, 1);
 
       await test.step('🟦 Remove item from cart', async () => {
@@ -46,7 +46,7 @@ for (const persona of ACCESS_USERS) {
       });
 
       await expect.soft(loc.pdp.item.addBtn, '🟧 UI: Add button visible').toBeVisible();
-      await expect.soft(loc.header.cartBadge, `🟧 UI: Cart Badge removed`).not.toBeVisible();
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge removed`).not.toBeVisible();
       await expect(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STATE_KEYS.cart, 0);
     });
 
@@ -62,7 +62,7 @@ for (const persona of ACCESS_USERS) {
       });
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(loc.header.cartBadge, `🟧 UI: Cart Badge shows 3 items`).toHaveText('3');
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows 3 items`).toHaveText('3');
       await expect(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STATE_KEYS.cart, 3);
     });
 
@@ -77,7 +77,7 @@ for (const persona of ACCESS_USERS) {
       });
 
       await expect.soft(loc.plp.item(firstItem).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(loc.header.cartBadge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
       await expect(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STATE_KEYS.cart, 1);
     });
 
