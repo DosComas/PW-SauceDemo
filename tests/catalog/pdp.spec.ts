@@ -7,7 +7,7 @@ const PDP_CONTEXT = { firstItem: 0, itemIndexes: [0, 1, 2], middleItem: 1 } as c
 const { firstItem, itemIndexes, middleItem } = PDP_CONTEXT;
 
 test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to inventory page', async () => {
+  await test.step('⬜ Go to inventory', async () => {
     await page.goto('/inventory.html');
   });
 });

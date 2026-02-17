@@ -4,7 +4,7 @@ import { t, DENIED_USERS, BASELINE_USERS } from '@data';
 const SCOPE = 'Login';
 
 test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to login page', async () => {
+  await test.step('⬜ Go to login', async () => {
     await page.goto('/');
   });
 });

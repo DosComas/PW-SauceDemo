@@ -1,5 +1,5 @@
 import { type Page, type Locator } from '@playwright/test';
-import { type Header, _appHeader, _appItem } from './common/app.locators';
+import { type Header, _itemLocs } from './common/app.locators';
 import { _ensureIndexExists, _injectItemText, _injectClones } from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
 
@@ -17,7 +17,7 @@ export const purchaseLocators = (page: Page) => {
         all: _cartItems,
       },
       item: (index: number) => {
-        const { name, desc, price } = _appItem(_cartItems.nth(index));
+        const { name, desc, price } = _itemLocs(_cartItems.nth(index));
         return { name, desc, price };
       },
     },

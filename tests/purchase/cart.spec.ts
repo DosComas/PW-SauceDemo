@@ -13,7 +13,7 @@ const CATALOG_CONTEXT = { firstItem: 0, listSize: 3 } as const;
 const { firstItem, listSize } = CATALOG_CONTEXT;
 
 test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to inventory page', async () => {
+  await test.step('⬜ Go to inventory', async () => {
     await page.goto('/inventory.html');
   });
 });

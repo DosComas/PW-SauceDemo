@@ -1,5 +1,5 @@
 import { type Page, type Locator } from '@playwright/test';
-import { _appItem } from './common/app.locators';
+import { _itemLocs } from './common/app.locators';
 import { type ItemTextLocators, _ensureIndexExists, _injectItemText, _injectClones } from './common/app.actions';
 import { VISUAL_MOCK, SortLabels } from '@data';
 
@@ -20,21 +20,21 @@ const catalogLocators = (page: Page) => {
       sort: page.getByTestId('product-sort-container'),
       items: {
         all: _plpItems,
-        prices: _appItem(page).price,
-        names: _appItem(page).name,
+        prices: _itemLocs(page).price,
+        names: _itemLocs(page).name,
         imgs: _getImg(page),
       },
       item: (index: number) => {
         const root = _plpItems.nth(index);
         return {
-          ..._appItem(root),
+          ..._itemLocs(root),
           img: _getImg(root),
         };
       },
     },
     pdp: {
       item: {
-        ..._appItem(page),
+        ..._itemLocs(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
       },
       backBtn: page.getByTestId('back-to-products'),
@@ -64,28 +64,31 @@ async function _scrapeItemData(itemLoc: ItemTextLocators & { img: Locator }) {
 
 export const catalog = (page: Page) => {
   const loc = catalogLocators(page);
+  const _plpItem = (i: number) => loc.plp.item(i);
+  const _plpEnsure = async (i: number) => await _ensureIndexExists(loc.plp.items.all, i);
+  const _pdpItem = loc.pdp.item;
 
   return {
     loc,
     action: {
       plp: {
         scrape: async ({ index }: { index: number }) => {
-          await _ensureIndexExists(loc.plp.items.all, index);
-          return _scrapeItemData(loc.plp.item(index));
+          await _plpEnsure(index);
+          return _scrapeItemData(_plpItem(index));
         },
         open: async ({ index, via }: { index: number; via: 'name' | 'img' }) => {
-          await _ensureIndexExists(loc.plp.items.all, index);
-          const item = loc.plp.item(index);
+          await _plpEnsure(index);
+          const item = _plpItem(index);
           const target = via === 'img' ? item.img : item.name;
           await target.click();
         },
         add: async ({ index }: { index: number }) => {
-          await _ensureIndexExists(loc.plp.items.all, index);
-          await loc.plp.item(index).addBtn.click();
+          await _plpEnsure(index);
+          await _plpItem(index).addBtn.click();
         },
         remove: async ({ index }: { index: number }) => {
-          await _ensureIndexExists(loc.plp.items.all, index);
-          await loc.plp.item(index).removeBtn.click();
+          await _plpEnsure(index);
+          await _plpItem(index).removeBtn.click();
         },
         sort: async ({ label }: { label: SortLabels }) => {
           await loc.plp.sort.selectOption(label);
@@ -98,10 +101,10 @@ export const catalog = (page: Page) => {
         },
       },
       pdp: {
-        scrape: async () => await _scrapeItemData(loc.pdp.item),
-        mockItem: async () => await _injectItemText(loc.pdp.item, VISUAL_MOCK.product),
-        add: async () => await loc.pdp.item.addBtn.click(),
-        remove: async () => await loc.pdp.item.removeBtn.click(),
+        scrape: async () => await _scrapeItemData(_pdpItem),
+        mockItem: async () => await _injectItemText(_pdpItem, VISUAL_MOCK.product),
+        add: async () => await _pdpItem.addBtn.click(),
+        remove: async () => await _pdpItem.removeBtn.click(),
         back: async () => await loc.pdp.backBtn.click(),
       },
     },

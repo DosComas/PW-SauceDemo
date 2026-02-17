@@ -13,8 +13,10 @@ const accountLocators = (page: Page) => ({
 });
 
 // DOMAIN INTERFACE
+
 export const account = (page: Page, headerLocs: Header) => {
   const loc = accountLocators(page);
+  const _openMenu = async () => await headerLocs.menuBtn.click();
 
   return {
     loc,
@@ -26,11 +28,12 @@ export const account = (page: Page, headerLocs: Header) => {
           await loc.login.loginBtn.click();
         },
       },
-      header: {
+      menu: {
         logout: async () => {
-          await headerLocs.menuBtn.click();
+          await _openMenu();
           await headerLocs.logoutBtn.click();
         },
+        open: async () => _openMenu(),
       },
     },
     session: {

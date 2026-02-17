@@ -4,7 +4,7 @@ import { t, ACCESS_USERS } from '@data';
 const SCOPE = 'Logout';
 
 test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to inventory page', async () => {
+  await test.step('⬜ Go to inventory', async () => {
     await page.goto('/inventory.html');
   });
 });
@@ -15,7 +15,7 @@ for (const persona of ACCESS_USERS) {
 
     test(`${SCOPE}: Secure logout and session destruction`, async ({ page, loc, action, session }) => {
       await test.step('🟦 Logout', async () => {
-        await action.header.logout();
+        await action.menu.logout();
       });
 
       await expect.soft(loc.login.loginBtn, '🟧 UI: Login button visible').toBeVisible();

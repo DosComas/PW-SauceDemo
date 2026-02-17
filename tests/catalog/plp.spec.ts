@@ -21,7 +21,7 @@ const SORT_CASES: SortCase[] = [
 ];
 
 test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to inventory page', async () => {
+  await test.step('⬜ Go to inventory', async () => {
     await page.goto('/inventory.html');
   });
 });

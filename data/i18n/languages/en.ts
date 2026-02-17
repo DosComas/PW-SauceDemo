@@ -5,16 +5,18 @@ export const en = {
     storeName: 'Swag Labs',
   },
 
-  /** App Shell: Navigation and Global Actions visible throughout the session */
-  header: {
+  /** Navigation Drawer items */
+  menu: {
     logout: 'Logout',
     openMenu: 'Open Menu',
-    about: 'About',
+    about: { label: 'About', url: 'https://saucelabs.com/' },
   },
+
+  /** * Footer: Social media presence */
   footer: {
     social: {
       twitter: { label: 'Twitter', url: 'https://twitter.com/saucelabs' },
-      facebook: { label: 'Facebook', url: 'https://facebook.com/saucelabs' },
+      facebook: { label: 'Facebook', url: 'https://www.facebook.com/saucelabs' },
       linkedin: { label: 'LinkedIn', url: 'https://www.linkedin.com/company/sauce-labs/' },
     },
   },
