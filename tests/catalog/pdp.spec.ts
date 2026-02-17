@@ -52,9 +52,7 @@ for (const persona of ACCESS_USERS) {
 
     test(`${SCOPE}: State persistence on PDP entry`, async ({ page, loc, action }) => {
       await test.step('⬜ Add items to cart on inventory', async () => {
-        for (const index of itemIndexes) {
-          await action.plp.add({ index });
-        }
+        await action.plp.add({ index: itemIndexes });
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
@@ -83,15 +81,13 @@ for (const persona of ACCESS_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
-        await test.step('⬜ Navigate to PDP and mock grid', async () => {
+        const img = await test.step('⬜ Navigate to PDP and mock grid', async () => {
           await action.plp.open({ index: firstItem, via: 'name' });
           await action.pdp.mockItem();
+          return loc.pdp.item.img;
         });
 
-        await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot({
-          mask: [loc.pdp.item.img],
-          fullPage: true,
-        });
+        await expect(page, '🟧 UI: PDP layout visual check').toHaveScreenshot({ mask: [img], fullPage: true });
       });
     }
   });

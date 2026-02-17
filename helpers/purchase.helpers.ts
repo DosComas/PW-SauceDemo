@@ -18,7 +18,7 @@ export const purchaseLocators = (page: Page) => {
       },
       item: (index: number) => {
         const root = _cards.nth(index);
-        const { name, desc, price } = _getItem(root.nth(index));
+        const { name, desc, price } = _getItem(root);
         return { name, desc, price };
       },
     },

@@ -10,25 +10,13 @@ export type ItemTextLocators = { name: Locator; desc: Locator; price: Locator };
 
 export async function _ensureIndexes(loc: Locator, input: IndexInput) {
   const list = Array.isArray(input) ? input : [input];
-  if (list.length === 0) {
-    return [];
-  }
+  if (list.length === 0) return [];
 
   const min = Math.min(...list);
-  if (min < 0) {
-    throw new Error(`[_resolveIndexes] Negative indexes are not supported: ${min}`);
-  }
-
-  await loc.first().waitFor();
-  const count = await loc.count();
-  if (count === 0) {
-    throw new Error(`[_resolveIndexes] Page empty, no items found`);
-  }
+  if (min < 0) throw new Error(`[_ensureIndexes] Negative index: ${min}`);
 
   const max = Math.max(...list);
-  if (max >= count) {
-    throw new Error(`[_resolveIndexes] Index out of bounds, requested: ${max}, available: ${count - 1}`);
-  }
+  await loc.nth(max).waitFor();
 
   return list;
 }

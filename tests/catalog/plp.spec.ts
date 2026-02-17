@@ -42,9 +42,7 @@ for (const persona of ACCESS_USERS) {
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
       await test.step('🟦 Add items to cart', async () => {
-        for (const productIndex of itemIndexes) {
-          await action.plp.add({ index: productIndex });
-        }
+        await action.plp.add({ index: itemIndexes });
       });
 
       await expect.soft(loc.plp.item(firstItem).removeBtn, '🟧 UI: Remove button visible').toBeVisible();

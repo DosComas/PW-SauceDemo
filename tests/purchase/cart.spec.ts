@@ -11,7 +11,7 @@ const SCOPE = 'Cart';
 const CART_CONTEXT = {
   firstItem: 0,
   middleItem: 1,
-  itemIndexes: [0, 1, 2],
+  itemIndexes: [0, 5, 2],
   listSize: 3,
 } as const;
 const { firstItem, middleItem, itemIndexes, listSize } = CART_CONTEXT;
@@ -27,7 +27,7 @@ for (const persona of ACCESS_USERS) {
     test.use({ storageState: persona.storageState });
 
     // TODO
-    test.only(`${SCOPE}: Items match PLP data`, async ({ page, loc, action }) => {
+    test(`${SCOPE}: Items match PLP data`, async ({ page, loc, action }) => {
       const expected = await test.step('⬜ Scrape items data', async () => {
         return action.plp.scrape({ index: itemIndexes });
       });
@@ -37,14 +37,14 @@ for (const persona of ACCESS_USERS) {
         await action.cart.open();
       });
 
+      let iCount = 0;
       for (const index of itemIndexes) {
-        const cartItemLoc = loc.cart.item(index);
+        const cartItemLoc = loc.cart.item(iCount);
+        iCount += 1;
         const expectedItem = expected[index];
 
-        // ideas to make this easy to read.
-        // less than 3 items (2).
-        // check the 3 properties at once.
-        // message diff than just 0 1 2.
+        // expect(["d"]).toMatchObject use this some how, the same for the socials thing
+
         await expect.soft(cartItemLoc.name, `🟧 UI: Item ${index} name matches`).toHaveText(expectedItem.name);
         await expect.soft(cartItemLoc.price, `🟧 UI: Item ${index} price matches`).toHaveText(expectedItem.price);
         await expect.soft(cartItemLoc.desc, `🟧 UI: Item ${index} description matches`).toHaveText(expectedItem.desc);

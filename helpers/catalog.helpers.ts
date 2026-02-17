@@ -9,7 +9,8 @@ import { type ItemTextFields, VISUAL_MOCK, SortLabels } from '@data';
 export type ItemSortAttribute = Pick<ReturnType<typeof catalogLocators>['plp']['items'], 'names' | 'prices'>;
 type ItemLocators = ItemTextLocators & { img: Locator };
 type ItemData = ItemTextFields & { imgSrc: string };
-type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
+type ItemDataMap = Record<number, ItemData>;
+type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemDataMap;
 
 // LOCATORS
 
@@ -51,7 +52,13 @@ const catalogLocators = (page: Page) => {
 async function _scrapeItems<T extends IndexInput>(cardsLoc: Locator, getItem: (i: number) => ItemLocators, index: T) {
   const indexes = await _ensureIndexes(cardsLoc, index);
   const itemDataList = await Promise.all(indexes.map((i) => _scrapeItem(getItem(i))));
-  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as ScrapeResult<T>;
+
+  if (typeof index === 'number') return itemDataList[0] as ScrapeResult<T>;
+
+  const indexedData: ItemDataMap = {};
+  indexes.forEach((originalIndex, arrayPos) => (indexedData[originalIndex] = itemDataList[arrayPos]));
+
+  return indexedData as ScrapeResult<T>;
 }
 
 async function _scrapeItem(itemLoc: ItemLocators): Promise<ItemData> {
@@ -64,7 +71,7 @@ async function _scrapeItem(itemLoc: ItemLocators): Promise<ItemData> {
 
   const missing = Object.keys(itemData).filter((k) => !itemData[k as keyof ItemData]);
   if (missing.length > 0) {
-    throw new Error(`[_scrapeItem] Missing data: ${missing.join(', ')}`);
+    throw new Error(`[_scrapeItem] Missing item data: ${missing.join(', ')}`);
   }
 
   return itemData;
