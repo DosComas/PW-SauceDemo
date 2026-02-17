@@ -1,6 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { type Header, _getItem } from './common/app.locators';
-import { _ensureIndexes, _injectItemText, _injectClones } from './common/app.actions';
+import * as c from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
 
 // TYPES
@@ -27,7 +27,14 @@ export const purchaseLocators = (page: Page) => {
 
 // DOMAIN ACTIONS
 
-export async function _injectBadgeNum(badgeLoc: Locator, count: number) {
+async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => c.ItemLocators) {
+  await cardsLoc.first().waitFor();
+  const count = await cardsLoc.count();
+  const range = Array.from({ length: count }, (_, i) => i);
+  return await Promise.all(range.map((i) => c._scrapeItem(getItem(i))));
+}
+
+async function _injectBadgeNum(badgeLoc: Locator, count: number) {
   if (await badgeLoc.isVisible()) {
     await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
   }
@@ -38,15 +45,19 @@ export async function _injectBadgeNum(badgeLoc: Locator, count: number) {
 export const purchase = (page: Page, headerLocs: Header) => {
   const loc = purchaseLocators(page);
 
+  const cards = loc.cart.items.cards;
+  const getItem = (i: number) => loc.cart.item(i);
+
   return {
     loc,
     action: {
       cart: {
+        scrape: async () => _scrapeAllItems(cards, getItem),
         open: async () => await headerLocs.cart.openBtn.click(),
         mockList: async ({ size }: { size: number }) => {
           const blueprint = loc.cart.items.cards.first();
-          await _injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
-          await _injectClones(loc.cart.list, blueprint, size);
+          await c._injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
+          await c._injectClones(loc.cart.list, blueprint, size);
           await _injectBadgeNum(headerLocs.cart.badge, size);
         },
       },

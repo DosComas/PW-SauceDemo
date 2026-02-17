@@ -8,6 +8,13 @@ const SCOPE = 'Cart';
 
 // remove from cart and go back to... inventory, pdp? to chceck sync. how about data? badge? local?
 // -- go to pdp, scrape, go back, check item and cart
+
+// test buttons, sync buttons, states
+
+// how about addin items form the PDP to cart?
+
+// test remove from cart? test going back?
+
 const CART_CONTEXT = {
   firstItem: 0,
   middleItem: 1,
@@ -26,10 +33,9 @@ for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
-    // TODO
-    test(`${SCOPE}: Items match PLP data`, async ({ page, loc, action }) => {
-      const expected = await test.step('⬜ Scrape items data', async () => {
-        return action.plp.scrape({ index: itemIndexes });
+    test(`${SCOPE}: Items match PLP data`, async ({ loc, action }) => {
+      const expected = await test.step('⬜ Scrape PLP items data', async () => {
+        return await action.plp.scrape({ index: itemIndexes, img: false });
       });
 
       await test.step('⬜ Add items and navigate to cart', async () => {
@@ -37,18 +43,13 @@ for (const persona of ACCESS_USERS) {
         await action.cart.open();
       });
 
-      let iCount = 0;
-      for (const index of itemIndexes) {
-        const cartItemLoc = loc.cart.item(iCount);
-        iCount += 1;
-        const expectedItem = expected[index];
+      await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
 
-        // expect(["d"]).toMatchObject use this some how, the same for the socials thing
+      const actual = await test.step('🟧 UI: Scrape Cart items data', async () => {
+        return await action.cart.scrape();
+      });
 
-        await expect.soft(cartItemLoc.name, `🟧 UI: Item ${index} name matches`).toHaveText(expectedItem.name);
-        await expect.soft(cartItemLoc.price, `🟧 UI: Item ${index} price matches`).toHaveText(expectedItem.price);
-        await expect.soft(cartItemLoc.desc, `🟧 UI: Item ${index} description matches`).toHaveText(expectedItem.desc);
-      }
+      expect(actual, '🟧 Data: All Cart items match PLP source').toMatchObject(expected);
     });
 
     // TODO
@@ -77,80 +78,6 @@ for (const persona of ACCESS_USERS) {
     }
   });
 }
-
-/*
-import { test, expect } from '@playwright/test';
-import { getTranslation } from '../helpers/translationHelpers';
-import { addProductsToCart } from '../helpers/productsHelpers';
-
-test.beforeEach(async ({ page }) => {
-  await test.step('Navigate to web page', async () => {
-    await page.goto('/inventory.html');
-  });
-});
-
-[
-  { title: 'Single', addQuantity: 1, testID: '@TC-2.1' },
-  { title: 'Five', addQuantity: 5, testID: '@TC-2.2' },
-].forEach(({ title, addQuantity, testID }) => {
-  test(`Add ${title} Product/s to Cart`, { tag: testID }, async ({ page }) => {
-    await test.step(`Add ${addQuantity} product/s to the cart`, async () => {
-      await addProductsToCart(page, addQuantity);
-    });
-
-    await test.step(`The cart badge updates to show ${addQuantity}`, async () => {
-      await expect(
-        page.getByTestId('shopping-cart-badge'),
-        'Cart badge count mismatch or not displayed'
-      ).toContainText(addQuantity.toString());
-
-      await expect(
-        page.getByTestId('shopping-cart-link'),
-        'Shopping cart icon mismatch or missing'
-      ).toHaveScreenshot();
-    });
-  });
-});
-
-[
-  { title: 'Add 1 and Remove 1', addQuantity: 1, removeQuantity: 1 },
-  { title: 'Add 4 and Remove 2', addQuantity: 4, removeQuantity: 2 },
-].forEach(({ title, addQuantity, removeQuantity }) => {
-  test(`${title} Products from Cart`, { tag: '@TC-4.1' }, async ({ page }) => {
-    await test.step(`Add ${addQuantity} product/s to the cart`, async () => {
-      await addProductsToCart(page, addQuantity);
-    });
-
-    await test.step(`Remove ${removeQuantity} product/s from the cart`, async () => {
-      for (let i = 0; i < removeQuantity; i++) {
-        await page
-          .getByRole('button', { name: await getTranslation('remove') })
-          .first()
-          .click();
-      }
-    });
-
-    await test.step(`The cart badge updates its count`, async () => {
-      const expectedCartCount = addQuantity - removeQuantity;
-
-      const cartBadge = page.getByTestId('shopping-cart-badge');
-
-      if (expectedCartCount == 0) {
-        await expect(
-          cartBadge,
-          'Cart badge should not be visible when empty'
-        ).not.toBeVisible();
-      } else {
-        await expect(
-          cartBadge,
-          'Cart badge count mismatch or not displayed'
-        ).toContainText(expectedCartCount.toString());
-      }
-    });
-  });
-});
-
-*/
 
 /*
 for (const persona of BASELINE_USERS) {

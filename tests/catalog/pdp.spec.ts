@@ -17,7 +17,7 @@ for (const persona of ACCESS_USERS) {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Content matches PLP data`, async ({ loc, action }) => {
-      const expected = await test.step('⬜ Scrape Item data', async () => {
+      const expected = await test.step('⬜ Scrape PLP Item data', async () => {
         return await action.plp.scrape({ index: firstItem });
       });
 
@@ -25,10 +25,13 @@ for (const persona of ACCESS_USERS) {
         await action.plp.open({ index: firstItem, via: 'name' });
       });
 
-      await expect.soft(loc.pdp.item.name, '🟧 UI: Item name matches').toHaveText(expected.name);
-      await expect.soft(loc.pdp.item.desc, '🟧 UI: Item description matches').toHaveText(expected.desc);
-      await expect.soft(loc.pdp.item.price, '🟧 UI: Item price matches').toHaveText(expected.price);
-      await expect(loc.pdp.item.img, '🟧 UI: Item image source matches').toHaveAttribute('src', expected.imgSrc);
+      const actual = await test.step('🟧 UI: Scrape PDP item data', async () => {
+        return await action.pdp.scrape();
+      });
+
+      await test.step('🟧 Data: PDP item match PLP source', async () => {
+        expect(actual).toMatchObject(expected);
+      });
     });
 
     test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
@@ -81,8 +84,11 @@ for (const persona of ACCESS_USERS) {
 
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
-        const img = await test.step('⬜ Navigate to PDP and mock grid', async () => {
+        await test.step('⬜ Navigate to PDP', async () => {
           await action.plp.open({ index: firstItem, via: 'name' });
+        });
+
+        const img = await test.step('⬜ Mock grid', async () => {
           await action.pdp.mockItem();
           return loc.pdp.item.img;
         });

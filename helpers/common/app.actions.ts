@@ -6,10 +6,14 @@ import { ItemTextFields } from '@data';
 export type IndexInput = number | readonly number[];
 export type ItemTextLocators = { name: Locator; desc: Locator; price: Locator };
 
+export type ItemLocators = ItemTextLocators & { img?: Locator };
+export type ItemData = ItemTextFields & { imgSrc?: string };
+export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
+
 // COMMON ACTIONS
 
 export async function _ensureIndexes(loc: Locator, input: IndexInput) {
-  const list = Array.isArray(input) ? input : [input];
+  const list: number[] = Array.isArray(input) ? input : [input];
   if (list.length === 0) return [];
 
   const min = Math.min(...list);
@@ -56,4 +60,20 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
     },
     { blueprintNode: handle, n: count },
   );
+}
+
+export async function _scrapeItem(itemLoc: ItemLocators, img: boolean = true) {
+  const itemData: ItemData = {
+    name: (await itemLoc.name.innerText()).trim(),
+    desc: (await itemLoc.desc.innerText()).trim(),
+    price: (await itemLoc.price.innerText()).trim(),
+  };
+  if (img && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
+
+  const missing = Object.keys(itemData).filter((key) => !itemData[key as keyof ItemData]);
+  if (missing.length > 0) {
+    throw new Error(`[_scrapeItem] Missing item data: ${missing.join(', ')}`);
+  }
+
+  return itemData;
 }

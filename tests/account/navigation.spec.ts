@@ -2,7 +2,7 @@ import { expect, test } from '@fixtures';
 import { type SocialPlatform, type SocialPlatformData, BASELINE_USERS } from '@data';
 import { t } from '@data';
 
-const SCOPE = 'Nav';
+const SCOPE = 'Navigation';
 
 const SOCIAL_LINKS = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
 const ABOUT_DATA = t.menu.about;
@@ -19,10 +19,11 @@ for (const persona of BASELINE_USERS) {
 
     test(`${SCOPE}: Social Media Links`, async ({ loc }) => {
       for (const [platform, expected] of SOCIAL_LINKS) {
-        const socialLoc = loc.footer.social[platform];
-
-        await expect.soft(socialLoc, `🟧 UI: ${expected.label} opens in a new tab`).toHaveAttribute('target', '_blank');
-        await expect.soft(socialLoc, `🟧 Data: ${expected.label} matches URL`).toHaveAttribute('href', expected.url);
+        await test.step(`🟧 Data: ${expected.label} link properties`, async () => {
+          const socialLoc = loc.footer.social[platform];
+          await expect.soft(socialLoc).toHaveAttribute('href', expected.url);
+          await expect.soft(socialLoc).toHaveAttribute('target', '_blank');
+        });
       }
     });
 

@@ -7,12 +7,12 @@ const AUTH_DIR = './.auth';
 const VALID_USERNAME = process.env.VALID_USERNAME as string;
 const VALID_PASSWORD = process.env.VALID_PASSWORD as string;
 
-interface UserPersona {
+type UserPersona = {
   role: string;
   user: string;
   pass: string;
   tag: string;
-}
+};
 
 type TestUserData = {
   access: (UserPersona & {

@@ -1,16 +1,11 @@
 import { type Page, type Locator } from '@playwright/test';
 import { _getItem } from './common/app.locators';
-import type { IndexInput, ItemTextLocators } from './common/app.actions';
-import { _ensureIndexes, _injectItemText, _injectClones } from './common/app.actions';
-import { type ItemTextFields, VISUAL_MOCK, SortLabels } from '@data';
+import * as c from './common/app.actions';
+import { VISUAL_MOCK, SortLabels } from '@data';
 
 // TYPES
 
 export type ItemSortAttribute = Pick<ReturnType<typeof catalogLocators>['plp']['items'], 'names' | 'prices'>;
-type ItemLocators = ItemTextLocators & { img: Locator };
-type ItemData = ItemTextFields & { imgSrc: string };
-type ItemDataMap = Record<number, ItemData>;
-type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemDataMap;
 
 // LOCATORS
 
@@ -49,32 +44,15 @@ const catalogLocators = (page: Page) => {
 
 // DOMAIN ACTIONS
 
-async function _scrapeItems<T extends IndexInput>(cardsLoc: Locator, getItem: (i: number) => ItemLocators, index: T) {
-  const indexes = await _ensureIndexes(cardsLoc, index);
-  const itemDataList = await Promise.all(indexes.map((i) => _scrapeItem(getItem(i))));
-
-  if (typeof index === 'number') return itemDataList[0] as ScrapeResult<T>;
-
-  const indexedData: ItemDataMap = {};
-  indexes.forEach((originalIndex, arrayPos) => (indexedData[originalIndex] = itemDataList[arrayPos]));
-
-  return indexedData as ScrapeResult<T>;
-}
-
-async function _scrapeItem(itemLoc: ItemLocators): Promise<ItemData> {
-  const itemData = {
-    name: (await itemLoc.name.innerText()).trim(),
-    desc: (await itemLoc.desc.innerText()).trim(),
-    price: (await itemLoc.price.innerText()).trim(),
-    imgSrc: (await itemLoc.img.getAttribute('src')) || '',
-  };
-
-  const missing = Object.keys(itemData).filter((k) => !itemData[k as keyof ItemData]);
-  if (missing.length > 0) {
-    throw new Error(`[_scrapeItem] Missing item data: ${missing.join(', ')}`);
-  }
-
-  return itemData;
+async function _scrapeItems<T extends c.IndexInput>(
+  cardsLoc: Locator,
+  getItem: (i: number) => c.ItemLocators,
+  index: T,
+  img: boolean = true,
+) {
+  const indexes = await c._ensureIndexes(cardsLoc, index);
+  const itemDataList = await Promise.all(indexes.map((i) => c._scrapeItem(getItem(i), img)));
+  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as c.ScrapeResult<T>;
 }
 
 // DOMAIN INTERFACE
@@ -85,20 +63,20 @@ export const catalog = (page: Page) => {
   const item = loc.pdp.item;
   const cards = loc.plp.items.cards;
   const getItem = (i: number) => loc.plp.item(i);
-  const ensure = async (i: IndexInput) => await _ensureIndexes(cards, i);
+  const ensure = async (i: c.IndexInput) => await c._ensureIndexes(cards, i);
 
   return {
     loc,
     action: {
       plp: {
-        scrape: async <T extends IndexInput>({ index }: { index: T }) => {
-          return _scrapeItems(cards, getItem, index);
+        scrape: async <T extends c.IndexInput>({ index, img = true }: { index: T; img?: boolean }) => {
+          return _scrapeItems(cards, getItem, index, img);
         },
-        add: async ({ index }: { index: IndexInput }) => {
+        add: async ({ index }: { index: c.IndexInput }) => {
           const indexes = await ensure(index);
           for (const i of indexes) await getItem(i).addBtn.click();
         },
-        remove: async ({ index }: { index: IndexInput }) => {
+        remove: async ({ index }: { index: c.IndexInput }) => {
           const indexes = await ensure(index);
           for (const i of indexes) await getItem(i).removeBtn.click();
         },
@@ -112,16 +90,16 @@ export const catalog = (page: Page) => {
         },
         mockGrid: async ({ size }: { size: number }) => {
           const blueprint = cards.first();
-          await _injectItemText(loc.plp.item(0), VISUAL_MOCK.product);
-          await _injectClones(loc.plp.grid, blueprint, size);
+          await c._injectItemText(loc.plp.item(0), VISUAL_MOCK.product);
+          await c._injectClones(loc.plp.grid, blueprint, size);
         },
       },
       pdp: {
-        scrape: async () => await _scrapeItem(item),
+        scrape: async () => await c._scrapeItem(item),
         add: async () => await item.addBtn.click(),
         remove: async () => await item.removeBtn.click(),
         back: async () => await loc.pdp.backBtn.click(),
-        mockItem: async () => await _injectItemText(item, VISUAL_MOCK.product),
+        mockItem: async () => await c._injectItemText(item, VISUAL_MOCK.product),
       },
     },
   };
