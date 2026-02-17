@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { t, ACCESS_USERS } from '@data';
-
-const SCOPE = 'Cart';
+import { createRandom } from '@utils';
 
 // CASES?:
 // Cases: add product to cart, check sync? data? badge? local?
@@ -15,13 +14,11 @@ const SCOPE = 'Cart';
 
 // test remove from cart? test going back?
 
-const CART_CONTEXT = {
-  firstItem: 0,
-  middleItem: 1,
-  itemIndexes: [0, 5, 2],
-  listSize: 3,
-} as const;
-const { firstItem, middleItem, itemIndexes, listSize } = CART_CONTEXT;
+const SCOPE = 'Cart';
+
+const random = createRandom();
+const itemIndexes = random.basket(3);
+const itemIndex = random.target(itemIndexes);
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory', async () => {
@@ -65,12 +62,12 @@ for (const persona of ACCESS_USERS) {
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, action }) => {
         await test.step('⬜ Add an item and go to cart', async () => {
-          await action.plp.add({ index: firstItem });
+          await action.plp.add({ index: itemIndex });
           await action.cart.open();
         });
 
         await test.step('⬜ Mock List', async () => {
-          await action.cart.mockList({ size: listSize });
+          await action.cart.mockList();
         });
 
         await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot({ fullPage: true });

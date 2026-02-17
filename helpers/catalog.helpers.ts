@@ -3,11 +3,15 @@ import { _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
 import { VISUAL_MOCK, SortLabels } from '@data';
 
-// TYPES
+// ==========================================
+// 🏛️ DOMAIN TYPES
+// ==========================================
 
 export type ItemSortAttribute = Pick<ReturnType<typeof catalogLocators>['plp']['items'], 'names' | 'prices'>;
 
-// LOCATORS
+// ==========================================
+// 🏛️ DOMAIN LOCATORS
+// ==========================================
 
 const catalogLocators = (page: Page) => {
   const _cards = page.getByTestId('inventory-item');
@@ -42,20 +46,9 @@ const catalogLocators = (page: Page) => {
   };
 };
 
-// DOMAIN ACTIONS
-
-async function _scrapeItems<T extends c.IndexInput>(
-  cardsLoc: Locator,
-  getItem: (i: number) => c.ItemLocators,
-  index: T,
-  img: boolean = true,
-) {
-  const indexes = await c._ensureIndexes(cardsLoc, index);
-  const itemDataList = await Promise.all(indexes.map((i) => c._scrapeItem(getItem(i), img)));
-  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as c.ScrapeResult<T>;
-}
-
-// DOMAIN INTERFACE
+// ==========================================
+// 🏛️ DOMAIN ACTIONS
+// ==========================================
 
 export const catalog = (page: Page) => {
   const loc = catalogLocators(page);
@@ -88,7 +81,7 @@ export const catalog = (page: Page) => {
         sort: async ({ label }: { label: SortLabels }) => {
           await loc.plp.sort.selectOption(label);
         },
-        mockGrid: async ({ size }: { size: number }) => {
+        mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
           const blueprint = cards.first();
           await c._injectItemText(loc.plp.item(0), VISUAL_MOCK.product);
           await c._injectClones(loc.plp.grid, blueprint, size);
@@ -104,3 +97,18 @@ export const catalog = (page: Page) => {
     },
   };
 };
+
+// ==========================================
+// 🏛️ DOMAIN PRIVATE ACTIONS
+// ==========================================
+
+async function _scrapeItems<T extends c.IndexInput>(
+  cardsLoc: Locator,
+  getItem: (i: number) => c.ItemLocators,
+  index: T,
+  img: boolean = true,
+) {
+  const indexes = await c._ensureIndexes(cardsLoc, index);
+  const itemDataList = await Promise.all(indexes.map((i) => c._scrapeItem(getItem(i), img)));
+  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as c.ScrapeResult<T>;
+}

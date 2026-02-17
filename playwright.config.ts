@@ -1,9 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 import { t, CURRENT_ENV } from '@data';
+import { createRandom } from '@utils';
 import dotenv from 'dotenv';
 import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+export const random = createRandom();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -23,7 +26,7 @@ export default defineConfig({
     [
       'html',
       {
-        title: `${CURRENT_ENV.environment} Report [${t.meta.locale}]`,
+        title: `${CURRENT_ENV.environment} Report [${t.meta.locale}] [Seed: ${random.seed}]`,
       },
     ],
   ],

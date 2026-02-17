@@ -1,7 +1,9 @@
 import { Locator } from '@playwright/test';
 import { ItemTextFields } from '@data';
 
-// TYPES
+// ==========================================
+// 🏛️ COMMON TYPES
+// ==========================================
 
 export type IndexInput = number | readonly number[];
 export type ItemTextLocators = { name: Locator; desc: Locator; price: Locator };
@@ -10,7 +12,9 @@ export type ItemLocators = ItemTextLocators & { img?: Locator };
 export type ItemData = ItemTextFields & { imgSrc?: string };
 export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
 
-// COMMON ACTIONS
+// ==========================================
+// 🏛️ COMMON ACTIONS
+// ==========================================
 
 export async function _ensureIndexes(loc: Locator, input: IndexInput) {
   const list: number[] = Array.isArray(input) ? input : [input];

@@ -1,6 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { type SortByField, type SortOrder } from '@utils';
+import { type SortByField, type SortOrder, createRandom } from '@utils';
 import { type SortLabels, t, ACCESS_USERS, STATE_KEYS } from '@data';
 import { type ItemSortAttribute } from '@helpers';
 
@@ -12,8 +12,9 @@ type SortCase = {
 
 const SCOPE = 'PLP';
 
-const PLP_CONTEXT = { firstItem: 0, itemIndexes: [0, 1, 2], gridSize: 5 } as const;
-const { firstItem, itemIndexes, gridSize } = PLP_CONTEXT;
+const random = createRandom();
+const itemIndexes = random.basket(3);
+const itemIndex = random.target(itemIndexes);
 
 const SORT_CASES: SortCase[] = [
   { sortBy: t.plp.sort.az, attribute: (items) => items.names, expected: { by: 'name', order: 'asc' } },
@@ -45,15 +46,15 @@ for (const persona of ACCESS_USERS) {
         await action.plp.add({ index: itemIndexes });
       });
 
-      await expect.soft(loc.plp.item(firstItem).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+      await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 3').toHaveText('3');
       await expect(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STATE_KEYS.cart, 3);
 
       await test.step('🟦 Remove item from cart', async () => {
-        await action.plp.remove({ index: firstItem });
+        await action.plp.remove({ index: itemIndex });
       });
 
-      await expect.soft(loc.plp.item(firstItem).addBtn, '🟧 UI: Add button visible').toBeVisible();
+      await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
       await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 2').toHaveText('2');
       await expect(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STATE_KEYS.cart, 2);
     });
@@ -61,7 +62,7 @@ for (const persona of ACCESS_USERS) {
     if (persona.isBaselineUser) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
         const imgs = await test.step('⬜ Mock grid', async () => {
-          await action.plp.mockGrid({ size: gridSize });
+          await action.plp.mockGrid();
           return await loc.plp.items.imgs.all();
         });
 

@@ -2,7 +2,10 @@ import { type Page } from '@playwright/test';
 import { type Header } from './common/app.locators';
 import { t, STATE_KEYS } from '@data';
 
-// LOCATORS
+// ==========================================
+// 🏛️ DOMAIN LOCATORS
+// ==========================================
+
 const accountLocators = (page: Page) => ({
   login: {
     nameInput: page.getByPlaceholder(t.login.username),
@@ -12,7 +15,9 @@ const accountLocators = (page: Page) => ({
   },
 });
 
-// DOMAIN INTERFACE
+// ==========================================
+// 🏛️ DOMAIN ACTIONS
+// ==========================================
 
 export const account = (page: Page, headerLocs: Header) => {
   const loc = accountLocators(page);

@@ -1,7 +1,15 @@
 import { Page, Locator } from '@playwright/test';
 import { type SocialPlatform, t } from '@data';
 
+// ==========================================
+// 🏛️ COMMON TYPES
+// ==========================================
+
 export type Header = ReturnType<typeof _getHeader>;
+
+// ==========================================
+// 🏛️ COMMON LOCATORS
+// ==========================================
 
 export const _getItem = (root: Page | Locator) => ({
   name: root.getByTestId('inventory-item-name'),

@@ -3,9 +3,9 @@ import { type Header, _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
 
-// TYPES
-
-// LOCATORS
+// ==========================================
+// 🏛️ DOMAIN LOCATORS
+// ==========================================
 
 export const purchaseLocators = (page: Page) => {
   const _cards = page.locator('.cart_item');
@@ -54,7 +54,7 @@ export const purchase = (page: Page, headerLocs: Header) => {
       cart: {
         scrape: async () => _scrapeAllItems(cards, getItem),
         open: async () => await headerLocs.cart.openBtn.click(),
-        mockList: async ({ size }: { size: number }) => {
+        mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
           await c._injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
           await c._injectClones(loc.cart.list, blueprint, size);
