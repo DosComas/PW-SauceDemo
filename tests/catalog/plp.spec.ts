@@ -1,10 +1,9 @@
-import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import type { SortOption, SortableLocators, SortCriteria } from '@data';
 import { t, AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
-type SortScenario = { option: SortOption; getLoc: (items: SortableLocators) => Locator; expected: SortCriteria };
+type SortScenario = { option: SortOption; by: keyof SortableLocators; order: SortCriteria['order'] };
 
 const SCOPE = 'PLP';
 
@@ -24,20 +23,20 @@ for (const persona of AUTHENTICATED) {
 
     (
       [
-        { option: t.plp.sort.az, getLoc: (it) => it.names, expected: { by: 'name', order: 'asc' } },
-        { option: t.plp.sort.hiLo, getLoc: (it) => it.prices, expected: { by: 'price', order: 'desc' } },
+        { option: t.plp.sort.az, by: 'names', order: 'asc' },
+        { option: t.plp.sort.hiLo, by: 'prices', order: 'desc' },
       ] as const satisfies SortScenario[]
-    ).forEach(({ option, getLoc, expected }) => {
+    ).forEach(({ option, by, order }) => {
       test(`${SCOPE}: Items follow ${option} order`, async ({ loc, action }) => {
         await test.step('🟦 Sort items', async () => {
           await action.plp.sort({ label: option });
         });
 
-        await expect(getLoc(loc.plp.items), `🟧 UI: Sorted by ${option}`).toBeSortedBy(expected.by, expected.order);
+        await expect(loc.plp.items[by], `🟧 UI: Sorted by ${option}`).toBeSortedBy(by, order);
       });
     });
 
-    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action, session }) => {
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ loc, action, session }) => {
       await test.step('🟦 Add items to cart', async () => {
         await action.plp.add({ index: itemIndexes });
       });

@@ -5,16 +5,18 @@ import { STATE_KEYS } from './session.data';
 // ==========================================
 // 🏛️ I18N DERIVED TYPES
 // ==========================================
+type PLP = LanguageData['plp'];
+type Footer = LanguageData['footer'];
 
-export type SortOption = LanguageData['plp']['sort'][keyof LanguageData['plp']['sort']];
-export type SocialPlatform = keyof LanguageData['footer']['social'];
-export type SocialPlatformData = LanguageData['footer']['social'][SocialPlatform];
+export type SortOption = PLP['sort'][keyof PLP['sort']];
+export type SocialPlatform = keyof Footer['social'];
+export type SocialPlatformData = Footer['social'][SocialPlatform];
 
 // ==========================================
-// 🏛️ SESSION TYPES
+// 🏛️ SESSION DERIVED TYPES
 // ==========================================
 
-export type StateKey = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];
+export type StateKeys = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];
 
 // ==========================================
 // 🏛️ ITEM TYPES
@@ -23,4 +25,4 @@ export type StateKey = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];
 export type ItemData = { name: string; desc: string; price: string; imgSrc?: string };
 export type ItemLocators = { name: Locator; desc: Locator; price: Locator; img?: Locator };
 export type SortableLocators = { names: Locator; prices: Locator };
-export type SortCriteria = { by: 'price' | 'name'; order: 'asc' | 'desc' };
+export type SortCriteria = { by: keyof SortableLocators; order: 'asc' | 'desc' };

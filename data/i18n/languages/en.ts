@@ -2,7 +2,7 @@
 // 🏛️ TRANSLATION BUNDLE (English)
 // ==========================================
 
-export const en = {
+export const EN = {
   /** Global Configuration: Locale and Branding */
   meta: {
     locale: 'en-US',

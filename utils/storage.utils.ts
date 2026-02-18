@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import type { StateKey } from '@data';
+import type { StateKeys } from '@data';
 import { pollUntil } from './poll.utils';
 
 // ==========================================
@@ -16,7 +16,7 @@ export async function _getCookie(page: Page, name: string) {
  * Retrieves data from LocalStorage.
  * Uses progressive polling to ensure the data is present before returning.
  */
-export async function _getStorageData<T>(page: Page, key: StateKey, options?: { timeout?: number }): Promise<T> {
+export async function _getStorageData<T>(page: Page, key: StateKeys, options?: { timeout?: number }): Promise<T> {
   const { value, pass } = await pollUntil<T>(
     // CALLBACK: How to get the data
     async () => {

@@ -1,20 +1,20 @@
-import { en } from './languages/en';
+import { EN } from './languages/en';
 
 // ==========================================
 // 🏛️ TRANSLATION TYPES
 // ==========================================
 
 type Languages = keyof typeof DICTIONARY;
-export type LanguageData = typeof en;
+export type LanguageData = typeof EN;
 
 // ==========================================
-// 🏛️ I18N ENGINE (Proxy)
+// 🏛️ I18N ENGINE
 // ==========================================
 
-const DICTIONARY = { en };
+const DICTIONARY = { EN };
 
 const requestedLang = process.env.LANGUAGE as Languages;
-const activeLang = DICTIONARY[requestedLang] ? requestedLang : 'en';
+const activeLang = DICTIONARY[requestedLang] ? requestedLang : 'EN';
 const baseBundle = DICTIONARY[activeLang];
 
 export const t = new Proxy(baseBundle, {

@@ -26,10 +26,10 @@ export const customMatchers = {
         return texts.map((text, index) => {
           const raw = text.trim();
 
-          // Case A: Name logic (String)
-          if (by === 'name') return raw;
+          // Case A: Names logic (String)
+          if (by === 'names') return raw;
 
-          // Case B: Price logic (Number)
+          // Case B: Prices logic (Number)
           const numericPart = raw.replace(/[^0-9.-]+/g, '');
           const price = parseFloat(numericPart);
 

@@ -2,7 +2,7 @@ import type { Page, Locator } from '@playwright/test';
 import { _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
-import type { SortOption, ItemLocators } from '@data';
+import type { SortOption, ItemLocators, SortableLocators } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -22,7 +22,7 @@ const catalogLocators = (page: Page) => {
         prices: _getItem(page).price,
         names: _getItem(page).name,
         imgs: _getImg(page),
-      },
+      } satisfies SortableLocators & Record<string, Locator>,
       item: (index: number) => {
         const root = _cards.nth(index);
         return { ..._getItem(root), img: _getImg(root) };

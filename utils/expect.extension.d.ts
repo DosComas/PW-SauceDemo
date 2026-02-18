@@ -16,9 +16,9 @@ declare global {
        *
        * ```js
        * // Sort names A-Z (Using string order)
-       * await expect(loc.plp.items.names).toBeSorted('name', 'asc');
+       * await expect(loc.plp.items.names).toBeSorted('names', 'asc');
        * // Sort prices high-to-low (Using numeric order)
-       * await expect(loc.plp.items.prices).toBeSorted('price', 'desc');
+       * await expect(loc.plp.items.prices).toBeSorted('prices', 'desc');
        * ```
        *
        */
