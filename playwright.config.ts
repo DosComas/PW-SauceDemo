@@ -4,7 +4,7 @@ import { createRandom } from '@utils';
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env'), quiet: true });
 
 const random = createRandom();
 
@@ -29,6 +29,7 @@ export default defineConfig({
         title: `${CURRENT_ENV.environment} [${t.meta.locale}] [seed: ${random.seed}]`,
       },
     ],
+    ['dot'],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -41,7 +42,10 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   snapshotPathTemplate: `{testDir}/__snapshots__/{testFilePath}/{projectName}-${t.meta.locale}-{arg}{ext}`,
-
+  timeout: 15_000,
+  expect: {
+    timeout: 2_500,
+  },
   /* Configure projects for major browsers */
   projects: [
     {

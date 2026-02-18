@@ -1,3 +1,5 @@
+import { test, FullConfig } from '@playwright/test';
+
 // ==========================================
 // 🏛️ POLLING UTILITY
 // ==========================================
@@ -9,31 +11,30 @@
 export async function pollUntil<T>(
   callback: () => Promise<T | null>,
   condition: (value: T) => boolean,
-  timeout = 5000,
+  timeout?: number,
 ): Promise<{ value: T | null; pass: boolean; lastError?: unknown }> {
+  const config = test.info().config as FullConfig & { expect?: { timeout?: number } };
+  const finalTimeout = timeout ?? config.expect?.timeout ?? 5_000;
+
   const start = Date.now();
-  const INTERVALS = [100, 250, 500, 1000] as const;
+  const INTERVALS = [100, 250, 500, 1_000] as const;
 
   let value: T | null = null;
   let attempt = 0;
   let lastError: unknown;
 
-  while (Date.now() - start < timeout) {
+  while (Date.now() - start < finalTimeout) {
     try {
       value = await callback();
       if (value !== null && condition(value)) {
         return { value, pass: true };
       }
     } catch (err) {
-      // 🏛️ Capture the error so we aren't "blind" if it times out
       lastError = err;
     }
 
-    // 🏛️ Select delay, capping at the last element of the array
     const delay = INTERVALS[Math.min(attempt, INTERVALS.length - 1)];
-
-    // 🏛️ Check if we actually have time left to sleep
-    if (Date.now() - start + delay > timeout) break;
+    if (Date.now() - start + delay > finalTimeout) break;
 
     await new Promise((resolve) => setTimeout(resolve, delay));
     attempt++;

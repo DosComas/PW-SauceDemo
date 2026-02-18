@@ -8,12 +8,17 @@
   "editor.wordWrapColumn": 120,
   "editor.rulers": [120],
   "files.eol": "\n",
+  "explorer.compactFolders": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, tsconfig.json, eslint.config.mjs, .prettierrc, .gitignore"
+  },
 
   "files.exclude": {
-    "**/__snapshots__/**": false,
+    "**/node_modules/**": true,
     "**/test-results/**": true,
-    "**/playwright-report/**": true,
-    "**/node_modules/**": true
+    "**/playwright-report/**": true
   },
 
   "search.exclude": {

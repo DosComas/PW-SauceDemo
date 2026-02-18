@@ -5,28 +5,28 @@
   "scripts": {
     "test": "playwright test",
     "test:base": "playwright test -g \"@👤\" --project=Chrome",
-    "test:stress": "run test:base -- --repeat-each 100 -x --trace retain-on-failure",
+    "test:stress": "npm run test:base -- --repeat-each 100 -x --trace retain-on-failure",
     "test:report": "playwright show-report",
     "validate": "prettier --check . --log-level warn && eslint . --max-warnings=0 && tsc --noEmit",
     "fix": "prettier --write . && eslint . --fix"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Roberto Hurry <hurryroberto@gmail.com>",
+  "license": "MIT",
   "description": "",
+  "private": true,
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.3.0",
     "@playwright/test": "^1.58.2",
-    "@types/node": "^22.13.11",
+    "@types/node": "^25.2.3",
+    "dotenv": "^17.3.1",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.7.0",
     "globals": "^17.3.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0"
-  },
-  "dependencies": {
-    "dotenv": "^16.4.7"
   }
 }
