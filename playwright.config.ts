@@ -45,7 +45,7 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'Auth',
+      name: 'Setup',
       use: {
         ...devices['Desktop Chrome'],
       },
@@ -56,24 +56,24 @@ export default defineConfig({
     {
       name: 'Chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-      dependencies: ['Auth'],
+      dependencies: ['Setup'],
     },
     {
       name: 'Safari',
       use: { ...devices['Desktop Safari'] },
-      dependencies: ['Auth'],
+      dependencies: ['Setup'],
     },
 
     /* Test against mobile viewports. */
     {
       name: 'Android',
       use: { ...devices['Pixel 7'] },
-      dependencies: ['Auth'],
+      dependencies: ['Setup'],
     },
     {
       name: 'iPhone',
       use: { ...devices['iPhone 14'] },
-      dependencies: ['Auth'],
+      dependencies: ['Setup'],
     },
   ],
 
