@@ -9,31 +9,35 @@
 export async function pollUntil<T>(
   callback: () => Promise<T | null>,
   condition: (value: T) => boolean,
-  timeout: number = 5000,
-): Promise<{ value: T | null; pass: boolean }> {
+  timeout = 5000,
+): Promise<{ value: T | null; pass: boolean; lastError?: unknown }> {
   const start = Date.now();
-  let currentWait = 100;
+  const INTERVALS = [100, 250, 500, 1000] as const;
+
   let value: T | null = null;
+  let attempt = 0;
+  let lastError: unknown;
 
   while (Date.now() - start < timeout) {
     try {
       value = await callback();
-
-      // Ensure we have a value and it meets our business logic
       if (value !== null && condition(value)) {
         return { value, pass: true };
       }
-    } catch (error) {
-      // Transient errors are expected during polling.
+    } catch (err) {
+      // 🏛️ Capture the error so we aren't "blind" if it times out
+      lastError = err;
     }
 
-    // Progressive Polling: 100ms -> 250ms -> 500ms -> 1000ms
-    await new Promise((res) => setTimeout(res, currentWait));
+    // 🏛️ Select delay, capping at the last element of the array
+    const delay = INTERVALS[Math.min(attempt, INTERVALS.length - 1)];
 
-    if (currentWait < 1000) {
-      currentWait = currentWait < 250 ? 250 : currentWait < 500 ? 500 : 1000;
-    }
+    // 🏛️ Check if we actually have time left to sleep
+    if (Date.now() - start + delay > timeout) break;
+
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    attempt++;
   }
 
-  return { value, pass: false };
+  return { value, pass: false, lastError };
 }

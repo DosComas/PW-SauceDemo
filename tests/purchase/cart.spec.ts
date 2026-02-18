@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { t, AUTHENTICATED, BASELINE } from '@data';
+import { AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
 // CASES?:

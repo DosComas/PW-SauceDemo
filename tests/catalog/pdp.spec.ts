@@ -36,7 +36,7 @@ for (const persona of AUTHENTICATED) {
       });
     });
 
-    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action, session }) => {
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ loc, action, session }) => {
       await test.step('🟦 Navigate to PDP and add item', async () => {
         await action.plp.open({ index: itemIndex, via: 'img' });
         await action.pdp.add();
@@ -59,7 +59,7 @@ for (const persona of AUTHENTICATED) {
       });
     });
 
-    test(`${SCOPE}: State persistence on PDP entry`, async ({ page, loc, action, session }) => {
+    test(`${SCOPE}: State persistence on PDP entry`, async ({ loc, action, session }) => {
       await test.step('⬜ Add items to cart on inventory', async () => {
         await action.plp.add({ index: itemIndexes });
       });
@@ -75,7 +75,7 @@ for (const persona of AUTHENTICATED) {
       });
     });
 
-    test(`${SCOPE}: State persistence on PDP return`, async ({ page, loc, action, session }) => {
+    test(`${SCOPE}: State persistence on PDP return`, async ({ loc, action, session }) => {
       await test.step('⬜ Navigate to PLP', async () => {
         await action.plp.open({ index: itemIndex, via: 'name' });
       });

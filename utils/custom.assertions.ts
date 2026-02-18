@@ -17,7 +17,7 @@ export const customMatchers = {
     const assertionName = 'toBeSortedBy';
     const isDescending = order === 'desc';
 
-    // Polling Phase
+    // Polling Phase: Extract and Validate
     const { value: actualValues, pass } = await pollUntil(
       // CALLBACK: Data Extraction
       async () => {
@@ -34,7 +34,6 @@ export const customMatchers = {
           const price = parseFloat(numericPart);
 
           if (!numericPart || isNaN(price)) {
-            // Throwing here triggers a retry in pollUntil
             throw new Error(`Price parsing failed at index ${index}. Received: "${raw}"`);
           }
 
@@ -42,40 +41,41 @@ export const customMatchers = {
         });
       },
 
-      // CONDITION: Sort Validation
+      // CONDITION: Updated for Resilience
       (values) => {
-        if (!values || values.length < 2) return true;
+        // 1. Guard against empty lists (prevents false positive passes)
+        if (!values || values.length === 0) return false;
 
+        // 2. A single item is technically sorted, but we continue checking if multi-item
+        if (values.length < 2) return true;
+
+        // 3. Deterministic Sort Check
         return values.every((curr, i) => {
           if (i === 0) return true;
           const prev = values[i - 1];
 
-          // Comparison Logic: Numbers vs Strings
-          const isOrdered =
-            typeof prev === 'number' && typeof curr === 'number'
-              ? isDescending
-                ? prev >= curr
-                : prev <= curr
-              : isDescending
-                ? String(prev).localeCompare(String(curr), undefined, { numeric: true }) >= 0
-                : String(prev).localeCompare(String(curr), undefined, { numeric: true }) <= 0;
-
-          return isOrdered;
+          return typeof prev === 'number' && typeof curr === 'number'
+            ? isDescending
+              ? prev >= curr
+              : prev <= curr
+            : isDescending
+              ? String(prev).localeCompare(String(curr), undefined, { numeric: true }) >= 0
+              : String(prev).localeCompare(String(curr), undefined, { numeric: true }) <= 0;
         });
       },
       options?.timeout,
     );
 
-    // Reporting Phase
+    // Reporting Phase: Generate Actionable Intelligence
     const message = () => {
       const matcherHint = this.utils.matcherHint(assertionName, 'locator', undefined, {
         isNot: this.isNot,
         promise: this.promise,
       });
 
-      // Guard against null if polling completely failed/timed out
       const safeValues = actualValues || [];
 
+      // Create the "Identity" of what the sorted list SHOULD look like
       const expectedValues = [...safeValues].sort((a, b) => {
         const isNum = typeof a === 'number' && typeof b === 'number';
         if (isDescending) {
@@ -93,7 +93,7 @@ export const customMatchers = {
         );
       }
 
-      // Find the violation
+      // Search for the specific violation index
       const vIndex = safeValues.findIndex((val, i) => {
         if (i === 0) return false;
         const prev = safeValues[i - 1];
@@ -106,9 +106,8 @@ export const customMatchers = {
             : String(prev).localeCompare(String(val)) > 0;
       });
 
-      // Handle edge case where no violation is found but pass is false (e.g., empty list)
       if (vIndex === -1) {
-        return `${matcherHint}\n\nError: Polling timed out or received empty data.`;
+        return `${matcherHint}\n\nError: Polling timed out. Final data state: ${safeValues.length === 0 ? 'Empty List' : 'Unexpected state'}.`;
       }
 
       const prev = safeValues[vIndex - 1];

@@ -1,8 +1,8 @@
-import { test, expect } from '@fixtures';
-import { AUTHENTICATED } from '@data';
-import { createRandom } from '@utils';
+// import { test, expect } from '@fixtures';
+// import { AUTHENTICATED, createCheckoutMock } from '@data';
+// import { createRandom } from '@utils';
 
-const SCOPE = 'E2E';
+// const SCOPE = 'E2E';
 
 // maybe not needed?
 

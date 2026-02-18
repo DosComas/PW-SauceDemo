@@ -25,6 +25,7 @@ export const _getHeader = (page: Page) => ({
     openBtn: page.getByRole('button', { name: t.menu.openMenu }),
     logoutBtn: page.getByRole('link', { name: t.menu.logout }),
     aboutBtn: page.getByRole('link', { name: t.menu.about.label }),
+    closeBtn: page.getByRole('button', { name: 'Close Menu' }),
   },
   cart: {
     openBtn: page.getByTestId('shopping-cart-link'),

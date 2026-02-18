@@ -17,17 +17,21 @@ const requestedLang = process.env.LANGUAGE as Languages;
 const activeLang = DICTIONARY[requestedLang] ? requestedLang : 'EN';
 const baseBundle = DICTIONARY[activeLang];
 
-export const t = new Proxy(baseBundle, {
-  get(target, prop: string): any {
-    const bundle = target as Record<string, any>;
+const handler: ProxyHandler<LanguageData> = {
+  get(target, prop, receiver) {
+    if (typeof prop === 'symbol' || prop === 'then') return Reflect.get(target, prop, receiver);
 
-    if (typeof prop === 'symbol' || prop === 'then') return bundle[prop];
+    if (!(prop in target)) throw new Error(`[i18n] Missing path, "t.${String(prop)}", language: "${activeLang}"`);
 
-    if (!(prop in bundle)) throw new Error(`[i18n] Missing path: "t.${prop}", language: "${activeLang}"`);
-
-    const value = bundle[prop];
-    if (value !== null && typeof value === 'object') return new Proxy(value, this);
+    const value = Reflect.get(target, prop, receiver);
+    if (value !== null && typeof value === 'object') return new Proxy(value as LanguageData, handler);
 
     return value;
   },
-}) as unknown as LanguageData;
+};
+
+// ==========================================
+// 🏛️ DOMAIN TRANSLATIONS (t)
+// ==========================================
+
+export const t: LanguageData = new Proxy(baseBundle, handler);
