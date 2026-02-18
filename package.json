@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npx playwright test",
     "test:base": "npx playwright test -g \"@👤\" --project=Chrome",
-    "test:stress": "npm run test:base -- --repeat-each 25",
+    "test:stress": "npm run test:base -- --repeat-each 100",
     "test:access": "npx playwright test -g \"@👤|@⚠️|@💣|@👁️\"",
     "test:denied": "npx playwright test -g \"@🔑|@🎭|@🔒\"",
     "test:report": "npx playwright show-report"
