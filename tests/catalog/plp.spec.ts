@@ -1,7 +1,7 @@
 import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { type ExpectedSort, createRandom } from '@utils';
-import { type SortOption, t, ACCESS_USERS } from '@data';
+import { type SortOption, t, AUTHENTICATED } from '@data';
 import { type SortableFields } from '@helpers';
 
 const SCOPE = 'PLP';
@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of ACCESS_USERS) {
+for (const persona of AUTHENTICATED) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
@@ -57,7 +57,7 @@ for (const persona of ACCESS_USERS) {
       });
     });
 
-    if (persona.isBaselineUser) {
+    if (persona.isBaseline) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
         const imgs = await test.step('⬜ Mock grid', async () => {
           await action.plp.mockGrid();

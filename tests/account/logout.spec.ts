@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { t, ACCESS_USERS } from '@data';
+import { t, AUTHENTICATED } from '@data';
 
 const SCOPE = 'Logout';
 
@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of ACCESS_USERS) {
+for (const persona of AUTHENTICATED) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 

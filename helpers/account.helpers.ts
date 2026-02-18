@@ -22,7 +22,7 @@ const accountLocators = (page: Page) => ({
 
 export const account = (page: Page, headerLocs: Header) => {
   const loc = accountLocators(page);
-  const openMenu = async () => await headerLocs.menu.openBtn.click();
+  const openMenu = async () => await headerLocs.menu.openBtn.click({ delay: 250 });
 
   return {
     loc,
@@ -37,7 +37,7 @@ export const account = (page: Page, headerLocs: Header) => {
       menu: {
         logout: async () => {
           await openMenu();
-          await headerLocs.menu.logoutBtn.click();
+          await headerLocs.menu.logoutBtn.click({ delay: 250 });
         },
         open: async () => openMenu(),
       },

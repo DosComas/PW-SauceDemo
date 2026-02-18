@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { ACCESS_USERS, STATE_KEYS } from '@data';
+import { AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
 const SCOPE = 'PDP';
@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of ACCESS_USERS) {
+for (const persona of AUTHENTICATED) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
@@ -92,7 +92,7 @@ for (const persona of ACCESS_USERS) {
       });
     });
 
-    if (persona.isBaselineUser) {
+    if (persona.isBaseline) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, loc, action }) => {
         await test.step('⬜ Navigate to PDP', async () => {
           await action.plp.open({ index: itemIndex, via: 'name' });

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { t, DENIED_USERS, BASELINE_USERS } from '@data';
+import { t, BASELINE, UNAUTHORIZED } from '@data';
 
 const SCOPE = 'Login';
 
@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of DENIED_USERS) {
+for (const persona of UNAUTHORIZED) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test(`${SCOPE}: Reject invalid credentials`, async ({ loc, action }) => {
       await test.step('🟦 Log into the app', async () => {
@@ -17,13 +17,13 @@ for (const persona of DENIED_USERS) {
       });
 
       await expect(loc.login.errorMsg, '🟧 UI: Error message matches').toContainText(
-        t.login.errors[persona.expectedErrorKey],
+        t.login.errors[persona.expectedError],
       );
     });
   });
 }
 
-for (const persona of BASELINE_USERS) {
+for (const persona of BASELINE) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test(`${SCOPE}: Accept valid credentials`, async ({ loc, action, session }) => {
       await test.step('🟦 Log in to app', async () => {

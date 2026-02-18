@@ -1,5 +1,5 @@
 import { expect, test } from '@fixtures';
-import { type SocialPlatform, type SocialPlatformData, BASELINE_USERS } from '@data';
+import { type SocialPlatform, type SocialPlatformData, BASELINE } from '@data';
 import { t } from '@data';
 
 const SCOPE = 'Navigation';
@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of BASELINE_USERS) {
+for (const persona of BASELINE) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 

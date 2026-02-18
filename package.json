@@ -3,10 +3,11 @@
   "version": "9.9.9",
   "main": "index.js",
   "scripts": {
+    "test:base:20": "npx playwright test -g \"@👤\" --project=Chrome --repeat-each 20",
     "test:all": "npx playwright test",
-    "test:base": "npx playwright test -g \"👤\" --project=Chrome",
-    "test:access": "npx playwright test -g \"👤|⚠️|💣|👁️\"",
-    "test:denied": "npx playwright test -g \"🔑|🎭|🔒\"",
+    "test:base": "npx playwright test -g \"@👤\" --project=Chrome",
+    "test:access": "npx playwright test -g \"@👤|@⚠️|@💣|@👁️\"",
+    "test:denied": "npx playwright test -g \"@🔑|@🎭|@🔒\"",
     "test:report": "npx playwright show-report"
   },
   "keywords": [],

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { t, ACCESS_USERS } from '@data';
+import { t, AUTHENTICATED, BASELINE } from '@data';
 import { createRandom } from '@utils';
 
 // CASES?:
@@ -26,7 +26,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-for (const persona of ACCESS_USERS) {
+for (const persona of AUTHENTICATED) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
@@ -59,7 +59,7 @@ for (const persona of ACCESS_USERS) {
     });
     // END
 
-    if (persona.isBaselineUser) {
+    if (persona.isBaseline) {
       test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, action }) => {
         await test.step('⬜ Add an item and go to cart', async () => {
           await action.plp.add({ index: itemIndex });

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { ACCESS_USERS } from '@data';
+import { AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
 const SCOPE = 'E2E';
