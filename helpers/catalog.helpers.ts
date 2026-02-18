@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 import { _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
 import { VISUAL_MOCK, SortLabels } from '@data';

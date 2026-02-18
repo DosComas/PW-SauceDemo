@@ -1,3 +1,7 @@
+// ==========================================
+// 🏛️ TRANSLATION BUNDLE (English)
+// ==========================================
+
 export const en = {
   /** Global Configuration: Locale and Branding */
   meta: {

@@ -41,14 +41,16 @@ for (const persona of ACCESS_USERS) {
       });
     });
 
-    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action, session }) => {
       await test.step('🟦 Add items to cart', async () => {
         await action.plp.add({ index: itemIndexes });
       });
 
       await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
       await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 3').toHaveText('3');
-      await expect(page, '🟧 Data: Local storage has 3 items').toHaveStorageLength(STATE_KEYS.cart, 3);
+      await test.step('🟧 Data: Local storage has 3 items', async () => {
+        expect(await session.cartItems()).toHaveLength(3);
+      });
 
       await test.step('🟦 Remove item from cart', async () => {
         await action.plp.remove({ index: itemIndex });
@@ -56,7 +58,9 @@ for (const persona of ACCESS_USERS) {
 
       await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
       await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 2').toHaveText('2');
-      await expect(page, '🟧 Data: Local storage has 2 items').toHaveStorageLength(STATE_KEYS.cart, 2);
+      await test.step('🟧 Data: Local storage has 2 items', async () => {
+        expect(await session.cartItems()).toHaveLength(2);
+      });
     });
 
     if (persona.isBaselineUser) {

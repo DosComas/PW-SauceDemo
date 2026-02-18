@@ -1,11 +1,19 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { _getHeader, _getFooter } from './common/app.locators';
 import { account } from './account.helpers';
 import { catalog } from './catalog.helpers';
 import { purchase } from './purchase.helpers';
 
+// ==========================================
+// 🏛️ GLOBAL TYPES
+// ==========================================
+
 export type App = ReturnType<typeof createApp>;
-export { type ItemSortAttribute } from './catalog.helpers';
+export type { ItemSortAttribute } from './catalog.helpers';
+
+// ==========================================
+// 🏛️ APP CREATOR
+// ==========================================
 
 export const createApp = (page: Page) => {
   const headerLocs = _getHeader(page);

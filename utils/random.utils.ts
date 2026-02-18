@@ -1,9 +1,19 @@
-// PUBLIC FACTORY
+import { faker } from '@faker-js/faker';
+
+// ==========================================
+// 🏛️ CORE UTILS
+// ==========================================
 
 export const createRandom = () => {
   const currentSeed = _getEnvSeed() || _generateSeed();
+
   process.env.TEST_SEED = currentSeed;
+
   const rng = _initSeededRNG(currentSeed);
+
+  const seedNum = currentSeed.split('').reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0);
+
+  faker.seed(seedNum);
 
   return {
     seed: currentSeed,
@@ -33,7 +43,9 @@ export const createRandom = () => {
   };
 };
 
-// PRIVATE HELPERS
+// ==========================================
+// 🏛️ PRIVATE HELPERS
+// ==========================================
 
 function _getEnvSeed() {
   return process.env.TEST_SEED?.trim().toUpperCase().slice(0, 4) || null;

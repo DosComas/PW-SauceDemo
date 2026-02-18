@@ -6,7 +6,7 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-export const random = createRandom();
+const random = createRandom();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -26,7 +26,7 @@ export default defineConfig({
     [
       'html',
       {
-        title: `${CURRENT_ENV.environment} Report [${t.meta.locale}] [Seed: ${random.seed}]`,
+        title: `${CURRENT_ENV.environment} [${t.meta.locale}] [seed: ${random.seed}]`,
       },
     ],
   ],

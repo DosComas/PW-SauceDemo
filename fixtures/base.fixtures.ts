@@ -2,14 +2,17 @@ import { test as base, expect as baseExpect } from '@playwright/test';
 import { customMatchers } from '@utils';
 import { type App, createApp } from '@helpers';
 
+// ==========================================
+// 🏛️ CUSTOM ASSERTIONS
+// ==========================================
+
 export const expect = baseExpect.extend(customMatchers);
 
-interface MyFixtures {
-  _app: App;
-  loc: App['loc'];
-  action: App['action'];
-  session: App['session'];
-}
+// ==========================================
+// 🏛️ TEST FIXTURES
+// ==========================================
+
+type MyFixtures = { _app: App; loc: App['loc']; action: App['action']; session: App['session'] };
 
 export const test = base.extend<MyFixtures>({
   _app: async ({ page }, use) => {

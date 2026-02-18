@@ -36,26 +36,30 @@ for (const persona of ACCESS_USERS) {
       });
     });
 
-    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action }) => {
+    test(`${SCOPE}: Add/Remove button toggles cart state`, async ({ page, loc, action, session }) => {
       await test.step('🟦 Navigate to PDP and add item', async () => {
         await action.plp.open({ index: itemIndex, via: 'img' });
         await action.pdp.add();
       });
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
-      await expect(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STATE_KEYS.cart, 1);
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
+      await test.step('🟧 Data: Local storage has 1 item', async () => {
+        expect(await session.cartItems()).toHaveLength(1);
+      });
 
       await test.step('🟦 Remove item from cart', async () => {
         await action.pdp.remove();
       });
 
       await expect.soft(loc.pdp.item.addBtn, '🟧 UI: Add button visible').toBeVisible();
-      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge removed`).not.toBeVisible();
-      await expect(page, `🟧 Data: Local storage is empty`).toHaveStorageLength(STATE_KEYS.cart, 0);
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge removed').not.toBeVisible();
+      await test.step('🟧 Data: Local storage is empty`', async () => {
+        expect(await session.cartItems()).toHaveLength(0);
+      });
     });
 
-    test(`${SCOPE}: State persistence on PDP entry`, async ({ page, loc, action }) => {
+    test(`${SCOPE}: State persistence on PDP entry`, async ({ page, loc, action, session }) => {
       await test.step('⬜ Add items to cart on inventory', async () => {
         await action.plp.add({ index: itemIndexes });
       });
@@ -65,11 +69,13 @@ for (const persona of ACCESS_USERS) {
       });
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows 3 items`).toHaveText('3');
-      await expect(page, `🟧 Data: Local storage has 3 items`).toHaveStorageLength(STATE_KEYS.cart, 3);
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 3 items').toHaveText('3');
+      await test.step('🟧 Data: Local storage has 3 items`', async () => {
+        expect(await session.cartItems()).toHaveLength(3);
+      });
     });
 
-    test(`${SCOPE}: State persistence on PDP return`, async ({ page, loc, action }) => {
+    test(`${SCOPE}: State persistence on PDP return`, async ({ page, loc, action, session }) => {
       await test.step('⬜ Navigate to PLP', async () => {
         await action.plp.open({ index: itemIndex, via: 'name' });
       });
@@ -80,8 +86,10 @@ for (const persona of ACCESS_USERS) {
       });
 
       await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
-      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows 1 item`).toHaveText('1');
-      await expect(page, `🟧 Data: Local storage has 1 item`).toHaveStorageLength(STATE_KEYS.cart, 1);
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
+      await test.step('🟧 Data: Local storage has 1 item', async () => {
+        expect(await session.cartItems()).toHaveLength(1);
+      });
     });
 
     if (persona.isBaselineUser) {

@@ -7,7 +7,6 @@ import { ItemTextFields } from '@data';
 
 export type IndexInput = number | readonly number[];
 export type ItemTextLocators = { name: Locator; desc: Locator; price: Locator };
-
 export type ItemLocators = ItemTextLocators & { img?: Locator };
 export type ItemData = ItemTextFields & { imgSrc?: string };
 export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];

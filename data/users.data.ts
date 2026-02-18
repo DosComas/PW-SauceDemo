@@ -1,30 +1,24 @@
-import { faker } from '@faker-js/faker';
 import { t } from '@data';
 import path from 'path';
+
+// ==========================================
+// 🏛️ USER PERSONA TYPES
+// ==========================================
+
+type UserPersona = { role: string; user: string; pass: string; tag: string };
+type TestUserData = {
+  access: (UserPersona & { expectAuth: true; storageState: string; isBaselineUser: boolean })[];
+  denied: (UserPersona & { expectAuth: false; expectedErrorKey: keyof typeof t.login.errors })[];
+};
+
+// ==========================================
+// 🏛️ USER PERSONAS
+// ==========================================
 
 const AUTH_DIR = './.auth';
 
 const VALID_USERNAME = process.env.VALID_USERNAME as string;
 const VALID_PASSWORD = process.env.VALID_PASSWORD as string;
-
-type UserPersona = {
-  role: string;
-  user: string;
-  pass: string;
-  tag: string;
-};
-
-type TestUserData = {
-  access: (UserPersona & {
-    expectAuth: true;
-    storageState: string;
-    isBaselineUser: boolean;
-  })[];
-  denied: (UserPersona & {
-    expectAuth: false;
-    expectedErrorKey: keyof typeof t.login.errors;
-  })[];
-};
 
 const TEST_USERS: TestUserData = {
   access: [
@@ -93,12 +87,10 @@ const TEST_USERS: TestUserData = {
   ],
 } as const;
 
+// ==========================================
+// 🏛️ PUBLIC EXPORTS
+// ==========================================
+
 export const ACCESS_USERS = TEST_USERS.access;
 export const DENIED_USERS = TEST_USERS.denied;
 export const BASELINE_USERS = ACCESS_USERS.filter((u) => u.isBaselineUser);
-
-export const createCheckoutData = () => ({
-  firstName: faker.person.firstName(),
-  lastName: faker.person.lastName(),
-  zipCode: faker.location.zipCode(),
-});

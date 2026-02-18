@@ -2,7 +2,7 @@ import { test as setup, expect } from '@fixtures';
 import { t, ACCESS_USERS } from '@data';
 
 for (const persona of ACCESS_USERS) {
-  setup(`Authenticate as ${persona.role}`, async ({ page, loc, action, session }) => {
+  setup(`Authenticate as ${persona.role}`, { tag: persona.tag }, async ({ page, loc, action, session }) => {
     await setup.step('⬜ Go to login', async () => {
       await page.goto('/');
     });

@@ -5,9 +5,9 @@
   "scripts": {
     "test:all": "npx playwright test",
     "test:base": "npx playwright test -g \"👤\" --project=Chrome",
-    "test:access": "npx playwright test -g '👤|⚠️|💣|👁️'",
-    "test:denied": "npx playwright test -g '🔑|🎭|🔒'",
-    "report": "npx playwright show-report"
+    "test:access": "npx playwright test -g \"👤|⚠️|💣|👁️\"",
+    "test:denied": "npx playwright test -g \"🔑|🎭|🔒\"",
+    "test:report": "npx playwright show-report"
   },
   "keywords": [],
   "author": "",

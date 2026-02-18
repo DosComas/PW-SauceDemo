@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 import { type Header, _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
 import { VISUAL_MOCK } from '@data';
@@ -25,22 +25,9 @@ export const purchaseLocators = (page: Page) => {
   };
 };
 
-// DOMAIN ACTIONS
-
-async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => c.ItemLocators) {
-  await cardsLoc.first().waitFor();
-  const count = await cardsLoc.count();
-  const range = Array.from({ length: count }, (_, i) => i);
-  return await Promise.all(range.map((i) => c._scrapeItem(getItem(i))));
-}
-
-async function _injectBadgeNum(badgeLoc: Locator, count: number) {
-  if (await badgeLoc.isVisible()) {
-    await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
-  }
-}
-
-// DOMAIN INTERFACE
+// ==========================================
+// 🏛️ DOMAIN ACTIONS
+// ==========================================
 
 export const purchase = (page: Page, headerLocs: Header) => {
   const loc = purchaseLocators(page);
@@ -64,3 +51,20 @@ export const purchase = (page: Page, headerLocs: Header) => {
     },
   };
 };
+
+// ==========================================
+// 🏛️ DOMAIN PRIVATE ACTIONS
+// ==========================================
+
+async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => c.ItemLocators) {
+  await cardsLoc.first().waitFor();
+  const count = await cardsLoc.count();
+  const range = Array.from({ length: count }, (_, i) => i);
+  return await Promise.all(range.map((i) => c._scrapeItem(getItem(i))));
+}
+
+async function _injectBadgeNum(badgeLoc: Locator, count: number) {
+  if (await badgeLoc.isVisible()) {
+    await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
+  }
+}
