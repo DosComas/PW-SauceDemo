@@ -5,84 +5,15 @@ import { pollUntil } from './poll.utils';
 // 🏛️ CUSTOM TYPES
 // ==========================================
 
-export type SortByField = 'price' | 'name';
-export type SortOrder = 'asc' | 'desc';
+type SortByField = 'price' | 'name';
+type SortOrder = 'asc' | 'desc';
+export type ExpectedSort = { by: SortByField; order: SortOrder };
 
 // ==========================================
 // 🏛️ CUSTOM MATCHERS (Assertions)
 // ==========================================
 
 export const customMatchers = {
-  /*
-  async toHaveStorageLength(
-    this: ExpectMatcherState,
-    page: Page,
-    key: StateKey,
-    expected: number,
-    options?: { timeout?: number },
-  ) {
-    const assertionName = 'toHaveStorageLength';
-
-    let actualLength: number | null = null;
-    let keyExists = false;
-    let errorType: string | null = null;
-
-    // Polling Phase
-    const { pass } = await pollUntil(
-      async () => {
-        const rawValue = await page.evaluate((k) => window.localStorage.getItem(k), key);
-
-        // Validation Logic
-        if (rawValue === null) {
-          keyExists = false;
-          actualLength = null;
-          return null;
-        }
-
-        keyExists = true;
-        try {
-          const parsed = JSON.parse(rawValue);
-          actualLength = Array.isArray(parsed) ? parsed.length : -1;
-          if (actualLength === -1) {
-            errorType = 'Not an array';
-            return null;
-          }
-        } catch {
-          errorType = 'Invalid JSON';
-          actualLength = -2;
-          return null;
-        }
-
-        return actualLength;
-      },
-      (value) => value === expected,
-      options?.timeout,
-    );
-
-    // Reporting Phase
-    const message = () => {
-      const matcherHint = this.utils.matcherHint(assertionName, `page.localStorage`, JSON.stringify(expected), {
-        isNot: this.isNot,
-      });
-
-      const details: string[] = [];
-
-      if (!keyExists) {
-        details.push(`Key "${key}" not found in localStorage`);
-      } else if (errorType) {
-        details.push(`Value error: ${errorType}`);
-      } else if (actualLength !== null) {
-        details.push(`Expected: ${this.utils.printExpected(expected)}`);
-        details.push(`Received: ${this.utils.printReceived(actualLength)}`);
-      }
-
-      return matcherHint + '\n\n' + details.join('\n');
-    };
-
-    return { message, pass };
-  },
-  */
-
   async toBeSortedBy(
     this: ExpectMatcherState,
     locator: Locator,

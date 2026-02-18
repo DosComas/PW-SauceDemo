@@ -1,13 +1,15 @@
 import type { Page, Locator } from '@playwright/test';
 import { _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
-import { VISUAL_MOCK, SortLabels } from '@data';
+import { VISUAL_MOCK, SortOption } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN TYPES
 // ==========================================
 
-export type ItemSortAttribute = Pick<ReturnType<typeof catalogLocators>['plp']['items'], 'names' | 'prices'>;
+export type SortableFields = {
+  plp: { items: Pick<ReturnType<typeof catalogLocators>['plp']['items'], 'names' | 'prices'> };
+};
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -30,10 +32,7 @@ const catalogLocators = (page: Page) => {
       },
       item: (index: number) => {
         const root = _cards.nth(index);
-        return {
-          ..._getItem(root),
-          img: _getImg(root),
-        };
+        return { ..._getItem(root), img: _getImg(root) };
       },
     },
     pdp: {
@@ -78,7 +77,7 @@ export const catalog = (page: Page) => {
           const item = getItem(i);
           await (via === 'img' ? item.img : item.name).click();
         },
-        sort: async ({ label }: { label: SortLabels }) => {
+        sort: async ({ label }: { label: SortOption }) => {
           await loc.plp.sort.selectOption(label);
         },
         mockGrid: async ({ size = 5 }: { size?: number } = {}) => {

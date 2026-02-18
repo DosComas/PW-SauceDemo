@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import type { Header } from './common/app.locators';
-import { _getStorageData } from '@utils';
+import { _getStorageData, _getCookie } from '@utils';
 import { t, STATE_KEYS } from '@data';
 
 // ==========================================
@@ -43,10 +43,7 @@ export const account = (page: Page, headerLocs: Header) => {
       },
     },
     session: {
-      userSession: async () => {
-        const cookies = await page.context().cookies();
-        return cookies.find((c) => c.name === STATE_KEYS.userSession);
-      },
+      userSession: async () => await _getCookie(page, STATE_KEYS.userSession),
       cartItems: async () => await _getStorageData<number[]>(page, STATE_KEYS.cart),
     },
   };

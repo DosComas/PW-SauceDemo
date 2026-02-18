@@ -6,6 +6,12 @@ import { pollUntil } from './poll.utils';
 // 🏛️ STORAGE SCRAPER
 // ==========================================
 
+/** Retrieves a specific cookie by name */
+export async function _getCookie(page: Page, name: string) {
+  const cookies = await page.context().cookies();
+  return cookies.find((c) => c.name === name);
+}
+
 /**
  * Retrieves data from LocalStorage.
  * Uses progressive polling to ensure the data is present before returning.

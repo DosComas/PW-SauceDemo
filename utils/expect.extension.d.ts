@@ -1,5 +1,4 @@
-import { type SortByField, SortOrder } from './custom.assertions';
-import { StateKey } from '@data';
+import type { SortByField, SortOrder } from './custom.assertions';
 
 // ==========================================
 // 🏛️ GLOBAL MATCHERS (IntelliSense)

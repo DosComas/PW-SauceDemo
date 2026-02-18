@@ -9,7 +9,7 @@ import { purchase } from './purchase.helpers';
 // ==========================================
 
 export type App = ReturnType<typeof createApp>;
-export type { ItemSortAttribute } from './catalog.helpers';
+export type { SortableFields } from './catalog.helpers';
 
 // ==========================================
 // 🏛️ APP CREATOR

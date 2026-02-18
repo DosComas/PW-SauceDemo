@@ -1,14 +1,8 @@
 import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { type SortByField, type SortOrder, createRandom } from '@utils';
-import { type SortLabels, t, ACCESS_USERS, STATE_KEYS } from '@data';
-import { type ItemSortAttribute } from '@helpers';
-
-type SortCase = {
-  sortBy: SortLabels;
-  attribute: (items: ItemSortAttribute) => Locator;
-  expected: { by: SortByField; order: SortOrder };
-};
+import { type ExpectedSort, createRandom } from '@utils';
+import { type SortOption, t, ACCESS_USERS } from '@data';
+import { type SortableFields } from '@helpers';
 
 const SCOPE = 'PLP';
 
@@ -16,9 +10,9 @@ const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
 
-const SORT_CASES: SortCase[] = [
-  { sortBy: t.plp.sort.az, attribute: (items) => items.names, expected: { by: 'name', order: 'asc' } },
-  { sortBy: t.plp.sort.hiLo, attribute: (items) => items.prices, expected: { by: 'price', order: 'desc' } },
+const SORT_CASES: { option: SortOption; field: (items: SortableFields) => Locator; expected: ExpectedSort }[] = [
+  { option: t.plp.sort.az, field: (loc) => loc.plp.items.names, expected: { by: 'name', order: 'asc' } },
+  { option: t.plp.sort.hiLo, field: (loc) => loc.plp.items.prices, expected: { by: 'price', order: 'desc' } },
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -31,13 +25,13 @@ for (const persona of ACCESS_USERS) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
-    SORT_CASES.forEach(({ sortBy, attribute, expected }) => {
-      test(`${SCOPE}: Items follow ${sortBy} order`, async ({ loc, action }) => {
+    SORT_CASES.forEach(({ option, field, expected }) => {
+      test(`${SCOPE}: Items follow ${option} order`, async ({ loc, action }) => {
         await test.step('🟦 Sort items', async () => {
-          await action.plp.sort({ label: sortBy });
+          await action.plp.sort({ label: option });
         });
 
-        await expect(attribute(loc.plp.items), `🟧 UI: Sorted by ${sortBy}`).toBeSortedBy(expected.by, expected.order);
+        await expect(field(loc), `🟧 UI: Sorted by ${option}`).toBeSortedBy(expected.by, expected.order);
       });
     });
 
