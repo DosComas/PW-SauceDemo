@@ -1,13 +1,15 @@
 import { test as setup, expect } from '@fixtures';
+import type { AuthenticatedPersona } from '@data';
 import { t, AUTHENTICATED } from '@data';
 
-let personasToAuth = AUTHENTICATED;
+let personasToAuth: readonly AuthenticatedPersona[];
 
 const hasGrep = process.argv.some((arg) => arg === '-g' || arg.startsWith('--grep'));
+
 if (hasGrep) {
   personasToAuth = AUTHENTICATED.filter((p) => process.argv.join(' ').includes(p.tag));
   if (personasToAuth.length === 0) personasToAuth = AUTHENTICATED;
-}
+} else personasToAuth = AUTHENTICATED;
 
 for (const persona of personasToAuth) {
   setup(`Authenticate as ${persona.role}`, { tag: persona.tag }, async ({ page, loc, action, session }) => {

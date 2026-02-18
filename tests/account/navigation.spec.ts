@@ -1,11 +1,11 @@
 import { expect, test } from '@fixtures';
-import { type SocialPlatform, type SocialPlatformData, BASELINE } from '@data';
-import { t } from '@data';
+import type { SocialPlatform, SocialPlatformData } from '@data';
+import { t, BASELINE } from '@data';
 
 const SCOPE = 'Navigation';
 
-const SOCIAL_LINKS = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
-const ABOUT_DATA = t.menu.about;
+const SOCIAL = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
+const ABOUT = t.menu.about;
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory', async () => {
@@ -18,7 +18,7 @@ for (const persona of BASELINE) {
     test.use({ storageState: persona.storageState });
 
     test(`${SCOPE}: Social Media Links`, async ({ loc }) => {
-      for (const [platform, expected] of SOCIAL_LINKS) {
+      for (const [platform, expected] of SOCIAL) {
         await test.step(`🟧 Data: ${expected.label} link properties`, async () => {
           const socialLoc = loc.footer.social[platform];
           await expect.soft(socialLoc).toHaveAttribute('href', expected.url);
@@ -33,10 +33,7 @@ for (const persona of BASELINE) {
       });
 
       await expect.soft(loc.header.menu.aboutBtn, '🟧 UI: About button visible').toBeVisible();
-      await expect(loc.header.menu.aboutBtn, `🟧 Data: ${ABOUT_DATA.label} matches URL`).toHaveAttribute(
-        'href',
-        ABOUT_DATA.url,
-      );
+      await expect(loc.header.menu.aboutBtn, `🟧 Data: ${ABOUT.label} matches URL`).toHaveAttribute('href', ABOUT.url);
     });
   });
 }

@@ -3,7 +3,7 @@
   "version": "9.9.9",
   "main": "index.js",
   "scripts": {
-    "test:base:20": "npx playwright test -g \"@👤\" --project=Chrome --repeat-each 20",
+    "test:base:repeat": "npx playwright test -g \"@👤\" --project=Chrome --repeat-each 25",
     "test:all": "npx playwright test",
     "test:base": "npx playwright test -g \"@👤\" --project=Chrome",
     "test:access": "npx playwright test -g \"@👤|@⚠️|@💣|@👁️\"",

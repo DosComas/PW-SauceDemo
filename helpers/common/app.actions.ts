@@ -1,14 +1,11 @@
 import { Locator } from '@playwright/test';
-import { ItemTextFields } from '@data';
+import type { ItemData, ItemLocators } from '@data';
 
 // ==========================================
 // 🏛️ COMMON TYPES
 // ==========================================
 
 export type IndexInput = number | readonly number[];
-export type ItemTextLocators = { name: Locator; desc: Locator; price: Locator };
-export type ItemLocators = ItemTextLocators & { img?: Locator };
-export type ItemData = ItemTextFields & { imgSrc?: string };
 export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
 
 // ==========================================
@@ -28,7 +25,7 @@ export async function _ensureIndexes(loc: Locator, input: IndexInput) {
   return list;
 }
 
-export async function _injectItemText(itemLoc: ItemTextLocators, data: ItemTextFields) {
+export async function _injectItemText(itemLoc: ItemLocators, data: ItemData) {
   await itemLoc.name.waitFor();
 
   const mapping = [
@@ -65,13 +62,13 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function _scrapeItem(itemLoc: ItemLocators, img: boolean = true) {
+export async function _scrapeItem(itemLoc: ItemLocators, imgSrc: boolean = true) {
   const itemData: ItemData = {
     name: (await itemLoc.name.innerText()).trim(),
     desc: (await itemLoc.desc.innerText()).trim(),
     price: (await itemLoc.price.innerText()).trim(),
   };
-  if (img && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
+  if (imgSrc && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
 
   const missing = Object.keys(itemData).filter((key) => !itemData[key as keyof ItemData]);
   if (missing.length > 0) {

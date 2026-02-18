@@ -5,15 +5,10 @@ import { catalog } from './catalog.helpers';
 import { purchase } from './purchase.helpers';
 
 // ==========================================
-// 🏛️ GLOBAL TYPES
+// 🏛️ HELPERS GATEWAY
 // ==========================================
 
 export type App = ReturnType<typeof createApp>;
-export type { SortableFields } from './catalog.helpers';
-
-// ==========================================
-// 🏛️ APP CREATOR
-// ==========================================
 
 export const createApp = (page: Page) => {
   const headerLocs = _getHeader(page);

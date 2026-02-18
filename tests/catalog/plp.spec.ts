@@ -1,19 +1,16 @@
 import { type Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { type ExpectedSort, createRandom } from '@utils';
-import { type SortOption, t, AUTHENTICATED } from '@data';
-import { type SortableFields } from '@helpers';
+import type { SortOption, SortableLocators, SortCriteria } from '@data';
+import { t, AUTHENTICATED } from '@data';
+import { createRandom } from '@utils';
+
+type SortScenario = { option: SortOption; getLoc: (items: SortableLocators) => Locator; expected: SortCriteria };
 
 const SCOPE = 'PLP';
 
 const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
-
-const SORT_CASES: { option: SortOption; field: (items: SortableFields) => Locator; expected: ExpectedSort }[] = [
-  { option: t.plp.sort.az, field: (loc) => loc.plp.items.names, expected: { by: 'name', order: 'asc' } },
-  { option: t.plp.sort.hiLo, field: (loc) => loc.plp.items.prices, expected: { by: 'price', order: 'desc' } },
-];
 
 test.beforeEach(async ({ page }) => {
   await test.step('⬜ Go to inventory', async () => {
@@ -25,13 +22,18 @@ for (const persona of AUTHENTICATED) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
-    SORT_CASES.forEach(({ option, field, expected }) => {
+    (
+      [
+        { option: t.plp.sort.az, getLoc: (it) => it.names, expected: { by: 'name', order: 'asc' } },
+        { option: t.plp.sort.hiLo, getLoc: (it) => it.prices, expected: { by: 'price', order: 'desc' } },
+      ] as const satisfies SortScenario[]
+    ).forEach(({ option, getLoc, expected }) => {
       test(`${SCOPE}: Items follow ${option} order`, async ({ loc, action }) => {
         await test.step('🟦 Sort items', async () => {
           await action.plp.sort({ label: option });
         });
 
-        await expect(field(loc), `🟧 UI: Sorted by ${option}`).toBeSortedBy(expected.by, expected.order);
+        await expect(getLoc(loc.plp.items), `🟧 UI: Sorted by ${option}`).toBeSortedBy(expected.by, expected.order);
       });
     });
 

@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import { type Header, _getItem } from './common/app.locators';
 import * as c from './common/app.actions';
-import { VISUAL_MOCK } from '@data';
+import { type ItemLocators, VISUAL_MOCK } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -32,14 +32,14 @@ export const purchaseLocators = (page: Page) => {
 export const purchase = (page: Page, headerLocs: Header) => {
   const loc = purchaseLocators(page);
 
-  const cards = loc.cart.items.cards;
-  const getItem = (i: number) => loc.cart.item(i);
+  const _cards = loc.cart.items.cards;
+  const _getItem = (i: number) => loc.cart.item(i);
 
   return {
     loc,
     action: {
       cart: {
-        scrape: async () => _scrapeAllItems(cards, getItem),
+        scrape: async () => _scrapeAllItems(_cards, _getItem),
         open: async () => await headerLocs.cart.openBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
@@ -56,7 +56,7 @@ export const purchase = (page: Page, headerLocs: Header) => {
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => c.ItemLocators) {
+async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => ItemLocators) {
   await cardsLoc.first().waitFor();
   const count = await cardsLoc.count();
   const range = Array.from({ length: count }, (_, i) => i);

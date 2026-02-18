@@ -4,12 +4,8 @@ import { en } from './languages/en';
 // 🏛️ TRANSLATION TYPES
 // ==========================================
 
-type Language = keyof typeof DICTIONARY;
-type LanguageData = typeof en;
-
-export type SortOption = LanguageData['plp']['sort'][keyof LanguageData['plp']['sort']];
-export type SocialPlatform = keyof LanguageData['footer']['social'];
-export type SocialPlatformData = LanguageData['footer']['social'][SocialPlatform];
+type Languages = keyof typeof DICTIONARY;
+export type LanguageData = typeof en;
 
 // ==========================================
 // 🏛️ I18N ENGINE (Proxy)
@@ -17,8 +13,9 @@ export type SocialPlatformData = LanguageData['footer']['social'][SocialPlatform
 
 const DICTIONARY = { en };
 
-const currentLang = (process.env.LANGUAGE as Language) || 'en';
-const baseBundle = DICTIONARY[currentLang] || DICTIONARY.en;
+const requestedLang = process.env.LANGUAGE as Languages;
+const activeLang = DICTIONARY[requestedLang] ? requestedLang : 'en';
+const baseBundle = DICTIONARY[activeLang];
 
 export const t = new Proxy(baseBundle, {
   get(target, prop: string): any {
@@ -26,7 +23,7 @@ export const t = new Proxy(baseBundle, {
 
     if (typeof prop === 'symbol' || prop === 'then') return bundle[prop];
 
-    if (!(prop in bundle)) throw new Error(`[i18n] Missing path: "t.${prop}", language: "${currentLang}"`);
+    if (!(prop in bundle)) throw new Error(`[i18n] Missing path: "t.${prop}", language: "${activeLang}"`);
 
     const value = bundle[prop];
     if (value !== null && typeof value === 'object') return new Proxy(value, this);

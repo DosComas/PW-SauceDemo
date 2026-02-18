@@ -6,8 +6,8 @@ import path from 'path';
 // ==========================================
 
 type BasePersona = { role: string; user: string; pass: string; tag: string };
-type AuthenticatedPersona = BasePersona & { expectAuth: true; storageState: string; isBaseline: boolean };
-type UnauthorizedPersona = BasePersona & { expectAuth: false; expectedError: keyof typeof t.login.errors };
+export type AuthenticatedPersona = BasePersona & { expectAuth: true; storageState: string; isBaseline: boolean };
+export type UnauthorizedPersona = BasePersona & { expectAuth: false; expectedError: keyof typeof t.login.errors };
 
 // ==========================================
 // 🏛️ PERSONA REGISTRY
@@ -18,7 +18,7 @@ const AUTH_DIR = './.auth';
 const VALID_USER = process.env.VALID_USERNAME as string;
 const VALID_PASS = process.env.VALID_PASSWORD as string;
 
-const AUTHENTICATED_PERSONAS: AuthenticatedPersona[] = [
+const AUTHENTICATED_PERSONAS = [
   {
     role: 'Normal User',
     user: VALID_USER,
@@ -55,9 +55,9 @@ const AUTHENTICATED_PERSONAS: AuthenticatedPersona[] = [
     storageState: path.join(AUTH_DIR, 'visual_user.json'),
     isBaseline: false,
   },
-];
+] as const satisfies readonly AuthenticatedPersona[];
 
-const UNAUTHORIZED_PERSONAS: UnauthorizedPersona[] = [
+const UNAUTHORIZED_PERSONAS = [
   {
     role: 'Invalid Password User',
     user: VALID_USER,
@@ -82,7 +82,7 @@ const UNAUTHORIZED_PERSONAS: UnauthorizedPersona[] = [
     expectAuth: false,
     expectedError: 'lockedOut',
   },
-];
+] as const satisfies readonly UnauthorizedPersona[];
 
 // ==========================================
 // 🏛️ IDENTITY GATEWAY

@@ -2,6 +2,7 @@
 // 🏛️ ENV TYPES
 // ==========================================
 
+type EnvConfig = { baseUrl: string; environment: string };
 type EnvKey = keyof typeof ENV_MAP;
 
 // ==========================================
@@ -10,7 +11,7 @@ type EnvKey = keyof typeof ENV_MAP;
 
 const ENV_MAP = {
   prod: { baseUrl: 'https://www.saucedemo.com', environment: 'Production' },
-} as const;
+} as const satisfies Record<string, EnvConfig>;
 
 const ENV_KEY = (process.env.ENVIRONMENT?.toLowerCase() || 'prod') as EnvKey;
 
@@ -18,4 +19,4 @@ const ENV_KEY = (process.env.ENVIRONMENT?.toLowerCase() || 'prod') as EnvKey;
 // 🏛️ PUBLIC EXPORTS
 // ==========================================
 
-export const CURRENT_ENV = ENV_MAP[ENV_KEY] || ENV_MAP.prod;
+export const CURRENT_ENV = ENV_MAP[ENV_KEY];
