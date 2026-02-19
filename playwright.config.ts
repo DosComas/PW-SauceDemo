@@ -33,7 +33,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
-  snapshotPathTemplate: `{testDir}/__snapshots__/{testFilePath}/{projectName}-${t.meta.locale}-{arg}{ext}`,
+  snapshotPathTemplate: `{testDir}/__snapshots__/{projectName}/[${t.meta.locale}]-{arg}{ext}`,
   timeout: 20_000,
   expect: { timeout: 3_000 },
 
