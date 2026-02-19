@@ -7,14 +7,15 @@ import { t, STATE_KEYS } from '@data';
 // 🏛️ DOMAIN LOCATORS
 // ==========================================
 
-const accountLocators = (page: Page) => ({
-  login: {
-    nameInput: page.getByPlaceholder(t.login.username),
-    passInput: page.getByPlaceholder(t.login.password),
-    loginBtn: page.getByRole('button', { name: t.login.button }),
-    errorMsg: page.getByTestId('error'),
-  },
-});
+const accountLocators = (page: Page) =>
+  ({
+    login: {
+      nameInput: page.getByPlaceholder(t.login.username),
+      passInput: page.getByPlaceholder(t.login.password),
+      loginBtn: page.getByRole('button', { name: t.login.button }),
+      errorMsg: page.getByTestId('error'),
+    },
+  }) as const;
 
 // ==========================================
 // 🏛️ DOMAIN GATEWAY
@@ -51,5 +52,5 @@ export const account = (page: Page) => {
       userSession: async () => await _getCookie(page, STATE_KEYS.userSession),
       cartItems: async () => await _getStorageData<number[]>(page, STATE_KEYS.cart),
     },
-  };
+  } as const;
 };

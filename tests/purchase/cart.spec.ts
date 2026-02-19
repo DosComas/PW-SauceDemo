@@ -14,67 +14,67 @@ import { createRandom } from '@utils';
 
 // test remove from cart? test going back?
 
-const SCOPE = 'Cart';
-
 const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
 
-test.beforeEach(async ({ page }) => {
-  await test.step('⬜ Go to inventory', async () => {
-    await page.goto('/inventory.html');
+test.describe('Cart', () => {
+  test.beforeEach(async ({ page }) => {
+    await test.step('⬜ Go to inventory', async () => {
+      await page.goto('/inventory.html');
+    });
   });
-});
 
-for (const persona of AUTHENTICATED) {
-  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
-    test.use({ storageState: persona.storageState });
+  for (const persona of AUTHENTICATED) {
+    test.describe(`${persona.role}`, { tag: persona.tag }, () => {
+      test.use({ storageState: persona.storageState });
 
-    test(`${SCOPE}: Items match PLP data`, async ({ loc, action }) => {
-      const expected = await test.step('⬜ Scrape PLP items data', async () => {
-        return await action.plp.scrape({ index: itemIndexes, img: false });
-      });
+      test('Items match PLP data', async ({ loc, action }) => {
+        const expected = await test.step('⬜ Scrape PLP items data', async () => {
+          return await action.plp.scrape({ index: itemIndexes, img: false });
+        });
 
-      await test.step('⬜ Add items and navigate to cart', async () => {
-        await action.plp.add({ index: itemIndexes });
-        await action.cart.open();
-      });
-
-      await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
-
-      const actual = await test.step('🟧 UI: Scrape Cart items data', async () => {
-        return await action.cart.scrape();
-      });
-
-      expect(actual, '🟧 Data: All Cart items match PLP source').toMatchObject(expected);
-    });
-
-    // TODO
-    test.skip(`${SCOPE}: remove from cart, check sync?`, async ({ page }) => {
-      await test.step('⬜ Arrange: prepare state', async () => {});
-
-      await test.step('🟦 Action: perform interaction', async () => {});
-
-      await expect.soft(page, '🟧 UI: verify outcome').toHaveURL('d');
-    });
-    // END
-
-    if (persona.isBaseline) {
-      test(`${SCOPE}: Visual layout`, { tag: '@visual' }, async ({ page, action }) => {
-        await test.step('⬜ Add an item and go to cart', async () => {
-          await action.plp.add({ index: itemIndex });
+        await test.step('⬜ Add items and navigate to cart', async () => {
+          await action.plp.add({ index: itemIndexes });
           await action.cart.open();
         });
 
-        await test.step('⬜ Mock List', async () => {
-          await action.cart.mockList();
+        await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
+
+        const actual = await test.step('🟧 UI: Scrape Cart items data', async () => {
+          return await action.cart.scrape();
         });
 
-        await expect(page, '🟧 UI: Cart layout visual check').toHaveScreenshot({ fullPage: true });
+        expect(actual, '🟧 Data: Cart items match PLP source').toMatchObject(expected);
       });
-    }
-  });
-}
+
+      // TODO
+      test.skip('remove from cart, check sync?', async ({ page }) => {
+        await test.step('⬜ Arrange: prepare state', async () => {});
+
+        await test.step('🟦 Action: perform interaction', async () => {});
+
+        await expect.soft(page, '🟧 UI: verify outcome').toHaveURL('d');
+      });
+      // END
+
+      if (persona.isBaseline) {
+        test('Visual layout', { tag: '@visual' }, async ({ page, action }) => {
+          await test.step('⬜ Add an item and go to cart', async () => {
+            await action.plp.add({ index: itemIndex });
+            await action.cart.open();
+          });
+
+          await test.step('⬜ Mock List', async () => {
+            await action.cart.mockList();
+          });
+
+          await expect(page, '🟧 UI: Layout visual check').toHaveScreenshot({ fullPage: true });
+        });
+      }
+    });
+  }
+});
 
 /*
 for (const persona of BASELINE_USERS) {

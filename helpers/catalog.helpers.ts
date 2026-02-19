@@ -35,7 +35,7 @@ const catalogLocators = (page: Page) => {
       },
       backBtn: page.getByTestId('back-to-products'),
     },
-  };
+  } as const;
 };
 
 // ==========================================
@@ -87,7 +87,7 @@ export const catalog = (page: Page) => {
         mockItem: async () => await c._injectItemText(_item, VISUAL_MOCK.product),
       },
     },
-  };
+  } as const;
 };
 
 // ==========================================
@@ -99,8 +99,9 @@ async function _scrapeItems<T extends c.IndexInput>(
   getItem: (i: number) => ItemLocators,
   index: T,
   imgSrc: boolean = true,
-) {
+): Promise<c.ScrapeResult<T>> {
   const indexes = await c._ensureIndexes(cardsLoc, index);
   const itemDataList = await Promise.all(indexes.map((i) => c._scrapeItem(getItem(i), imgSrc)));
-  return Array.isArray(index) ? itemDataList : itemDataList[0];
+
+  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as c.ScrapeResult<T>;
 }

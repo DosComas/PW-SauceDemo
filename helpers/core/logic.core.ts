@@ -12,7 +12,7 @@ export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : I
 // 🏛️ LOGIC ACTIONS
 // ==========================================
 
-export async function _ensureIndexes(loc: Locator, input: IndexInput) {
+export async function _ensureIndexes(loc: Locator, input: IndexInput): Promise<number[]> {
   const list: number[] = Array.isArray(input) ? input : [input];
   if (list.length === 0) return [];
 
@@ -27,7 +27,7 @@ export async function _ensureIndexes(loc: Locator, input: IndexInput) {
   return list;
 }
 
-export async function _injectItemText(itemLoc: ItemLocators, data: ItemData) {
+export async function _injectItemText(itemLoc: ItemLocators, data: ItemData): Promise<void> {
   await itemLoc.name.waitFor();
 
   const mapping = [
@@ -39,7 +39,7 @@ export async function _injectItemText(itemLoc: ItemLocators, data: ItemData) {
   await Promise.all(mapping.map(({ loc, val }) => loc.evaluate((el, txt) => (el.textContent = txt), val)));
 }
 
-export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator, count: number) {
+export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator, count: number): Promise<void> {
   const handle = await blueprintLoc.elementHandle();
   if (!handle) throw new Error(`[_injectClones] Blueprint handle is null, locator: "${blueprintLoc.toString()}"`);
 
@@ -60,7 +60,7 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function _scrapeItem(itemLoc: ItemLocators, imgSrc: boolean = true) {
+export async function _scrapeItem(itemLoc: ItemLocators, imgSrc: boolean = true): Promise<ItemData> {
   const itemData: ItemData = {
     name: (await itemLoc.name.innerText()).trim(),
     desc: (await itemLoc.desc.innerText()).trim(),

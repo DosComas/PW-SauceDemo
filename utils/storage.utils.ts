@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page, Cookie } from '@playwright/test';
 import type { StateKeys } from '@data';
 import { pollUntil } from './poll.utils';
 
@@ -7,7 +7,7 @@ import { pollUntil } from './poll.utils';
 // ==========================================
 
 /** Retrieves a specific cookie by name */
-export async function _getCookie(page: Page, name: string) {
+export async function _getCookie(page: Page, name: string): Promise<Cookie | undefined> {
   const cookies = await page.context().cookies();
   return cookies.find((c) => c.name === name);
 }
@@ -21,7 +21,6 @@ export async function _getStorageData<T>(page: Page, key: StateKeys, options?: {
     // CALLBACK: How to get the data
     async () => {
       const raw = await page.evaluate((k) => window.localStorage.getItem(k), key);
-
       if (raw === null) return null;
 
       try {

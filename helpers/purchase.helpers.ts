@@ -2,7 +2,8 @@ import type { Page, Locator } from '@playwright/test';
 import { _itemFragment } from './core/fragments.core';
 import { layoutLocators } from './core/layout.core';
 import * as c from './core/logic.core';
-import { type ItemLocators, VISUAL_MOCK } from '@data';
+import type { ItemLocators, ItemData } from '@data';
+import { VISUAL_MOCK } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -23,7 +24,7 @@ export const purchaseLocators = (page: Page) => {
         return { name, desc, price };
       },
     },
-  };
+  } as const;
 };
 
 // ==========================================
@@ -51,20 +52,20 @@ export const purchase = (page: Page) => {
         },
       },
     },
-  };
+  } as const;
 };
 
 // ==========================================
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => ItemLocators) {
+async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => ItemLocators): Promise<ItemData[]> {
   await cardsLoc.first().waitFor();
   const count = await cardsLoc.count();
   const range = Array.from({ length: count }, (_, i) => i);
   return await Promise.all(range.map((i) => c._scrapeItem(getItem(i))));
 }
 
-async function _injectBadgeNum(badgeLoc: Locator, count: number) {
+async function _injectBadgeNum(badgeLoc: Locator, count: number): Promise<void> {
   if (await badgeLoc.isVisible()) await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
 }

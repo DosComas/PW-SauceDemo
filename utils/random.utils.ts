@@ -47,15 +47,15 @@ export const createRandom = () => {
 // 🏛️ PRIVATE HELPERS
 // ==========================================
 
-function _getEnvSeed() {
+function _getEnvSeed(): string | null {
   return process.env.TEST_SEED?.trim().toUpperCase().slice(0, 4) || null;
 }
 
-function _generateSeed() {
+function _generateSeed(): string {
   return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-function _initSeededRNG(seedStr: string) {
+function _initSeededRNG(seedStr: string): () => number {
   let seedNum = seedStr.split('').reduce((acc, char) => {
     return ((acc << 5) - acc + char.charCodeAt(0)) | 0;
   }, 0);
