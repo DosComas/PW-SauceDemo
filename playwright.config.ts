@@ -22,15 +22,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    [
-      'html',
-      {
-        title: `${CURRENT_ENV.environment} [${t.meta.locale}] [seed: ${random.seed}]`,
-      },
-    ],
-    ['dot'],
-  ],
+  reporter: [['html', { title: `${CURRENT_ENV.environment} [${t.meta.locale}] [seed: ${random.seed}]` }], ['dot']],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -43,17 +35,13 @@ export default defineConfig({
   },
   snapshotPathTemplate: `{testDir}/__snapshots__/{testFilePath}/{projectName}-${t.meta.locale}-{arg}{ext}`,
   timeout: 20_000,
-  expect: {
-    timeout: 3_000,
-  },
+  expect: { timeout: 3_000 },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'Setup',
-      use: {
-        ...devices['Desktop Chrome'],
-      },
+      use: { ...devices['Desktop Chrome'] },
       testMatch: 'auth.setup.ts',
     },
 

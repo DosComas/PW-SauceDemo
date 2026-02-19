@@ -1,6 +1,6 @@
 import type { Page, Locator } from '@playwright/test';
-import { _getItem } from './common/app.locators';
-import * as c from './common/app.actions';
+import { _itemFragment } from './core/fragments.core';
+import * as c from './core/logic.core';
 import { VISUAL_MOCK } from '@data';
 import type { SortOption, ItemLocators, SortableLocators } from '@data';
 
@@ -19,18 +19,18 @@ const catalogLocators = (page: Page) => {
       sort: page.getByTestId('product-sort-container'),
       items: {
         cards: _cards,
-        prices: _getItem(page).price,
-        names: _getItem(page).name,
+        prices: _itemFragment(page).price,
+        names: _itemFragment(page).name,
         imgs: _getImg(page),
       } satisfies SortableLocators & Record<string, Locator>,
       item: (index: number) => {
         const root = _cards.nth(index);
-        return { ..._getItem(root), img: _getImg(root) };
+        return { ..._itemFragment(root), img: _getImg(root) };
       },
     },
     pdp: {
       item: {
-        ..._getItem(page),
+        ..._itemFragment(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
       },
       backBtn: page.getByTestId('back-to-products'),
@@ -39,7 +39,7 @@ const catalogLocators = (page: Page) => {
 };
 
 // ==========================================
-// 🏛️ DOMAIN ACTIONS
+// 🏛️ DOMAIN GATEWAY
 // ==========================================
 
 export const catalog = (page: Page) => {
@@ -102,5 +102,5 @@ async function _scrapeItems<T extends c.IndexInput>(
 ) {
   const indexes = await c._ensureIndexes(cardsLoc, index);
   const itemDataList = await Promise.all(indexes.map((i) => c._scrapeItem(getItem(i), imgSrc)));
-  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as c.ScrapeResult<T>;
+  return Array.isArray(index) ? itemDataList : itemDataList[0];
 }

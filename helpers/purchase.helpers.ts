@@ -1,6 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
-import { type Header, _getItem } from './common/app.locators';
-import * as c from './common/app.actions';
+import { _itemFragment } from './core/fragments.core';
+import { layoutLocators } from './core/layout.core';
+import * as c from './core/logic.core';
 import { type ItemLocators, VISUAL_MOCK } from '@data';
 
 // ==========================================
@@ -18,7 +19,7 @@ export const purchaseLocators = (page: Page) => {
       },
       item: (index: number) => {
         const root = _cards.nth(index);
-        const { name, desc, price } = _getItem(root);
+        const { name, desc, price } = _itemFragment(root);
         return { name, desc, price };
       },
     },
@@ -26,11 +27,12 @@ export const purchaseLocators = (page: Page) => {
 };
 
 // ==========================================
-// 🏛️ DOMAIN ACTIONS
+// 🏛️ DOMAIN GATEWAY
 // ==========================================
 
-export const purchase = (page: Page, headerLocs: Header) => {
+export const purchase = (page: Page) => {
   const loc = purchaseLocators(page);
+  const { header } = layoutLocators(page);
 
   const _cards = loc.cart.items.cards;
   const _getItem = (i: number) => loc.cart.item(i);
@@ -40,12 +42,12 @@ export const purchase = (page: Page, headerLocs: Header) => {
     action: {
       cart: {
         scrape: async () => _scrapeAllItems(_cards, _getItem),
-        open: async () => await headerLocs.cart.openBtn.click(),
+        open: async () => await header.cart.openBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
           await c._injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
           await c._injectClones(loc.cart.list, blueprint, size);
-          await _injectBadgeNum(headerLocs.cart.badge, size);
+          await _injectBadgeNum(header.cart.badge, size);
         },
       },
     },
@@ -64,7 +66,5 @@ async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => ItemLo
 }
 
 async function _injectBadgeNum(badgeLoc: Locator, count: number) {
-  if (await badgeLoc.isVisible()) {
-    await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
-  }
+  if (await badgeLoc.isVisible()) await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
 }

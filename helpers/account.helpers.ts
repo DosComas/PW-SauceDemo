@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import type { Header } from './common/app.locators';
+import { layoutLocators } from './core/layout.core';
 import { _getStorageData, _getCookie } from '@utils';
 import { t, STATE_KEYS } from '@data';
 
@@ -17,14 +17,16 @@ const accountLocators = (page: Page) => ({
 });
 
 // ==========================================
-// 🏛️ DOMAIN ACTIONS
+// 🏛️ DOMAIN GATEWAY
 // ==========================================
 
-export const account = (page: Page, headerLocs: Header) => {
+export const account = (page: Page) => {
   const loc = accountLocators(page);
+  const { header } = layoutLocators(page);
+
   const _openMenu = async () => {
-    await headerLocs.menu.panel.waitFor({ state: 'hidden' });
-    await headerLocs.menu.openBtn.click();
+    await header.menu.panel.waitFor({ state: 'hidden' });
+    await header.menu.openBtn.click();
   };
 
   return {
@@ -40,7 +42,7 @@ export const account = (page: Page, headerLocs: Header) => {
       menu: {
         logout: async () => {
           await _openMenu();
-          await headerLocs.menu.logoutBtn.click();
+          await header.menu.logoutBtn.click();
         },
         open: async () => _openMenu(),
       },

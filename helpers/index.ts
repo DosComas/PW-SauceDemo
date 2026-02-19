@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { _getHeader, _getFooter } from './common/app.locators';
+import { layoutLocators } from './core/layout.core';
 import { account } from './account.helpers';
 import { catalog } from './catalog.helpers';
 import { purchase } from './purchase.helpers';
@@ -11,17 +11,13 @@ import { purchase } from './purchase.helpers';
 export type App = ReturnType<typeof createApp>;
 
 export const createApp = (page: Page) => {
-  const headerLocs = _getHeader(page);
-  const footerLocs = _getFooter(page);
-
   const catalogObj = catalog(page);
-  const accountObj = account(page, headerLocs);
-  const purchaseObj = purchase(page, headerLocs);
+  const accountObj = account(page);
+  const purchaseObj = purchase(page);
 
   return {
     loc: {
-      header: headerLocs,
-      footer: footerLocs,
+      ...layoutLocators(page),
       ...accountObj.loc,
       ...catalogObj.loc,
       ...purchaseObj.loc,

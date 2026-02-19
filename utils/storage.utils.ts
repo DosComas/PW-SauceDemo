@@ -35,9 +35,6 @@ export async function _getStorageData<T>(page: Page, key: StateKeys, options?: {
     options?.timeout,
   );
 
-  if (!pass) {
-    throw new Error(`[_getStorageData] Timed out waiting for key: "${key}"`);
-  }
-
+  if (!pass) throw new Error(`[_getStorageData] Timed out waiting for key: "${key}"`);
   return value as T;
 }

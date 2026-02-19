@@ -1,26 +1,28 @@
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import type { ItemData, ItemLocators } from '@data';
 
 // ==========================================
-// 🏛️ COMMON TYPES
+// 🏛️ LOGIC TYPES
 // ==========================================
 
 export type IndexInput = number | readonly number[];
 export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
 
 // ==========================================
-// 🏛️ COMMON ACTIONS
+// 🏛️ LOGIC ACTIONS
 // ==========================================
 
 export async function _ensureIndexes(loc: Locator, input: IndexInput) {
   const list: number[] = Array.isArray(input) ? input : [input];
   if (list.length === 0) return [];
 
-  const min = Math.min(...list);
-  if (min < 0) throw new Error(`[_ensureIndexes] Negative index: ${min}`);
-
   const max = Math.max(...list);
-  await loc.nth(max).waitFor();
+  try {
+    await loc.nth(max).waitFor();
+  } catch {
+    const count = await loc.count();
+    throw new Error(`[_ensureIndexes] Index out of bounds, requested: ${max}, available: ${count}`);
+  }
 
   return list;
 }
@@ -39,9 +41,7 @@ export async function _injectItemText(itemLoc: ItemLocators, data: ItemData) {
 
 export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator, count: number) {
   const handle = await blueprintLoc.elementHandle();
-  if (!handle) {
-    throw new Error(`[_injectClones] Blueprint handle is null, locator: "${blueprintLoc.toString()}"`);
-  }
+  if (!handle) throw new Error(`[_injectClones] Blueprint handle is null, locator: "${blueprintLoc.toString()}"`);
 
   await containerLoc.evaluate(
     (container, { blueprintNode, n }) => {
@@ -54,9 +54,7 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
 
       // Append the new mocked clones
       const cleanClone = blueprintNode.cloneNode(true);
-      for (let i = 0; i < n; i++) {
-        container.appendChild(cleanClone.cloneNode(true));
-      }
+      for (let i = 0; i < n; i++) container.appendChild(cleanClone.cloneNode(true));
     },
     { blueprintNode: handle, n: count },
   );
@@ -71,9 +69,7 @@ export async function _scrapeItem(itemLoc: ItemLocators, imgSrc: boolean = true)
   if (imgSrc && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
 
   const missing = Object.keys(itemData).filter((key) => !itemData[key as keyof ItemData]);
-  if (missing.length > 0) {
-    throw new Error(`[_scrapeItem] Missing item data: ${missing.join(', ')}`);
-  }
+  if (missing.length > 0) throw new Error(`[_scrapeItem] Missing item data: ${missing.join(', ')}`);
 
   return itemData;
 }

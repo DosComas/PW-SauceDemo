@@ -60,7 +60,7 @@ for (const persona of AUTHENTICATED) {
     });
 
     test(`${SCOPE}: State persistence on PDP entry`, async ({ loc, action, session }) => {
-      await test.step('⬜ Add items to cart on inventory', async () => {
+      await test.step('⬜ Add items to cart on PLP', async () => {
         await action.plp.add({ index: itemIndexes });
       });
 
