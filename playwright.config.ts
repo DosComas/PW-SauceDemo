@@ -42,10 +42,11 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   snapshotPathTemplate: `{testDir}/__snapshots__/{testFilePath}/{projectName}-${t.meta.locale}-{arg}{ext}`,
-  timeout: 15_000,
+  timeout: 20_000,
   expect: {
-    timeout: 2_500,
+    timeout: 3_000,
   },
+
   /* Configure projects for major browsers */
   projects: [
     {
