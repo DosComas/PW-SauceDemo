@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ESNext", // Ensures you can use the latest JS features
-    "module": "ESNext", // Required for modern ESM imports
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
@@ -10,14 +10,10 @@
       "@helpers": ["helpers/index.ts"],
       "@utils": ["utils/index.ts"]
     },
-    "resolveJsonModule": true, // IMPORTANT: Allows you to import .json data files directly
-    "strict": true, // Prevents "undefined" bugs in your custom assertions
+    "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true, // Speeds up compilation by not re-checking library types
-    "forceConsistentCasingInFileNames": true // Prevents Windows/Linux naming conflicts
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "**/*.ts",
-    "utils/expect.extension.d.ts" // Forces your custom types to be globally active
-  ]
+  "include": ["**/*.ts", "utils/expect.extension.d.ts"]
 }
