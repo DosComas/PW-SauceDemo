@@ -7,8 +7,8 @@
     "base": "playwright test -g \"@👤\" --project=Chrome",
     "stress": "npm run base -- --repeat-each 100 --retries 0 -x --trace retain-on-failure",
     "report": "playwright show-report",
-    "validate": "prettier --check . --log-level warn && eslint . --max-warnings=0 && tsc --noEmit",
-    "fix": "prettier --write . && eslint . --fix"
+    "check": "concurrently -s -k false -n \"PRETTIER,ESLINT,TSC\" -c \"cyan,magenta,green\" \"prettier --check . --log-level warn\" \"eslint . --max-warnings=0\" \"tsc --noEmit\"",
+    "fix": "concurrently -n \"PRETTIER,ESLINT\" -c \"cyan,magenta\" \"prettier --write --list-different .\" \"eslint . --fix\""
   },
   "keywords": [],
   "author": "Roberto Hurry <hurryroberto@gmail.com>",
@@ -20,6 +20,7 @@
     "@faker-js/faker": "^10.3.0",
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.2.3",
+    "concurrently": "^9.2.1",
     "dotenv": "^17.3.1",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
