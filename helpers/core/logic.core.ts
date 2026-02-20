@@ -71,7 +71,7 @@ export async function _readItem(itemLoc: ItemLocators, options?: { imgSrc?: bool
   if (imgSrc && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
 
   const missing = Object.keys(itemData).filter((key) => !itemData[key as keyof ItemData]);
-  if (missing.length > 0) throw new Error(`[_scrapeItem] Missing item data: ${missing.join(', ')}`);
+  if (missing.length > 0) throw new Error(`[_readItem] Missing item data: ${missing.join(', ')}`);
 
   return itemData;
 }
