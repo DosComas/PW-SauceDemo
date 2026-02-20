@@ -71,7 +71,7 @@ export const catalog = (page: Page) => {
         },
         mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
           const blueprint = _cards.first();
-          await c._injectItemText(loc.plp.item(0), VISUAL_MOCK.product);
+          await c._injectItemText(loc.plp.item(0), VISUAL_MOCK.item);
           await c._injectClones(loc.plp.grid, blueprint, size);
         },
       },
@@ -79,7 +79,7 @@ export const catalog = (page: Page) => {
         add: async () => await _item.addBtn.click(),
         remove: async () => await _item.removeBtn.click(),
         goBack: async () => await loc.pdp.backBtn.click(),
-        mockItem: async () => await c._injectItemText(_item, VISUAL_MOCK.product),
+        mockItem: async () => await c._injectItemText(_item, VISUAL_MOCK.item),
       },
     },
     query: {

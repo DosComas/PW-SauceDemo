@@ -42,7 +42,7 @@ export const purchase = (page: Page) => {
         open: async () => await header.cart.openBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
-          await c._injectItemText(loc.cart.item(0), d.VISUAL_MOCK.product);
+          await c._injectItemText(loc.cart.item(0), d.VISUAL_MOCK.item);
           await c._injectClones(loc.cart.list, blueprint, size);
           await _injectBadgeNum(header.cart.badge, size);
         },

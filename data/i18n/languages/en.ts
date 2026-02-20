@@ -37,13 +37,13 @@ export const EN = {
     },
   },
 
-  /** Product Components: Shared actions available on both PLP and PDP */
+  /** Item Components: Shared actions available on both PLP and PDP */
   item: {
     addToCart: 'Add to cart',
     remove: 'Remove',
   },
 
-  /** Inventory View: Product Listing Page (PLP) layout and sorting options */
+  /** Item Grid: Product Listing Page (PLP) layout and sorting options */
   plp: {
     title: 'Products',
     sort: {
