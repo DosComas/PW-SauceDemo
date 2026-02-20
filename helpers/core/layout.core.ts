@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
-import { type SocialPlatform, t } from '@data';
+import type * as d from '@data';
+import { t } from '@data';
 
 // ==========================================
 // 🏛️ LAYOUT LOCATORS GATEWAY
@@ -27,7 +28,7 @@ export const layoutLocators = (page: Page) => {
         twitter: _social.getByRole('link', { name: t.footer.social.twitter.label }),
         facebook: _social.getByRole('link', { name: t.footer.social.facebook.label }),
         linkedin: _social.getByRole('link', { name: t.footer.social.linkedin.label }),
-      } satisfies Record<SocialPlatform, Locator>,
+      } satisfies Record<d.SocialPlatform, Locator>,
     },
-  } as const;
+  } as const satisfies d.LocSchema;
 };

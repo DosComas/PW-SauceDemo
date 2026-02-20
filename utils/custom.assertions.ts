@@ -1,6 +1,6 @@
 import type { Locator, ExpectMatcherState } from '@playwright/test';
 import { pollUntil } from './poll.utils';
-import type { SortCriteria } from '@data';
+import type * as d from '@data';
 
 // ==========================================
 // 🏛️ CUSTOM MATCHERS
@@ -10,8 +10,8 @@ export const customMatchers = {
   async toBeSortedBy(
     this: ExpectMatcherState,
     locator: Locator,
-    by: SortCriteria['by'],
-    order: SortCriteria['order'],
+    by: d.SortCriteria['by'],
+    order: d.SortCriteria['order'],
     options?: { timeout?: number },
   ) {
     const assertionName = 'toBeSortedBy';

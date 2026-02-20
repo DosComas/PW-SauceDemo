@@ -26,3 +26,13 @@ export type ItemData = { name: string; desc: string; price: string; imgSrc?: str
 export type ItemLocators = { name: Locator; desc: Locator; price: Locator; img?: Locator };
 export type SortableLocators = { names: Locator; prices: Locator };
 export type SortCriteria = { by: keyof SortableLocators; order: 'asc' | 'desc' };
+
+// ==========================================
+// 🏛️ DOMAIN SCHEMA TYPES
+// ==========================================
+
+type Branch<T> = T | { readonly [k: string]: T | { readonly [k: string]: T } };
+export type LocatorBundle = { readonly [k: string]: Locator | ((...args: never[]) => Locator) };
+export type LocSchema = Branch<Locator | LocatorBundle | ((...args: never[]) => Locator | LocatorBundle)>;
+export type ActSchema = Branch<(...args: never[]) => Promise<void>>;
+export type QuerySchema = Branch<(...args: never[]) => Promise<unknown>>;

@@ -1,6 +1,6 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
-import type { SortOption, ItemLocators, SortableLocators } from '@data';
+import type * as d from '@data';
 import { VISUAL_MOCK } from '@data';
 
 // ==========================================
@@ -21,7 +21,7 @@ const catalogLocators = (page: Page) => {
         prices: c._itemFragment(page).price,
         names: c._itemFragment(page).name,
         imgs: _getImg(page),
-      } satisfies SortableLocators & Record<string, Locator>,
+      } satisfies d.SortableLocators & d.LocatorBundle,
       item: (index: number) => {
         const root = _cards.nth(index);
         return { ...c._itemFragment(root), img: _getImg(root) };
@@ -34,7 +34,7 @@ const catalogLocators = (page: Page) => {
       },
       backBtn: page.getByTestId('back-to-products'),
     },
-  } as const;
+  } as const satisfies d.LocSchema;
 };
 
 // ==========================================
@@ -66,7 +66,7 @@ export const catalog = (page: Page) => {
           const item = _getItem(i);
           await (via === 'img' ? item.img : item.name).click();
         },
-        sort: async ({ label }: { label: SortOption }) => {
+        sort: async ({ label }: { label: d.SortOption }) => {
           await loc.plp.sort.selectOption(label);
         },
         mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
@@ -81,18 +81,18 @@ export const catalog = (page: Page) => {
         goBack: async () => await loc.pdp.backBtn.click(),
         mockItem: async () => await c._injectItemText(_item, VISUAL_MOCK.item),
       },
-    },
+    } as const satisfies d.ActSchema,
     query: {
       plp: {
         items: async <T extends c.IndexInput>({ index, imgSrc = true }: { index: T; imgSrc?: boolean }) => {
-          return _readItems(_cards, _getItem, index, { imgSrc });
+          return _readItems(_cards, _getItem, index, imgSrc);
         },
       },
       pdp: {
-        item: async () => await c._readItem(_item),
+        item: async () => await c._readItem(_item, true),
       },
-    },
-  } as const;
+    } as const satisfies d.QuerySchema,
+  };
 };
 
 // ==========================================
@@ -101,12 +101,12 @@ export const catalog = (page: Page) => {
 
 async function _readItems<T extends c.IndexInput>(
   cardsLoc: Locator,
-  getItem: (i: number) => ItemLocators,
+  getItem: (i: number) => d.ItemLocators,
   index: T,
-  options?: { imgSrc?: boolean },
+  imgSrc?: boolean,
 ): Promise<c.ReadResult<T>> {
   const indexes = await c._ensureIndexes(cardsLoc, index);
-  const items = await Promise.all(indexes.map((i) => c._readItem(getItem(i), options)));
+  const items = await Promise.all(indexes.map((i) => c._readItem(getItem(i), imgSrc)));
 
   return (Array.isArray(index) ? items : items[0]) as c.ReadResult<T>;
 }

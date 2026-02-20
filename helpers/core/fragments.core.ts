@@ -1,4 +1,5 @@
 import type { Page, Locator } from '@playwright/test';
+import type * as d from '@data';
 import { t } from '@data';
 
 // ==========================================
@@ -12,4 +13,4 @@ export const _itemFragment = (root: Page | Locator) =>
     desc: root.getByTestId('inventory-item-desc'),
     addBtn: root.getByRole('button', { name: t.item.addToCart }),
     removeBtn: root.getByRole('button', { name: t.item.remove }),
-  }) as const;
+  }) as const satisfies d.LocatorBundle;

@@ -60,9 +60,7 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function _readItem(itemLoc: ItemLocators, options?: { imgSrc?: boolean }): Promise<ItemData> {
-  const { imgSrc = true } = options ?? {};
-
+export async function _readItem(itemLoc: ItemLocators, imgSrc?: boolean): Promise<ItemData> {
   const itemData: ItemData = {
     name: ((await itemLoc.name.textContent()) || '').trim(),
     desc: ((await itemLoc.desc.textContent()) || '').trim(),

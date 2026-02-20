@@ -1,6 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
-import * as d from '@data';
+import type * as d from '@data';
+import { VISUAL_MOCK } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -20,8 +21,8 @@ export const purchaseLocators = (page: Page) => {
         const { name, desc, price } = c._itemFragment(root);
         return { name, desc, price };
       },
-    },
-  } as const;
+    } as const satisfies d.LocSchema,
+  };
 };
 
 // ==========================================
@@ -42,18 +43,18 @@ export const purchase = (page: Page) => {
         open: async () => await header.cart.openBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
-          await c._injectItemText(loc.cart.item(0), d.VISUAL_MOCK.item);
+          await c._injectItemText(loc.cart.item(0), VISUAL_MOCK.item);
           await c._injectClones(loc.cart.list, blueprint, size);
           await _injectBadgeNum(header.cart.badge, size);
         },
       },
-    },
+    } as const satisfies d.ActSchema,
     query: {
       cart: {
         items: async () => await _readItems(_cards, _getItem),
       },
-    },
-  } as const;
+    } as const satisfies d.QuerySchema,
+  };
 };
 
 // ==========================================
