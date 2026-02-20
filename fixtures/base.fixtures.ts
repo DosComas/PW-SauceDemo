@@ -1,33 +1,25 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
 import { customMatchers } from '@utils';
-import { type App, createApp } from '../helpers/index';
+import { type Gateway, createGateway } from '../helpers/index';
+
+// ==========================================
+// 🏛️ CUSTOM FIXTURES
+// ==========================================
+
+type MyFixtures = { _gateway: Gateway; loc: Gateway['loc']; act: Gateway['act']; query: Gateway['query'] };
+
+export const test = base.extend<MyFixtures>({
+  _gateway: async ({ page }, use) => {
+    await use(createGateway(page));
+  },
+
+  loc: async ({ _gateway }, use) => await use(_gateway.loc),
+  act: async ({ _gateway }, use) => await use(_gateway.act),
+  query: async ({ _gateway }, use) => await use(_gateway.query),
+});
 
 // ==========================================
 // 🏛️ CUSTOM ASSERTIONS
 // ==========================================
 
 export const expect = baseExpect.extend(customMatchers);
-
-// ==========================================
-// 🏛️ CUSTOM FIXTURES
-// ==========================================
-
-type MyFixtures = { _app: App; loc: App['loc']; action: App['action']; session: App['session'] };
-
-export const test = base.extend<MyFixtures>({
-  _app: async ({ page }, use) => {
-    await use(createApp(page));
-  },
-
-  loc: async ({ _app }, use) => {
-    await use(_app.loc);
-  },
-
-  action: async ({ _app }, use) => {
-    await use(_app.action);
-  },
-
-  session: async ({ _app }, use) => {
-    await use(_app.session);
-  },
-});

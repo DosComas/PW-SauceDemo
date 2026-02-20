@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { t, AUTHENTICATED } from '@data';
 
-test.describe('Logout', () => {
+test.describe.parallel('Logout', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');
@@ -12,9 +12,9 @@ test.describe('Logout', () => {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
       test.use({ storageState: persona.storageState });
 
-      test('Secure logout and session destruction', async ({ page, loc, action, session }) => {
+      test('Secure logout and session destruction', async ({ page, loc, act, query }) => {
         await test.step('🟦 Logout', async () => {
-          await action.menu.logout();
+          await act.menu.logout();
         });
 
         await expect.soft(loc.login.loginBtn, '🟧 UI: Login button visible').toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Logout', () => {
           await page.reload();
         });
 
-        expect(await session.userSession(), '🟧 Data: Session cookies deleted').toBeUndefined();
+        expect(await query.session.user(), '🟧 Data: Session cookies deleted').toBeUndefined();
       });
     });
   }

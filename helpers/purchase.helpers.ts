@@ -1,9 +1,6 @@
 import type { Page, Locator } from '@playwright/test';
-import { _itemFragment } from './core/fragments.core';
-import { layoutLocators } from './core/layout.core';
-import * as c from './core/logic.core';
-import type { ItemLocators, ItemData } from '@data';
-import { VISUAL_MOCK } from '@data';
+import * as c from './core';
+import * as d from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -20,7 +17,7 @@ export const purchaseLocators = (page: Page) => {
       },
       item: (index: number) => {
         const root = _cards.nth(index);
-        const { name, desc, price } = _itemFragment(root);
+        const { name, desc, price } = c._itemFragment(root);
         return { name, desc, price };
       },
     },
@@ -33,23 +30,27 @@ export const purchaseLocators = (page: Page) => {
 
 export const purchase = (page: Page) => {
   const loc = purchaseLocators(page);
-  const { header } = layoutLocators(page);
+  const { header } = c.layoutLocators(page);
 
   const _cards = loc.cart.items.cards;
   const _getItem = (i: number) => loc.cart.item(i);
 
   return {
     loc,
-    action: {
+    act: {
       cart: {
-        scrape: async () => _scrapeAllItems(_cards, _getItem),
         open: async () => await header.cart.openBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
-          await c._injectItemText(loc.cart.item(0), VISUAL_MOCK.product);
+          await c._injectItemText(loc.cart.item(0), d.VISUAL_MOCK.product);
           await c._injectClones(loc.cart.list, blueprint, size);
           await _injectBadgeNum(header.cart.badge, size);
         },
+      },
+    },
+    query: {
+      cart: {
+        items: async () => await _readItems(_cards, _getItem),
       },
     },
   } as const;
@@ -59,11 +60,11 @@ export const purchase = (page: Page) => {
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _scrapeAllItems(cardsLoc: Locator, getItem: (i: number) => ItemLocators): Promise<ItemData[]> {
+async function _readItems(cardsLoc: Locator, getItem: (i: number) => d.ItemLocators): Promise<d.ItemData[]> {
   await cardsLoc.first().waitFor();
   const count = await cardsLoc.count();
   const range = Array.from({ length: count }, (_, i) => i);
-  return await Promise.all(range.map((i) => c._scrapeItem(getItem(i))));
+  return await Promise.all(range.map((i) => c._readItem(getItem(i))));
 }
 
 async function _injectBadgeNum(badgeLoc: Locator, count: number): Promise<void> {

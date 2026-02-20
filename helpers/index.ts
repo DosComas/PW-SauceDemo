@@ -8,9 +8,9 @@ import { purchase } from './purchase.helpers';
 // 🏛️ HELPERS GATEWAY
 // ==========================================
 
-export type App = ReturnType<typeof createApp>;
+export type Gateway = ReturnType<typeof createGateway>;
 
-export const createApp = (page: Page) => {
+export const createGateway = (page: Page) => {
   const catalogObj = catalog(page);
   const accountObj = account(page);
   const purchaseObj = purchase(page);
@@ -22,13 +22,15 @@ export const createApp = (page: Page) => {
       ...catalogObj.loc,
       ...purchaseObj.loc,
     },
-    action: {
-      ...accountObj.action,
-      ...catalogObj.action,
-      ...purchaseObj.action,
+    act: {
+      ...accountObj.act,
+      ...catalogObj.act,
+      ...purchaseObj.act,
     },
-    session: {
-      ...accountObj.session,
+    query: {
+      ...accountObj.query,
+      ...catalogObj.query,
+      ...purchaseObj.query,
     },
   };
 };

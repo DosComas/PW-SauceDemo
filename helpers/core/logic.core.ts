@@ -6,7 +6,7 @@ import type { ItemData, ItemLocators } from '@data';
 // ==========================================
 
 export type IndexInput = number | readonly number[];
-export type ScrapeResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
+export type ReadResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
 
 // ==========================================
 // 🏛️ LOGIC ACTIONS
@@ -60,11 +60,13 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function _scrapeItem(itemLoc: ItemLocators, imgSrc: boolean = true): Promise<ItemData> {
+export async function _readItem(itemLoc: ItemLocators, options?: { imgSrc?: boolean }): Promise<ItemData> {
+  const { imgSrc = true } = options ?? {};
+
   const itemData: ItemData = {
-    name: (await itemLoc.name.innerText()).trim(),
-    desc: (await itemLoc.desc.innerText()).trim(),
-    price: (await itemLoc.price.innerText()).trim(),
+    name: ((await itemLoc.name.textContent()) || '').trim(),
+    desc: ((await itemLoc.desc.textContent()) || '').trim(),
+    price: ((await itemLoc.price.textContent()) || '').trim(),
   };
   if (imgSrc && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
 

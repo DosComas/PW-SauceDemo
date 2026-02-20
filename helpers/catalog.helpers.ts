@@ -1,8 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
-import { _itemFragment } from './core/fragments.core';
-import * as c from './core/logic.core';
-import { VISUAL_MOCK } from '@data';
+import * as c from './core';
 import type { SortOption, ItemLocators, SortableLocators } from '@data';
+import { VISUAL_MOCK } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -19,18 +18,18 @@ const catalogLocators = (page: Page) => {
       sort: page.getByTestId('product-sort-container'),
       items: {
         cards: _cards,
-        prices: _itemFragment(page).price,
-        names: _itemFragment(page).name,
+        prices: c._itemFragment(page).price,
+        names: c._itemFragment(page).name,
         imgs: _getImg(page),
       } satisfies SortableLocators & Record<string, Locator>,
       item: (index: number) => {
         const root = _cards.nth(index);
-        return { ..._itemFragment(root), img: _getImg(root) };
+        return { ...c._itemFragment(root), img: _getImg(root) };
       },
     },
     pdp: {
       item: {
-        ..._itemFragment(page),
+        ...c._itemFragment(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
       },
       backBtn: page.getByTestId('back-to-products'),
@@ -52,11 +51,8 @@ export const catalog = (page: Page) => {
 
   return {
     loc,
-    action: {
+    act: {
       plp: {
-        scrape: async <T extends c.IndexInput>({ index, img = true }: { index: T; img?: boolean }) => {
-          return _scrapeItems(_cards, _getItem, index, img);
-        },
         add: async ({ index }: { index: c.IndexInput }) => {
           const indexes = await _ensure(index);
           for (const i of indexes) await _getItem(i).addBtn.click();
@@ -80,11 +76,20 @@ export const catalog = (page: Page) => {
         },
       },
       pdp: {
-        scrape: async () => await c._scrapeItem(_item),
         add: async () => await _item.addBtn.click(),
         remove: async () => await _item.removeBtn.click(),
-        back: async () => await loc.pdp.backBtn.click(),
+        goBack: async () => await loc.pdp.backBtn.click(),
         mockItem: async () => await c._injectItemText(_item, VISUAL_MOCK.product),
+      },
+    },
+    query: {
+      plp: {
+        items: async <T extends c.IndexInput>({ index, imgSrc = true }: { index: T; imgSrc?: boolean }) => {
+          return _readItems(_cards, _getItem, index, { imgSrc });
+        },
+      },
+      pdp: {
+        item: async () => await c._readItem(_item),
       },
     },
   } as const;
@@ -94,14 +99,14 @@ export const catalog = (page: Page) => {
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _scrapeItems<T extends c.IndexInput>(
+async function _readItems<T extends c.IndexInput>(
   cardsLoc: Locator,
   getItem: (i: number) => ItemLocators,
   index: T,
-  imgSrc: boolean = true,
-): Promise<c.ScrapeResult<T>> {
+  options?: { imgSrc?: boolean },
+): Promise<c.ReadResult<T>> {
   const indexes = await c._ensureIndexes(cardsLoc, index);
-  const itemDataList = await Promise.all(indexes.map((i) => c._scrapeItem(getItem(i), imgSrc)));
+  const items = await Promise.all(indexes.map((i) => c._readItem(getItem(i), options)));
 
-  return (Array.isArray(index) ? itemDataList : itemDataList[0]) as c.ScrapeResult<T>;
+  return (Array.isArray(index) ? items : items[0]) as c.ReadResult<T>;
 }

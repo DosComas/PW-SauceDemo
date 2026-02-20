@@ -5,7 +5,7 @@ import { t, BASELINE } from '@data';
 const SOCIAL = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
 const ABOUT = t.menu.about;
 
-test.describe('Navigation', () => {
+test.describe.parallel('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');
@@ -26,9 +26,9 @@ test.describe('Navigation', () => {
         }
       });
 
-      test('About Link', async ({ loc, action }) => {
+      test('About Link', async ({ loc, act }) => {
         await test.step('🟦 Open main menu', async () => {
-          await action.menu.open();
+          await act.menu.open();
         });
 
         await expect.soft(loc.header.menu.aboutBtn, '🟧 UI: About button visible').toBeVisible();

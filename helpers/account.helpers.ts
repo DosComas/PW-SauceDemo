@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
-import { layoutLocators } from './core/layout.core';
-import { _getStorageData, _getCookie } from '@utils';
+import * as c from './core';
+import * as u from '@utils';
 import { t, STATE_KEYS } from '@data';
 
 // ==========================================
@@ -23,7 +23,7 @@ const accountLocators = (page: Page) =>
 
 export const account = (page: Page) => {
   const loc = accountLocators(page);
-  const { header } = layoutLocators(page);
+  const { header } = c.layoutLocators(page);
 
   const _openMenu = async () => {
     await header.menu.panel.waitFor({ state: 'hidden' });
@@ -32,7 +32,7 @@ export const account = (page: Page) => {
 
   return {
     loc,
-    action: {
+    act: {
       login: {
         submit: async ({ user, pass }: { user: string; pass: string }) => {
           await loc.login.nameInput.fill(user);
@@ -48,9 +48,11 @@ export const account = (page: Page) => {
         open: async () => _openMenu(),
       },
     },
-    session: {
-      userSession: async () => await _getCookie(page, STATE_KEYS.userSession),
-      cartItems: async () => await _getStorageData<number[]>(page, STATE_KEYS.cart),
+    query: {
+      session: {
+        user: async () => await u._getCookie(page, STATE_KEYS.userSession),
+        cart: async () => await u._getStorageData<number[]>(page, STATE_KEYS.cart),
+      },
     },
   } as const;
 };

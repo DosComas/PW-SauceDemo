@@ -9,7 +9,7 @@ const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
 
-test.describe('PLP', () => {
+test.describe.parallel('PLP', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');
@@ -26,41 +26,41 @@ test.describe('PLP', () => {
           { option: t.plp.sort.hiLo, by: 'prices', order: 'desc' },
         ] as const satisfies SortScenario[]
       ).forEach(({ option, by, order }) => {
-        test(`Items follow ${option} order`, async ({ loc, action }) => {
+        test(`Items follow ${option} order`, async ({ loc, act }) => {
           await test.step('🟦 Sort items', async () => {
-            await action.plp.sort({ label: option });
+            await act.plp.sort({ label: option });
           });
 
           await expect(loc.plp.items[by], `🟧 UI: Sorted by ${option}`).toBeSortedBy(by, order);
         });
       });
 
-      test('Add/Remove button toggles cart state', async ({ loc, action, session }) => {
+      test('Add/Remove button toggles cart state', async ({ loc, act, query }) => {
         await test.step('🟦 Add items to cart', async () => {
-          await action.plp.add({ index: itemIndexes });
+          await act.plp.add({ index: itemIndexes });
         });
 
         await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 3').toHaveText('3');
         await test.step('🟧 Data: Local storage has 3 items', async () => {
-          expect(await session.cartItems()).toHaveLength(3);
+          expect(await query.session.cart()).toHaveLength(3);
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await action.plp.remove({ index: itemIndex });
+          await act.plp.remove({ index: itemIndex });
         });
 
         await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 2').toHaveText('2');
         await test.step('🟧 Data: Local storage has 2 items', async () => {
-          expect(await session.cartItems()).toHaveLength(2);
+          expect(await query.session.cart()).toHaveLength(2);
         });
       });
 
       if (persona.isBaseline) {
-        test('Visual layout', { tag: '@visual' }, async ({ page, loc, action }) => {
+        test('Visual layout', { tag: '@visual' }, async ({ page, loc, act }) => {
           const imgs = await test.step('⬜ Mock grid', async () => {
-            await action.plp.mockGrid();
+            await act.plp.mockGrid();
             return await loc.plp.items.imgs.all();
           });
 

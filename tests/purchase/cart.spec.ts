@@ -18,7 +18,7 @@ const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
 
-test.describe('Cart', () => {
+test.describe.parallel('Cart', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');
@@ -29,20 +29,20 @@ test.describe('Cart', () => {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
       test.use({ storageState: persona.storageState });
 
-      test('Items match PLP data', async ({ loc, action }) => {
+      test('Items match PLP data', async ({ loc, act, query }) => {
         const expected = await test.step('⬜ Scrape PLP items data', async () => {
-          return await action.plp.scrape({ index: itemIndexes, img: false });
+          return await query.plp.items({ index: itemIndexes, imgSrc: false });
         });
 
         await test.step('⬜ Add items and navigate to cart', async () => {
-          await action.plp.add({ index: itemIndexes });
-          await action.cart.open();
+          await act.plp.add({ index: itemIndexes });
+          await act.cart.open();
         });
 
         await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
 
         const actual = await test.step('🟧 UI: Scrape Cart items data', async () => {
-          return await action.cart.scrape();
+          return await query.cart.items();
         });
 
         expect(actual, '🟧 Data: Cart items match PLP source').toMatchObject(expected);
@@ -59,14 +59,14 @@ test.describe('Cart', () => {
       // END
 
       if (persona.isBaseline) {
-        test('Visual layout', { tag: '@visual' }, async ({ page, action }) => {
+        test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
           await test.step('⬜ Add an item and go to cart', async () => {
-            await action.plp.add({ index: itemIndex });
-            await action.cart.open();
+            await act.plp.add({ index: itemIndex });
+            await act.cart.open();
           });
 
           await test.step('⬜ Mock List', async () => {
-            await action.cart.mockList();
+            await act.cart.mockList();
           });
 
           await expect(page, '🟧 UI: Layout visual check').toHaveScreenshot({ fullPage: true });
