@@ -26,12 +26,8 @@ test.describe.parallel('PDP', () => {
           await act.plp.open({ index: itemIndex, via: 'name' });
         });
 
-        const actual = await test.step('🟧 UI: Scrape PDP item data', async () => {
-          return await query.pdp.item();
-        });
-
-        await test.step('🟧 Data: PDP item match PLP source', async () => {
-          expect(actual).toMatchObject(expected);
+        await test.step('🟧 UI: PDP item match PLP source', async () => {
+          expect(await query.pdp.item()).toMatchObject(expected);
         });
       });
 

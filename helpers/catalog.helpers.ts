@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { VISUAL_MOCK } from '@data';
+import { SAMPLE_ITEM } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -71,7 +71,7 @@ export const catalog = (page: Page) => {
         },
         mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
           const blueprint = _cards.first();
-          await c._injectItemText(loc.plp.item(0), VISUAL_MOCK.item);
+          await c._injectItemText(loc.plp.item(0), SAMPLE_ITEM);
           await c._injectClones(loc.plp.grid, blueprint, size);
         },
       },
@@ -79,7 +79,7 @@ export const catalog = (page: Page) => {
         add: async () => await _item.addBtn.click(),
         remove: async () => await _item.removeBtn.click(),
         goBack: async () => await loc.pdp.backBtn.click(),
-        mockItem: async () => await c._injectItemText(_item, VISUAL_MOCK.item),
+        mockItem: async () => await c._injectItemText(_item, SAMPLE_ITEM),
       },
     } as const satisfies d.ActSchema,
     query: {

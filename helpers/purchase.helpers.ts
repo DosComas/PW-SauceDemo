@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { VISUAL_MOCK } from '@data';
+import { SAMPLE_ITEM } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -40,10 +40,13 @@ export const purchase = (page: Page) => {
     loc,
     act: {
       cart: {
-        open: async () => await header.cart.openBtn.click(),
+        goto: async () => await header.cart.openBtn.click(),
+        open: async ({ index }: { index: number }) => {
+          await _getItem(index).name.click();
+        },
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
-          await c._injectItemText(loc.cart.item(0), VISUAL_MOCK.item);
+          await c._injectItemText(loc.cart.item(0), SAMPLE_ITEM);
           await c._injectClones(loc.cart.list, blueprint, size);
           await _injectBadgeNum(header.cart.badge, size);
         },
