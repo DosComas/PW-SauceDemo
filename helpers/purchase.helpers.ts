@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { SAMPLE_ITEM } from '@data';
+import { t, SAMPLE_ITEM } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -19,6 +19,7 @@ export const purchaseLocators = (page: Page) => {
       item: (index: number) => ({
         ...c._itemFragment(_cards.nth(index)),
       }),
+      backBtn: page.getByRole('button', { name: t.cart.goBack }),
     } as const satisfies d.LocSchema,
   };
 };
@@ -47,6 +48,7 @@ export const purchase = (page: Page) => {
           const indexes = await c._ensureIndexes(_cards, index);
           for (const i of indexes) await _getItem(i).removeBtn.click();
         },
+        goBack: async () => await loc.cart.backBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
           await c._injectItemText(loc.cart.item(0), SAMPLE_ITEM);

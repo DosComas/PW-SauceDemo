@@ -2,22 +2,9 @@ import { test, expect } from '@fixtures';
 import { AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
-// CASES?:
-// Cases: add product to cart, check sync? data? badge? local?
-
-// remove from cart and go back to... inventory, pdp? to chceck sync. how about data? badge? local?
-// -- go to pdp, scrape, go back, check item and cart
-
-// test buttons, sync buttons, states
-
-// how about addin items form the PDP to cart?
-
-// test remove from cart? test going back?
-
 const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
-const secondItem = 1;
 
 test.describe.parallel('Cart', () => {
   test.beforeEach(async ({ page }) => {
@@ -53,11 +40,11 @@ test.describe.parallel('Cart', () => {
         });
 
         const expected = await test.step('⬜ Scrape Cart item data', async () => {
-          return await query.cart.items({ index: secondItem });
+          return await query.cart.items({ index: 1 });
         });
 
         await test.step('🟦 Navigate from Cart to PDP', async () => {
-          await act.cart.openItem({ index: secondItem });
+          await act.cart.openItem({ index: 1 });
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
@@ -66,40 +53,24 @@ test.describe.parallel('Cart', () => {
         });
       });
 
-      // TODO
-      test.skip('A: from cart remove item, go to pdp (state)', async ({ act }) => {
-        // go to PDP
-        // add item PDP
-        // go to cart
-        // check data only? or remove item and check it is empy the list, badge, and local storage?
-
-        await test.step('⬜ Add items and navigate to cart', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
+      test('State persistence on Cart return', async ({ loc, act, query }) => {
+        await test.step('⬜ Add item to cart from PDP', async () => {
+          await act.plp.openItem({ index: itemIndex, via: 'img' });
+          await act.pdp.addToCart();
           await act.cart.openCart();
         });
 
-        await test.step('🟦 Remove one item and go to PDP', async () => {});
-
-        // await expect.soft(page, '🟧 UI: button, badge and LS').toHaveURL('d');
-      });
-
-      test.skip('B: from cart remove item, go to plp, check (state)', async ({ act }) => {
-        // add items PLP
-        // remove 1 cart
-        // go back to shopping cart
-        // check PLP item
-
-        await test.step('⬜ Add items and navigate to cart', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
-          await act.cart.openCart();
+        await test.step('⬜ Remove item from Cart and continue shopping', async () => {
+          await act.cart.removeFromCart({ index: 0 });
+          await act.cart.goBack();
         });
 
-        await test.step('🟦 Remove one item and go to PLP', async () => {});
-
-        // await expect.soft(page, '🟧 UI: button, badge and LS').toHaveURL('d');
+        await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
+        await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
+        await test.step('🟧 Data: Local storage has 0 items', async () => {
+          expect(await query.session.readCart()).toHaveLength(0);
+        });
       });
-
-      // END
 
       test('Remove button toggles cart state', async ({ loc, act, query }) => {
         await test.step('⬜ Add items and navigate to cart', async () => {

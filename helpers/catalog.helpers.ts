@@ -25,17 +25,17 @@ const catalogLocators = (page: Page) => {
       } satisfies d.SortableLocators & d.LocatorBundle,
       item: (index: number) => ({
         ...c._itemFragment(_cards.nth(index)),
-        addBtn: _getAddBtn(_cards.nth(index)),
         img: _getImg(_cards.nth(index)),
+        addBtn: _getAddBtn(_cards.nth(index)),
       }),
     },
     pdp: {
       item: {
         ...c._itemFragment(page),
-        addBtn: _getAddBtn(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
+        addBtn: _getAddBtn(page),
       },
-      backBtn: page.getByTestId('back-to-products'),
+      backBtn: page.getByRole('button', { name: t.pdp.goBack }),
     },
   } as const satisfies d.LocSchema;
 };

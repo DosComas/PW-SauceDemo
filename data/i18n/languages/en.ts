@@ -56,12 +56,13 @@ export const EN = {
 
   /** Detail View: Single Product Details Page (PDP) specific navigation */
   pdp: {
-    back: 'Back to products',
+    goBack: 'Back to products',
   },
 
   /** Shopping Experience: Cart overview and entry point to checkout */
   cart: {
     checkout: 'Checkout',
+    goBack: 'Continue Shopping',
   },
 
   /** Transaction Flow: Customer information and order completion */
