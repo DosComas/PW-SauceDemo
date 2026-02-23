@@ -16,11 +16,9 @@ export const purchaseLocators = (page: Page) => {
       items: {
         cards: _cards,
       },
-      item: (index: number) => {
-        const root = _cards.nth(index);
-        const { name, desc, price, removeBtn } = c._itemFragment(root);
-        return { name, desc, price, removeBtn };
-      },
+      item: (index: number) => ({
+        ...c._itemFragment(_cards.nth(index)),
+      }),
     } as const satisfies d.LocSchema,
   };
 };
@@ -80,15 +78,16 @@ async function _readCartItems<T extends number | undefined>(
   getItem: (i: number) => d.ItemLocators,
   index?: T,
 ): Promise<T extends number ? d.ItemData : d.ItemData[]> {
-  // 1. Scrape ALL if index is missing
+  // Scrape ALL if index is missing
   if (index === undefined) {
     await cardsLoc.first().waitFor();
-    const count = await cardsLoc.count();
-    const range = Array.from({ length: count }, (_, i) => i);
+    const range = Array.from({ length: await cardsLoc.count() }, (_, i) => i);
     const items = await Promise.all(range.map((i) => c._readItem(getItem(i))));
     return items as T extends number ? d.ItemData : d.ItemData[];
   }
 
-  const item = await c._readItem(getItem(index));
+  // Scrape single item if index is number
+  const [i] = await c._ensureIndexes(cardsLoc, index);
+  const item = await c._readItem(getItem(i));
   return item as T extends number ? d.ItemData : d.ItemData[];
 }

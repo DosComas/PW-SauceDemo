@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { SAMPLE_ITEM } from '@data';
+import { t, SAMPLE_ITEM } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -10,6 +10,7 @@ import { SAMPLE_ITEM } from '@data';
 const catalogLocators = (page: Page) => {
   const _cards = page.getByTestId('inventory-item');
   const _getImg = (root: Locator | Page) => root.locator('.inventory_item_img').getByRole('img');
+  const _getAddBtn = (root: Locator | Page) => root.getByRole('button', { name: t.item.addToCart });
 
   return {
     plp: {
@@ -22,14 +23,16 @@ const catalogLocators = (page: Page) => {
         names: c._itemFragment(page).name,
         imgs: _getImg(page),
       } satisfies d.SortableLocators & d.LocatorBundle,
-      item: (index: number) => {
-        const root = _cards.nth(index);
-        return { ...c._itemFragment(root), img: _getImg(root) };
-      },
+      item: (index: number) => ({
+        ...c._itemFragment(_cards.nth(index)),
+        addBtn: _getAddBtn(_cards.nth(index)),
+        img: _getImg(_cards.nth(index)),
+      }),
     },
     pdp: {
       item: {
         ...c._itemFragment(page),
+        addBtn: _getAddBtn(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
       },
       backBtn: page.getByTestId('back-to-products'),
