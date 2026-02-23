@@ -1,12 +1,12 @@
 import type { Locator } from '@playwright/test';
-import type { ItemData, ItemLocators } from '@data';
+import type * as d from '@data';
 
 // ==========================================
 // 🏛️ LOGIC TYPES
 // ==========================================
 
 export type IndexInput = number | readonly number[];
-export type ReadResult<T extends IndexInput> = T extends number ? ItemData : ItemData[];
+export type ReadResult<T extends IndexInput> = T extends number ? d.ItemData : d.ItemData[];
 
 // ==========================================
 // 🏛️ LOGIC ACTIONS
@@ -28,7 +28,7 @@ export async function _ensureIndexes(loc: Locator, input: IndexInput): Promise<n
   return list;
 }
 
-export async function _injectItemText(itemLoc: ItemLocators, data: ItemData): Promise<void> {
+export async function _injectItemText(itemLoc: d.ItemLocators, data: d.ItemData): Promise<void> {
   await itemLoc.name.waitFor();
 
   const mapping = [
@@ -61,15 +61,15 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function _readItem(itemLoc: ItemLocators, imgSrc?: boolean): Promise<ItemData> {
-  const itemData: ItemData = {
+export async function _readItem(itemLoc: d.ItemLocators, imgSrc?: boolean): Promise<d.ItemData> {
+  const itemData: d.ItemData = {
     name: ((await itemLoc.name.textContent()) || '').trim(),
     desc: ((await itemLoc.desc.textContent()) || '').trim(),
     price: ((await itemLoc.price.textContent()) || '').trim(),
   };
-  if (imgSrc && itemLoc.img) itemData.imgSrc = (await itemLoc.img.getAttribute('src')) || '';
+  if (imgSrc && itemLoc.img) itemData.img = (await itemLoc.img.getAttribute('src')) || '';
 
-  const missing = Object.keys(itemData).filter((key) => !itemData[key as keyof ItemData]);
+  const missing = Object.keys(itemData).filter((key) => !itemData[key as keyof d.ItemData]);
   if (missing.length > 0) throw new Error(`[_readItem] Missing item data: ${missing.join(', ')}`);
 
   return itemData;
