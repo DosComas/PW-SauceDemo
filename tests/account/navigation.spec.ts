@@ -2,8 +2,7 @@ import { expect, test } from '@fixtures';
 import type { SocialPlatform, SocialPlatformData } from '@data';
 import { t, BASELINE } from '@data';
 
-const SOCIAL = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
-const ABOUT = t.menu.about;
+const SOCIAL_LINKS = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
 
 test.describe.parallel('Navigation', () => {
   test.beforeEach(async ({ page }) => {
@@ -17,7 +16,7 @@ test.describe.parallel('Navigation', () => {
       test.use({ storageState: persona.storageState });
 
       test('Social Media Links', async ({ loc }) => {
-        for (const [platform, expected] of SOCIAL) {
+        for (const [platform, expected] of SOCIAL_LINKS) {
           await test.step(`🟧 UI: ${expected.label} link properties`, async () => {
             const socialLoc = loc.footer.social[platform];
             await expect.soft(socialLoc).toHaveAttribute('href', expected.url);
@@ -32,7 +31,7 @@ test.describe.parallel('Navigation', () => {
         });
 
         await expect.soft(loc.header.menu.aboutBtn, '🟧 UI: About button visible').toBeVisible();
-        await expect(loc.header.menu.aboutBtn, `🟧 UI: About link URL`).toHaveAttribute('href', ABOUT.url);
+        await expect(loc.header.menu.aboutBtn, `🟧 UI: About link URL`).toHaveAttribute('href', t.menu.about.url);
       });
     });
   }
