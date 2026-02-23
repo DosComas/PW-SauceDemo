@@ -41,6 +41,7 @@ const catalogLocators = (page: Page) => {
 // 🏛️ DOMAIN GATEWAY
 // ==========================================
 
+/** Catalog domain: plp/pdp locators, actions, and item queries */
 export const catalog = (page: Page) => {
   const loc = catalogLocators(page);
 
@@ -53,21 +54,21 @@ export const catalog = (page: Page) => {
     loc,
     act: {
       plp: {
-        add: async ({ index }: { index: c.IndexInput }) => {
+        addToCart: async ({ index }: { index: c.IndexInput }) => {
           const indexes = await _ensure(index);
           for (const i of indexes) await _getItem(i).addBtn.click();
         },
-        remove: async ({ index }: { index: c.IndexInput }) => {
+        removeFromCart: async ({ index }: { index: c.IndexInput }) => {
           const indexes = await _ensure(index);
           for (const i of indexes) await _getItem(i).removeBtn.click();
         },
-        open: async ({ index, via }: { index: number; via: 'name' | 'img' }) => {
+        openItem: async ({ index, via }: { index: number; via: 'name' | 'img' }) => {
           const [i] = await _ensure(index);
           const item = _getItem(i);
           await (via === 'img' ? item.img : item.name).click();
         },
-        sort: async ({ label }: { label: d.SortOption }) => {
-          await loc.plp.sort.selectOption(label);
+        sortGrid: async ({ option }: { option: d.SortOption }) => {
+          await loc.plp.sort.selectOption(option);
         },
         mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
           const blueprint = _cards.first();
@@ -76,20 +77,20 @@ export const catalog = (page: Page) => {
         },
       },
       pdp: {
-        add: async () => await _item.addBtn.click(),
-        remove: async () => await _item.removeBtn.click(),
+        addToCart: async () => await _item.addBtn.click(),
+        removeFromCart: async () => await _item.removeBtn.click(),
         goBack: async () => await loc.pdp.backBtn.click(),
         mockItem: async () => await c._injectItemText(_item, SAMPLE_ITEM),
       },
     } as const satisfies d.ActSchema,
     query: {
       plp: {
-        items: async <T extends c.IndexInput>({ index, imgSrc = true }: { index: T; imgSrc?: boolean }) => {
-          return _readItems(_cards, _getItem, index, imgSrc);
+        readItems: async <T extends c.IndexInput>({ index, imgSrc = true }: { index: T; imgSrc?: boolean }) => {
+          return _readGridItems(_cards, _getItem, index, imgSrc);
         },
       },
       pdp: {
-        item: async () => await c._readItem(_item, true),
+        readItem: async () => await c._readItem(_item, true),
       },
     } as const satisfies d.QuerySchema,
   };
@@ -99,7 +100,7 @@ export const catalog = (page: Page) => {
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _readItems<T extends c.IndexInput>(
+async function _readGridItems<T extends c.IndexInput>(
   cardsLoc: Locator,
   getItem: (i: number) => d.ItemLocators,
   index: T,

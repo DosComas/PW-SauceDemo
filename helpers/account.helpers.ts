@@ -22,6 +22,7 @@ const accountLocators = (page: Page) =>
 // 🏛️ DOMAIN GATEWAY
 // ==========================================
 
+/** Account domain: login, menu, and session queries */
 export const account = (page: Page) => {
   const loc = accountLocators(page);
   const { header } = c.layoutLocators(page);
@@ -35,7 +36,7 @@ export const account = (page: Page) => {
     loc,
     act: {
       login: {
-        submit: async ({ user, pass }: { user: string; pass: string }) => {
+        submitCredentials: async ({ user, pass }: { user: string; pass: string }) => {
           await loc.login.nameInput.fill(user);
           await loc.login.passInput.fill(pass);
           await loc.login.loginBtn.click();
@@ -46,13 +47,13 @@ export const account = (page: Page) => {
           await _openMenu();
           await header.menu.logoutBtn.click();
         },
-        open: async () => _openMenu(),
+        openMenu: async () => _openMenu(),
       },
     } as const satisfies d.ActSchema,
     query: {
       session: {
-        user: async () => await u._getCookie(page, STATE_KEYS.userSession),
-        cart: async () => await u._getStorageData<number[]>(page, STATE_KEYS.cart),
+        readUser: async () => await u._getCookie(page, STATE_KEYS.userSession),
+        readCart: async () => await u._getStorageData<number[]>(page, STATE_KEYS.cart),
       },
     } as const satisfies d.QuerySchema,
   };

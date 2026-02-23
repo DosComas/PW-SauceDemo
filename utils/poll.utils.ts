@@ -4,10 +4,7 @@ import { test, FullConfig } from '@playwright/test';
 // 🏛️ POLLING UTILITY
 // ==========================================
 
-/**
- * A progressive polling utility that retries a callback until a condition is met.
- * Handles transient UI errors and scales wait times to be efficient.
- */
+/** Progressive polling utility: retries callback until condition met with backoff */
 export async function pollUntil<T>(
   callback: () => Promise<T | null>,
   condition: (value: T) => boolean,

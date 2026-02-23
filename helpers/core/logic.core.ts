@@ -12,6 +12,7 @@ export type ReadResult<T extends IndexInput> = T extends number ? ItemData : Ite
 // 🏛️ LOGIC ACTIONS
 // ==========================================
 
+/** Validates requested indexes exist in DOM, throws if any index out of bounds */
 export async function _ensureIndexes(loc: Locator, input: IndexInput): Promise<number[]> {
   const list: number[] = Array.isArray(input) ? input : [input];
   if (list.length === 0) return [];

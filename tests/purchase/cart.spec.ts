@@ -17,6 +17,7 @@ import { createRandom } from '@utils';
 const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
+const secondItem = 1;
 
 test.describe.parallel('Cart', () => {
   test.beforeEach(async ({ page }) => {
@@ -31,38 +32,96 @@ test.describe.parallel('Cart', () => {
 
       test('Items match PLP data', async ({ loc, act, query }) => {
         const expected = await test.step('⬜ Scrape PLP items data', async () => {
-          return await query.plp.items({ index: itemIndexes, imgSrc: false });
+          return await query.plp.readItems({ index: itemIndexes, imgSrc: false });
         });
 
-        await test.step('⬜ Add items and navigate to cart', async () => {
-          await act.plp.add({ index: itemIndexes });
-          await act.cart.open();
+        await test.step('🟦 Add items and navigate to cart', async () => {
+          await act.plp.addToCart({ index: itemIndexes });
+          await act.cart.openCart();
         });
 
         await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
+        await test.step('🟧 UI: Cart items match PLP source', async () => {
+          expect(await query.cart.items()).toMatchObject(expected);
+        });
+      });
 
-        const actual = await test.step('🟧 UI: Scrape Cart items data', async () => {
-          return await query.cart.items();
+      test('PDP matches Cart data', async ({ loc, act, query }) => {
+        await test.step('⬜ Add items and navigate to cart', async () => {
+          await act.plp.addToCart({ index: itemIndexes });
+          await act.cart.openCart();
         });
 
-        expect(actual, '🟧 Data: Cart items match PLP source').toMatchObject(expected);
+        const expected = await test.step('⬜ Scrape Cart item data', async () => {
+          return await query.cart.items({ index: secondItem });
+        });
+
+        await test.step('🟦 Navigate from Cart to PDP', async () => {
+          await act.cart.openItem({ index: secondItem });
+        });
+
+        await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+        await test.step('🟧 UI: PDP item match Cart source', async () => {
+          expect(await query.pdp.readItem()).toMatchObject(expected);
+        });
       });
 
       // TODO
-      test.skip('remove from cart, check sync?', async ({ page }) => {
-        await test.step('⬜ Arrange: prepare state', async () => {});
+      test.skip('A: from cart remove item, go to pdp (state)', async ({ act }) => {
+        // go to PDP
+        // add item PDP
+        // go to cart
+        // check data only? or remove item and check it is empy the list, badge, and local storage?
 
-        await test.step('🟦 Action: perform interaction', async () => {});
+        await test.step('⬜ Add items and navigate to cart', async () => {
+          await act.plp.addToCart({ index: itemIndexes });
+          await act.cart.openCart();
+        });
 
-        await expect.soft(page, '🟧 UI: verify outcome').toHaveURL('d');
+        await test.step('🟦 Remove one item and go to PDP', async () => {});
+
+        // await expect.soft(page, '🟧 UI: button, badge and LS').toHaveURL('d');
       });
+
+      test.skip('B: from cart remove item, go to plp, check (state)', async ({ act }) => {
+        // add items PLP
+        // remove 1 cart
+        // go back to shopping cart
+        // check PLP item
+
+        await test.step('⬜ Add items and navigate to cart', async () => {
+          await act.plp.addToCart({ index: itemIndexes });
+          await act.cart.openCart();
+        });
+
+        await test.step('🟦 Remove one item and go to PLP', async () => {});
+
+        // await expect.soft(page, '🟧 UI: button, badge and LS').toHaveURL('d');
+      });
+
       // END
+
+      test('Remove button toggles cart state', async ({ loc, act, query }) => {
+        await test.step('⬜ Add items and navigate to cart', async () => {
+          await act.plp.addToCart({ index: itemIndex });
+          await act.cart.openCart();
+        });
+
+        await test.step('🟦 Remove item from cart', async () => {
+          await act.cart.removeFromCart({ index: 0 });
+        });
+
+        await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
+        await test.step('🟧 Data: Local storage has 0 items', async () => {
+          expect(await query.session.readCart()).toHaveLength(0);
+        });
+      });
 
       if (persona.isBaseline) {
         test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
           await test.step('⬜ Add an item and go to cart', async () => {
-            await act.plp.add({ index: itemIndex });
-            await act.cart.open();
+            await act.plp.addToCart({ index: itemIndex });
+            await act.cart.openCart();
           });
 
           await test.step('⬜ Mock List', async () => {
@@ -75,40 +134,3 @@ test.describe.parallel('Cart', () => {
     });
   }
 });
-
-/*
-for (const persona of BASELINE_USERS) {
-  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
-    test.use({ storageState: persona.storageState });
-
-    test(`${SCOPE}: Remove item syncs with Badge and Inventory`, async ({ page, loc, action }) => {
-      const { removedItemIndex, retainedItemIndex } = CART_CONTEXT;
-
-      await test.step('🟦 Remove item from cart list', async () => {
-        await expect(loc.cart.items).toHaveCount(2);
-        await action.cart.remove({ index: removedItemIndex });
-      });
-
-      // 🏛️ Verification 1: Immediate Cart State
-      await expect.soft(loc.cart.item(removedItemIndex).component, '🟧 UI: Item removed').toBeHidden();
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge updates to 1').toHaveText('1');
-      await expect(page, '🟧 Data: Local storage has 1 item').toHaveStorageLength(STATE_KEYS.cart, 1);
-
-      await test.step('🟦 Return to Inventory to check Sync', async () => {
-        await action.cart.continueShopping();
-      });
-
-      // 🏛️ Verification 2: Cross-Page Sync (The "Grounded" Check)
-      await expect.soft(loc.plp.item(removedItemIndex).addBtn, '🟧 Sync: Removed item is reset').toBeVisible();
-      await expect.soft(loc.plp.item(retainedItemIndex).removeBtn, '🟧 Sync: Retained item is still active').toBeVisible();
-    });
-
-    test(`${SCOPE}: Checkout navigation flow`, async ({ page, loc, action }) => {
-      await test.step('🟦 Proceed to checkout', async () => {
-        await action.cart.checkout();
-      });
-
-      await expect(page, '🟧 Nav: Redirected to Checkout Step One').toHaveURL(/checkout-step-one/);
-    });
-  });
-}*/

@@ -28,7 +28,7 @@ test.describe.parallel('Navigation', () => {
 
       test('About Link', async ({ loc, act }) => {
         await test.step('🟦 Open main menu', async () => {
-          await act.menu.open();
+          await act.menu.openMenu();
         });
 
         await expect.soft(loc.header.menu.aboutBtn, '🟧 UI: About button visible').toBeVisible();

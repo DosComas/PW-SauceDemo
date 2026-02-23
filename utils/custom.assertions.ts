@@ -7,6 +7,7 @@ import type * as d from '@data';
 // ==========================================
 
 export const customMatchers = {
+  /** Verifies elements sorted by criteria (names/prices, asc/desc) with polling resilience */
   async toBeSortedBy(
     this: ExpectMatcherState,
     locator: Locator,

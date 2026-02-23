@@ -18,8 +18,8 @@ export const purchaseLocators = (page: Page) => {
       },
       item: (index: number) => {
         const root = _cards.nth(index);
-        const { name, desc, price } = c._itemFragment(root);
-        return { name, desc, price };
+        const { name, desc, price, removeBtn } = c._itemFragment(root);
+        return { name, desc, price, removeBtn };
       },
     } as const satisfies d.LocSchema,
   };
@@ -29,6 +29,7 @@ export const purchaseLocators = (page: Page) => {
 // 🏛️ DOMAIN GATEWAY
 // ==========================================
 
+/** Purchase domain: cart locators, actions, and item queries */
 export const purchase = (page: Page) => {
   const loc = purchaseLocators(page);
   const { header } = c.layoutLocators(page);
@@ -40,9 +41,13 @@ export const purchase = (page: Page) => {
     loc,
     act: {
       cart: {
-        goto: async () => await header.cart.openBtn.click(),
-        open: async ({ index }: { index: number }) => {
+        openCart: async () => await header.cart.openBtn.click(),
+        openItem: async ({ index }: { index: number }) => {
           await _getItem(index).name.click();
+        },
+        removeFromCart: async ({ index }: { index: c.IndexInput }) => {
+          const indexes = await c._ensureIndexes(_cards, index);
+          for (const i of indexes) await _getItem(i).removeBtn.click();
         },
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
@@ -54,7 +59,9 @@ export const purchase = (page: Page) => {
     } as const satisfies d.ActSchema,
     query: {
       cart: {
-        items: async () => await _readItems(_cards, _getItem),
+        items: async <T extends number | undefined = undefined>({ index }: { index?: T } = {}) => {
+          return _readCartItems(_cards, _getItem, index);
+        },
       },
     } as const satisfies d.QuerySchema,
   };
@@ -64,13 +71,24 @@ export const purchase = (page: Page) => {
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _readItems(cardsLoc: Locator, getItem: (i: number) => d.ItemLocators): Promise<d.ItemData[]> {
-  await cardsLoc.first().waitFor();
-  const count = await cardsLoc.count();
-  const range = Array.from({ length: count }, (_, i) => i);
-  return await Promise.all(range.map((i) => c._readItem(getItem(i))));
-}
-
 async function _injectBadgeNum(badgeLoc: Locator, count: number): Promise<void> {
   if (await badgeLoc.isVisible()) await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
+}
+
+async function _readCartItems<T extends number | undefined>(
+  cardsLoc: Locator,
+  getItem: (i: number) => d.ItemLocators,
+  index?: T,
+): Promise<T extends number ? d.ItemData : d.ItemData[]> {
+  // 1. Scrape ALL if index is missing
+  if (index === undefined) {
+    await cardsLoc.first().waitFor();
+    const count = await cardsLoc.count();
+    const range = Array.from({ length: count }, (_, i) => i);
+    const items = await Promise.all(range.map((i) => c._readItem(getItem(i))));
+    return items as T extends number ? d.ItemData : d.ItemData[];
+  }
+
+  const item = await c._readItem(getItem(index));
+  return item as T extends number ? d.ItemData : d.ItemData[];
 }

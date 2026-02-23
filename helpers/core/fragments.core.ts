@@ -6,6 +6,7 @@ import { t } from '@data';
 // 🏛️ FRAGMENTS LOCATORS
 // ==========================================
 
+/** Reusable item fragment: name, price, desc, add/remove buttons */
 export const _itemFragment = (root: Page | Locator) =>
   ({
     name: root.getByTestId('inventory-item-name'),

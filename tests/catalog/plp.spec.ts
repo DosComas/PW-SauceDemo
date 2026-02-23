@@ -28,7 +28,7 @@ test.describe.parallel('PLP', () => {
       ).forEach(({ option, by, order }) => {
         test(`Items follow ${option} order`, async ({ loc, act }) => {
           await test.step('🟦 Sort items', async () => {
-            await act.plp.sort({ label: option });
+            await act.plp.sortGrid({ option });
           });
 
           await expect(loc.plp.items[by], `🟧 UI: Sorted by ${option}`).toBeSortedBy(by, order);
@@ -37,23 +37,23 @@ test.describe.parallel('PLP', () => {
 
       test('Add/Remove button toggles cart state', async ({ loc, act, query }) => {
         await test.step('🟦 Add items to cart', async () => {
-          await act.plp.add({ index: itemIndexes });
+          await act.plp.addToCart({ index: itemIndexes });
         });
 
         await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 3').toHaveText('3');
         await test.step('🟧 Data: Local storage has 3 items', async () => {
-          expect(await query.session.cart()).toHaveLength(3);
+          expect(await query.session.readCart()).toHaveLength(3);
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await act.plp.remove({ index: itemIndex });
+          await act.plp.removeFromCart({ index: itemIndex });
         });
 
         await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 2').toHaveText('2');
         await test.step('🟧 Data: Local storage has 2 items', async () => {
-          expect(await query.session.cart()).toHaveLength(2);
+          expect(await query.session.readCart()).toHaveLength(2);
         });
       });
 

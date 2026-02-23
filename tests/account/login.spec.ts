@@ -12,7 +12,7 @@ test.describe.parallel('Login', () => {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
       test('Reject invalid credentials', async ({ loc, act }) => {
         await test.step('🟦 Log into the app', async () => {
-          await act.login.submit({ user: persona.user, pass: persona.pass });
+          await act.login.submitCredentials({ user: persona.user, pass: persona.pass });
         });
 
         await expect(loc.login.errorMsg, '🟧 UI: Error message matches').toContainText(
@@ -26,12 +26,12 @@ test.describe.parallel('Login', () => {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
       test('Accept valid credentials', async ({ loc, act, query }) => {
         await test.step('🟦 Log in to app', async () => {
-          await act.login.submit({ user: persona.user, pass: persona.pass });
+          await act.login.submitCredentials({ user: persona.user, pass: persona.pass });
         });
 
         await expect.soft(loc.plp.title, '🟧 UI: Products title check').toHaveText(t.plp.title);
         await expect.soft(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
-        expect(await query.session.user(), '🟧 Data: Session cookies present').toBeTruthy();
+        expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
       });
 
       test('Visual layout', { tag: '@visual' }, async ({ page, loc }) => {

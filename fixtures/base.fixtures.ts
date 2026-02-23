@@ -1,6 +1,6 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
 import { customMatchers } from '@utils';
-import { type Gateway, createGateway } from '../helpers/index';
+import { type Gateway, createGateway } from '../helpers';
 
 // ==========================================
 // 🏛️ CUSTOM FIXTURES
@@ -8,6 +8,7 @@ import { type Gateway, createGateway } from '../helpers/index';
 
 type MyFixtures = { _gateway: Gateway; loc: Gateway['loc']; act: Gateway['act']; query: Gateway['query'] };
 
+/** Fixture: Provides gateway access to loc, act, query */
 export const test = base.extend<MyFixtures>({
   _gateway: async ({ page }, use) => {
     await use(createGateway(page));
@@ -22,4 +23,5 @@ export const test = base.extend<MyFixtures>({
 // 🏛️ CUSTOM ASSERTIONS
 // ==========================================
 
+/** Custom matchers extended with toBeSortedBy */
 export const expect = baseExpect.extend(customMatchers);

@@ -6,6 +6,7 @@ import { t } from '@data';
 // 🏛️ LAYOUT LOCATORS GATEWAY
 // ==========================================
 
+/** Shared layout locators: header, footer, cart, menu */
 export const layoutLocators = (page: Page) => {
   const _social = page.locator('.social');
 

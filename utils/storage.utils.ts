@@ -12,10 +12,7 @@ export async function _getCookie(page: Page, name: string): Promise<Cookie | und
   return cookies.find((c) => c.name === name);
 }
 
-/**
- * Retrieves data from LocalStorage.
- * Uses progressive polling to ensure the data is present before returning.
- */
+/** Retrieves data from LocalStorage with polling resilience */
 export async function _getStorageData<T>(page: Page, key: StateKeys, options?: { timeout?: number }): Promise<T> {
   const { value, pass } = await pollUntil<T>(
     // CALLBACK: How to get the data

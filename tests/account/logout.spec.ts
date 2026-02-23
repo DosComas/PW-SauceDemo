@@ -29,7 +29,7 @@ test.describe.parallel('Logout', () => {
           await page.reload();
         });
 
-        expect(await query.session.user(), '🟧 Data: Session cookies deleted').toBeUndefined();
+        expect(await query.session.readUser(), '🟧 Data: Session cookies deleted').toBeUndefined();
       });
     });
   }

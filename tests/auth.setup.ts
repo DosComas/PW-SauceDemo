@@ -9,12 +9,12 @@ setup.describe.parallel('Setup', () => {
       });
 
       await setup.step('🟦 Log in to app', async () => {
-        await act.login.submit({ user: persona.user, pass: persona.pass });
+        await act.login.submitCredentials({ user: persona.user, pass: persona.pass });
       });
 
       await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
       await expect(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
-      expect(await query.session.user(), '🟧 Data: Session cookies present').toBeTruthy();
+      expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
 
       await setup.step('⬜ Save authentication state', async () => {
         await page.context().storageState({ path: persona.storageState });

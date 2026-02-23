@@ -18,9 +18,7 @@ export const createRandom = () => {
   return {
     seed: currentSeed,
 
-    /**
-     * Generates the "Basket" (The Batch).
-     */
+    /** Generates random basket of N items from pool of max */
     basket: (count: number = 3, max: number = 5): number[] => {
       const pool = Array.from({ length: max + 1 }, (_, i) => i);
       for (let i = pool.length - 1; i > 0; i--) {
@@ -30,9 +28,7 @@ export const createRandom = () => {
       return pool.slice(0, count);
     },
 
-    /**
-     * Picks the "Target" (The Subset).
-     */
+    /** Picks random item from array or generates target from max */
     target: (input: number | number[] = 5): number => {
       if (Array.isArray(input)) {
         const randomIndex = Math.floor(rng() * input.length);

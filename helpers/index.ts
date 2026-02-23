@@ -10,6 +10,7 @@ import { purchase } from './purchase.helpers';
 
 export type Gateway = ReturnType<typeof createGateway>;
 
+/** Unified entry point combining locators (loc), actions (act), and queries (query) */
 export const createGateway = (page: Page) => {
   const catalogObj = catalog(page);
   const accountObj = account(page);

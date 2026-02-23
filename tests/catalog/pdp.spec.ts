@@ -19,78 +19,78 @@ test.describe.parallel('PDP', () => {
 
       test('Content matches PLP data', async ({ act, query }) => {
         const expected = await test.step('⬜ Scrape PLP Item data', async () => {
-          return await query.plp.items({ index: itemIndex });
+          return await query.plp.readItems({ index: itemIndex });
         });
 
         await test.step('🟦 Navigate to PDP', async () => {
-          await act.plp.open({ index: itemIndex, via: 'name' });
+          await act.plp.openItem({ index: itemIndex, via: 'name' });
         });
 
         await test.step('🟧 UI: PDP item match PLP source', async () => {
-          expect(await query.pdp.item()).toMatchObject(expected);
+          expect(await query.pdp.readItem()).toMatchObject(expected);
         });
       });
 
       test('Add/Remove button toggles cart state', async ({ loc, act, query }) => {
         await test.step('🟦 Navigate to PDP and add item', async () => {
-          await act.plp.open({ index: itemIndex, via: 'img' });
-          await act.pdp.add();
+          await act.plp.openItem({ index: itemIndex, via: 'img' });
+          await act.pdp.addToCart();
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
         await test.step('🟧 Data: Local storage has 1 item', async () => {
-          expect(await query.session.cart()).toHaveLength(1);
+          expect(await query.session.readCart()).toHaveLength(1);
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await act.pdp.remove();
+          await act.pdp.removeFromCart();
         });
 
         await expect.soft(loc.pdp.item.addBtn, '🟧 UI: Add button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge removed').not.toBeVisible();
         await test.step('🟧 Data: Local storage is empty', async () => {
-          expect(await query.session.cart()).toHaveLength(0);
+          expect(await query.session.readCart()).toHaveLength(0);
         });
       });
 
       test('State persistence on PDP entry', async ({ loc, act, query }) => {
         await test.step('⬜ Add items to cart on PLP', async () => {
-          await act.plp.add({ index: itemIndexes });
+          await act.plp.addToCart({ index: itemIndexes });
         });
 
         await test.step('🟦 Navigate to PDP', async () => {
-          await act.plp.open({ index: itemIndex, via: 'img' });
+          await act.plp.openItem({ index: itemIndex, via: 'img' });
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 3 items').toHaveText('3');
         await test.step('🟧 Data: Local storage has 3 items`', async () => {
-          expect(await query.session.cart()).toHaveLength(3);
+          expect(await query.session.readCart()).toHaveLength(3);
         });
       });
 
       test('State persistence on PDP return', async ({ loc, act, query }) => {
         await test.step('⬜ Navigate to PLP', async () => {
-          await act.plp.open({ index: itemIndex, via: 'name' });
+          await act.plp.openItem({ index: itemIndex, via: 'name' });
         });
 
         await test.step('🟦 Add item and return to PDP', async () => {
-          await act.pdp.add();
+          await act.pdp.addToCart();
           await act.pdp.goBack();
         });
 
         await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
         await test.step('🟧 Data: Local storage has 1 item', async () => {
-          expect(await query.session.cart()).toHaveLength(1);
+          expect(await query.session.readCart()).toHaveLength(1);
         });
       });
 
       if (persona.isBaseline) {
         test('Visual layout', { tag: '@visual' }, async ({ page, loc, act }) => {
           await test.step('⬜ Navigate to PDP', async () => {
-            await act.plp.open({ index: itemIndex, via: 'name' });
+            await act.plp.openItem({ index: itemIndex, via: 'name' });
           });
 
           const img = await test.step('⬜ Mock grid', async () => {
