@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { t, BASELINE, UNAUTHORIZED } from '@data';
 
-test.describe.parallel('Login', () => {
+test.describe('Login', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to login', async () => {
       await page.goto('/');

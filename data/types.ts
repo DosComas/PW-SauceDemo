@@ -22,8 +22,6 @@ export type StateKeys = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];
 // 🏛️ ITEM TYPES
 // ==========================================
 
-export type ItemLocators = { name: Locator; desc: Locator; price: Locator; img?: Locator };
-export type ItemData = { [K in keyof ItemLocators]: string };
 export type SortableLocators = { names: Locator; prices: Locator };
 export type SortCriteria = { by: keyof SortableLocators; order: 'asc' | 'desc' };
 

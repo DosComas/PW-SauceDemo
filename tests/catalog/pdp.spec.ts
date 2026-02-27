@@ -6,7 +6,7 @@ const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
 
-test.describe.parallel('PDP', () => {
+test.describe('PDP', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');

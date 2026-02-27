@@ -6,7 +6,7 @@ const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
 
-test.describe.parallel('Cart', () => {
+test.describe('Cart', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');
@@ -33,7 +33,7 @@ test.describe.parallel('Cart', () => {
         });
       });
 
-      test('PDP matches Cart data', async ({ loc, act, query }) => {
+      test('Cart links to PDP', async ({ loc, act, query }) => {
         await test.step('⬜ Add items and navigate to cart', async () => {
           await act.plp.addToCart({ index: itemIndexes });
           await act.cart.openCart();
@@ -72,7 +72,7 @@ test.describe.parallel('Cart', () => {
         });
       });
 
-      test('Remove button toggles cart state', async ({ loc, act, query }) => {
+      test('Remove button toggles Cart state', async ({ loc, act, query }) => {
         await test.step('⬜ Add items and navigate to cart', async () => {
           await act.plp.addToCart({ index: itemIndex });
           await act.cart.openCart();

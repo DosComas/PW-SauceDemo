@@ -4,7 +4,7 @@ import { t, BASELINE } from '@data';
 
 const SOCIAL_LINKS = Object.entries(t.footer.social) as [SocialPlatform, SocialPlatformData][];
 
-test.describe.parallel('Navigation', () => {
+test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');

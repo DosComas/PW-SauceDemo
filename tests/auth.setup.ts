@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@fixtures';
 import { t, AUTHENTICATED } from '@data';
 
-setup.describe.parallel('Setup', () => {
+setup.describe('Setup', () => {
   for (const persona of AUTHENTICATED) {
     setup(`Authenticate as ${persona.role}`, { tag: persona.tag }, async ({ page, loc, act, query }) => {
       await setup.step('⬜ Go to login', async () => {

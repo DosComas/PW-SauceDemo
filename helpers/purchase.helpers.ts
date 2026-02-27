@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { t, SAMPLE_ITEM } from '@data';
+import { t, sampleItem, checkout } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -20,8 +20,18 @@ export const purchaseLocators = (page: Page) => {
         ...c._itemFragment(_cards.nth(index)),
       }),
       backBtn: page.getByRole('button', { name: t.cart.goBack }),
-    } as const satisfies d.LocSchema,
-  };
+    },
+    checkout: {
+      checkoutBtn: page.getByRole('button', { name: t.cart.checkout }),
+      input: {
+        firstName: page.getByPlaceholder(t.checkout.firstName),
+        lastName: page.getByPlaceholder(t.checkout.lastName),
+        zipCode: page.getByPlaceholder(t.checkout.zipCode),
+      } satisfies d.CheckoutLocators,
+      continueBtn: page.getByRole('button', { name: t.checkout.continue }),
+      finishBtn: page.getByRole('button', { name: t.checkout.finish }),
+    },
+  } as const satisfies d.LocSchema;
 };
 
 // ==========================================
@@ -51,9 +61,17 @@ export const purchase = (page: Page) => {
         goBack: async () => await loc.cart.backBtn.click(),
         mockList: async ({ size = 3 }: { size?: number } = {}) => {
           const blueprint = loc.cart.items.cards.first();
-          await c._injectItemText(loc.cart.item(0), SAMPLE_ITEM);
+          await c._injectItemText(loc.cart.item(0), sampleItem.data);
           await c._injectClones(loc.cart.list, blueprint, size);
-          await _injectBadgeNum(header.cart.badge, size);
+          await _injectBadgeNumber(header.cart.badge, size);
+        },
+      },
+      checkout: {
+        submitInfo: async (args: c.FormOptions<d.CheckoutData> = {}) => {
+          await loc.checkout.checkoutBtn.click();
+          const formData = { ...checkout.generate(), ...args.data };
+          await c._fillForm(checkout.config, loc.checkout.input, formData, args.skip);
+          await loc.checkout.continueBtn.click();
         },
       },
     } as const satisfies d.ActSchema,
@@ -71,7 +89,7 @@ export const purchase = (page: Page) => {
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _injectBadgeNum(badgeLoc: Locator, count: number): Promise<void> {
+async function _injectBadgeNumber(badgeLoc: Locator, count: number): Promise<void> {
   if (await badgeLoc.isVisible()) await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
 }
 

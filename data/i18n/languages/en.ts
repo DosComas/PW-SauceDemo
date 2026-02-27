@@ -69,7 +69,8 @@ export const EN = {
   checkout: {
     firstName: 'First Name',
     lastName: 'Last Name',
-    zip: 'Zip/Postal Code',
+    zipCode: 'Zip/Postal Code',
+    continue: 'Continue',
     finish: 'Finish',
   },
 } as const;

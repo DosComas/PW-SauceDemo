@@ -1,7 +1,10 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { t, SAMPLE_ITEM } from '@data';
+import { t, sampleItem } from '@data';
+
+type FullItemData = d.ItemData & { imgSrc?: string };
+type ReadResult<T extends c.IndexInput> = T extends number ? FullItemData : FullItemData[];
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -75,7 +78,7 @@ export const catalog = (page: Page) => {
         },
         mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
           const blueprint = _cards.first();
-          await c._injectItemText(loc.plp.item(0), SAMPLE_ITEM);
+          await c._injectItemText(loc.plp.item(0), sampleItem.data);
           await c._injectClones(loc.plp.grid, blueprint, size);
         },
       },
@@ -83,17 +86,21 @@ export const catalog = (page: Page) => {
         addToCart: async () => await _item.addBtn.click(),
         removeFromCart: async () => await _item.removeBtn.click(),
         goBack: async () => await loc.pdp.backBtn.click(),
-        mockItem: async () => await c._injectItemText(_item, SAMPLE_ITEM),
+        mockItem: async () => await c._injectItemText(_item, sampleItem.data),
       },
     } as const satisfies d.ActSchema,
     query: {
       plp: {
         readItems: async <T extends c.IndexInput>({ index, imgSrc = true }: { index: T; imgSrc?: boolean }) => {
-          return _readGridItems(_cards, _getItem, index, imgSrc);
+          return await _readGridItems(_cards, _getItem, index, imgSrc);
         },
       },
       pdp: {
-        readItem: async () => await c._readItem(_item, true),
+        readItem: async () => {
+          const itemData = await c._readItem(_item);
+          const imgSrc = await _readImgSrc(_item.img);
+          return { ...itemData, imgSrc } satisfies FullItemData;
+        },
       },
     } as const satisfies d.QuerySchema,
   };
@@ -105,12 +112,29 @@ export const catalog = (page: Page) => {
 
 async function _readGridItems<T extends c.IndexInput>(
   cardsLoc: Locator,
-  getItem: (i: number) => d.ItemLocators,
+  getItem: (i: number) => d.ItemLocators & { img: Locator },
   index: T,
   imgSrc?: boolean,
-): Promise<c.ReadResult<T>> {
+): Promise<ReadResult<T>> {
   const indexes = await c._ensureIndexes(cardsLoc, index);
-  const items = await Promise.all(indexes.map((i) => c._readItem(getItem(i), imgSrc)));
 
-  return (Array.isArray(index) ? items : items[0]) as c.ReadResult<T>;
+  const items = await Promise.all(
+    indexes.map(async (i) => {
+      const locators = getItem(i);
+      const itemData = await c._readItem(locators);
+
+      if (!imgSrc) return itemData;
+      else return { ...itemData, imgSrc: await _readImgSrc(locators.img) };
+    }),
+  );
+
+  return (Array.isArray(index) ? items : items[0]) as ReadResult<T>;
+}
+
+async function _readImgSrc(imgLoc: Locator): Promise<string> {
+  const imgSrc = await imgLoc.getAttribute('src');
+
+  if (!imgSrc) throw new Error(`[_readImgSrc] Missing image source attribute`);
+
+  return imgSrc;
 }

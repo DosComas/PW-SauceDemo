@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { t, AUTHENTICATED } from '@data';
 
-test.describe.parallel('Logout', () => {
+test.describe('Logout', () => {
   test.beforeEach(async ({ page }) => {
     await test.step('⬜ Go to inventory', async () => {
       await page.goto('/inventory.html');
