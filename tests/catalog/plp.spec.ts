@@ -37,7 +37,7 @@ test.describe('PLP', () => {
 
       test('Add/Remove button toggles cart state', async ({ loc, act, query }) => {
         await test.step('🟦 Add items to cart', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
+          await act.plp.addToCart({ indexes: itemIndexes });
         });
 
         await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
@@ -47,7 +47,7 @@ test.describe('PLP', () => {
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await act.plp.removeFromCart({ index: itemIndex });
+          await act.plp.removeFromCart({ indexes: itemIndex });
         });
 
         await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();

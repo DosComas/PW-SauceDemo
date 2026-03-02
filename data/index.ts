@@ -2,7 +2,7 @@
 // 🏛️ DATA GATEWAY
 // ==========================================
 
-export * from './mock.data';
+export * from './test.data';
 export * from './personas.data';
 export * from './env.data';
 export * from './session.data';

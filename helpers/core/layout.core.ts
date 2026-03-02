@@ -31,5 +31,5 @@ export const layoutLocators = (page: Page) => {
         linkedin: _social.getByRole('link', { name: t.footer.social.linkedin.label }),
       } satisfies Record<d.SocialPlatform, Locator>,
     },
-  } as const satisfies d.LocSchema;
+  } as const satisfies d.LocatorSchema;
 };

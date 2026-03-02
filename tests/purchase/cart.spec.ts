@@ -19,32 +19,32 @@ test.describe('Cart', () => {
 
       test('Items match PLP data', async ({ loc, act, query }) => {
         const expected = await test.step('⬜ Scrape PLP items data', async () => {
-          return await query.plp.readItems({ index: itemIndexes, imgSrc: false });
+          return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
         });
 
         await test.step('🟦 Add items and navigate to cart', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
+          await act.plp.addToCart({ indexes: itemIndexes });
           await act.cart.openCart();
         });
 
         await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
         await test.step('🟧 UI: Cart items match PLP source', async () => {
-          expect(await query.cart.items()).toMatchObject(expected);
+          expect(await query.cart.readItems()).toMatchObject(expected);
         });
       });
 
       test('Cart links to PDP', async ({ loc, act, query }) => {
         await test.step('⬜ Add items and navigate to cart', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
+          await act.plp.addToCart({ indexes: itemIndexes });
           await act.cart.openCart();
         });
 
         const expected = await test.step('⬜ Scrape Cart item data', async () => {
-          return await query.cart.items({ index: 1 });
+          return await query.cart.readItems({ index: 2 });
         });
 
         await test.step('🟦 Navigate from Cart to PDP', async () => {
-          await act.cart.openItem({ index: 1 });
+          await act.cart.openItem({ index: 2 });
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
@@ -61,7 +61,7 @@ test.describe('Cart', () => {
         });
 
         await test.step('⬜ Remove item from Cart and continue shopping', async () => {
-          await act.cart.removeFromCart({ index: 0 });
+          await act.cart.removeFromCart({ indexes: 0 });
           await act.cart.goBack();
         });
 
@@ -74,12 +74,12 @@ test.describe('Cart', () => {
 
       test('Remove button toggles Cart state', async ({ loc, act, query }) => {
         await test.step('⬜ Add items and navigate to cart', async () => {
-          await act.plp.addToCart({ index: itemIndex });
+          await act.plp.addToCart({ indexes: itemIndex });
           await act.cart.openCart();
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await act.cart.removeFromCart({ index: 0 });
+          await act.cart.removeFromCart({ indexes: 0 });
         });
 
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
@@ -91,11 +91,11 @@ test.describe('Cart', () => {
       if (persona.isBaseline) {
         test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
           await test.step('⬜ Add an item and go to cart', async () => {
-            await act.plp.addToCart({ index: itemIndex });
+            await act.plp.addToCart({ indexes: itemIndex });
             await act.cart.openCart();
           });
 
-          await test.step('⬜ Mock List', async () => {
+          await test.step('⬜ Mock Cart List', async () => {
             await act.cart.mockList();
           });
 

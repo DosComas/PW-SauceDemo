@@ -19,7 +19,7 @@ test.describe('PDP', () => {
 
       test('Content matches PLP data', async ({ act, query }) => {
         const expected = await test.step('⬜ Scrape PLP Item data', async () => {
-          return await query.plp.readItems({ index: itemIndex });
+          return await query.plp.readItems({ indexes: itemIndex });
         });
 
         await test.step('🟦 Navigate to PDP', async () => {
@@ -56,7 +56,7 @@ test.describe('PDP', () => {
 
       test('State persistence on PDP entry', async ({ loc, act, query }) => {
         await test.step('⬜ Add items to cart on PLP', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
+          await act.plp.addToCart({ indexes: itemIndexes });
         });
 
         await test.step('🟦 Navigate to PDP', async () => {

@@ -3,8 +3,39 @@ import * as c from './core';
 import type * as d from '@data';
 import { t, sampleItem } from '@data';
 
-type FullItemData = d.ItemData & { imgSrc?: string };
-type ReadResult<T extends c.IndexInput> = T extends number ? FullItemData : FullItemData[];
+// ==========================================
+// 🏛️ DOMAIN TYPES
+// ==========================================
+
+type ItemDataExtended = d.ItemData & { imgSrc?: string };
+type ReadResult<T extends c.IndexSet> = T extends number ? ItemDataExtended : ItemDataExtended[];
+
+type CatalogSchema = {
+  loc: ReturnType<typeof catalogLocators>;
+  act: {
+    plp: {
+      addToCart: (args: { indexes: c.IndexSet }) => Promise<void>;
+      removeFromCart: (args: { indexes: c.IndexSet }) => Promise<void>;
+      openItem: (args: { index: number; via: 'name' | 'img' }) => Promise<void>;
+      sortGrid: (args: { option: d.SortOption }) => Promise<void>;
+      mockGrid: (args?: { size?: number }) => Promise<void>;
+    };
+    pdp: {
+      addToCart: () => Promise<void>;
+      removeFromCart: () => Promise<void>;
+      goBack: () => Promise<void>;
+      mockItem: () => Promise<void>;
+    };
+  };
+  query: {
+    plp: {
+      readItems: <T extends c.IndexSet>(args: { indexes: T; imgSrc?: boolean }) => Promise<ReadResult<T>>;
+    };
+    pdp: {
+      readItem: () => Promise<ItemDataExtended>;
+    };
+  };
+};
 
 // ==========================================
 // 🏛️ DOMAIN LOCATORS
@@ -14,6 +45,7 @@ const catalogLocators = (page: Page) => {
   const _cards = page.getByTestId('inventory-item');
   const _getImg = (root: Locator | Page) => root.locator('.inventory_item_img').getByRole('img');
   const _getAddBtn = (root: Locator | Page) => root.getByRole('button', { name: t.item.addToCart });
+  const _getRemoveBtn = (root: Locator | Page) => root.getByRole('button', { name: t.item.remove });
 
   return {
     plp: {
@@ -30,6 +62,7 @@ const catalogLocators = (page: Page) => {
         ...c._itemFragment(_cards.nth(index)),
         img: _getImg(_cards.nth(index)),
         addBtn: _getAddBtn(_cards.nth(index)),
+        removeBtn: _getRemoveBtn(_cards.nth(index)),
       }),
     },
     pdp: {
@@ -37,10 +70,11 @@ const catalogLocators = (page: Page) => {
         ...c._itemFragment(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
         addBtn: _getAddBtn(page),
+        removeBtn: _getRemoveBtn(page),
       },
       backBtn: page.getByRole('button', { name: t.pdp.goBack }),
     },
-  } as const satisfies d.LocSchema;
+  } as const satisfies d.LocatorSchema;
 };
 
 // ==========================================
@@ -54,31 +88,31 @@ export const catalog = (page: Page) => {
   const _item = loc.pdp.item;
   const _cards = loc.plp.items.cards;
   const _getItem = (i: number) => loc.plp.item(i);
-  const _ensure = async (i: c.IndexInput) => await c._ensureIndexes(_cards, i);
+  const _ensure = async (i: c.IndexSet) => await c._ensureIndexes(_cards, i);
 
   return {
     loc,
     act: {
       plp: {
-        addToCart: async ({ index }: { index: c.IndexInput }) => {
-          const indexes = await _ensure(index);
-          for (const i of indexes) await _getItem(i).addBtn.click();
+        addToCart: async ({ indexes }) => {
+          const iis = await _ensure(indexes);
+          for (const i of iis) await _getItem(i).addBtn.click();
         },
-        removeFromCart: async ({ index }: { index: c.IndexInput }) => {
-          const indexes = await _ensure(index);
-          for (const i of indexes) await _getItem(i).removeBtn.click();
+        removeFromCart: async ({ indexes }) => {
+          const iis = await _ensure(indexes);
+          for (const i of iis) await _getItem(i).removeBtn.click();
         },
-        openItem: async ({ index, via }: { index: number; via: 'name' | 'img' }) => {
+        openItem: async ({ index, via }) => {
           const [i] = await _ensure(index);
           const item = _getItem(i);
           await (via === 'img' ? item.img : item.name).click();
         },
-        sortGrid: async ({ option }: { option: d.SortOption }) => {
-          await loc.plp.sort.selectOption(option);
+        sortGrid: async ({ option }) => {
+          await loc.plp.sort.selectOption({ label: option });
         },
-        mockGrid: async ({ size = 5 }: { size?: number } = {}) => {
+        mockGrid: async ({ size = 5 } = {}) => {
           const blueprint = _cards.first();
-          await c._injectItemText(loc.plp.item(0), sampleItem.data);
+          await c._injectText(sampleItem.config, loc.plp.item(0), sampleItem.data);
           await c._injectClones(loc.plp.grid, blueprint, size);
         },
       },
@@ -86,40 +120,40 @@ export const catalog = (page: Page) => {
         addToCart: async () => await _item.addBtn.click(),
         removeFromCart: async () => await _item.removeBtn.click(),
         goBack: async () => await loc.pdp.backBtn.click(),
-        mockItem: async () => await c._injectItemText(_item, sampleItem.data),
+        mockItem: async () => await c._injectText(sampleItem.config, _item, sampleItem.data),
       },
-    } as const satisfies d.ActSchema,
+    },
     query: {
       plp: {
-        readItems: async <T extends c.IndexInput>({ index, imgSrc = true }: { index: T; imgSrc?: boolean }) => {
-          return await _readGridItems(_cards, _getItem, index, imgSrc);
+        readItems: async ({ indexes, imgSrc = true }) => {
+          return await _readGridItems(_cards, _getItem, indexes, imgSrc);
         },
       },
       pdp: {
         readItem: async () => {
           const itemData = await c._readItem(_item);
           const imgSrc = await _readImgSrc(_item.img);
-          return { ...itemData, imgSrc } satisfies FullItemData;
+          return { ...itemData, imgSrc };
         },
       },
-    } as const satisfies d.QuerySchema,
-  };
+    },
+  } as const satisfies CatalogSchema;
 };
 
 // ==========================================
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-async function _readGridItems<T extends c.IndexInput>(
+async function _readGridItems<T extends c.IndexSet>(
   cardsLoc: Locator,
   getItem: (i: number) => d.ItemLocators & { img: Locator },
-  index: T,
+  indexes: T,
   imgSrc?: boolean,
 ): Promise<ReadResult<T>> {
-  const indexes = await c._ensureIndexes(cardsLoc, index);
+  const iis = await c._ensureIndexes(cardsLoc, indexes);
 
   const items = await Promise.all(
-    indexes.map(async (i) => {
+    iis.map(async (i) => {
       const locators = getItem(i);
       const itemData = await c._readItem(locators);
 
@@ -128,7 +162,7 @@ async function _readGridItems<T extends c.IndexInput>(
     }),
   );
 
-  return (Array.isArray(index) ? items : items[0]) as ReadResult<T>;
+  return (Array.isArray(indexes) ? items : items[0]) as ReadResult<T>;
 }
 
 async function _readImgSrc(imgLoc: Locator): Promise<string> {

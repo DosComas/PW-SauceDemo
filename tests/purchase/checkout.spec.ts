@@ -4,10 +4,10 @@ import { createRandom } from '@utils';
 
 const random = createRandom();
 const itemIndexes = random.basket(3);
-// const itemIndex = random.target(itemIndexes);
+const itemIndex = random.target(itemIndexes);
 
-// test data integrity (items plp match checkout)
-// test checkout link to pdp
+// test data integrity (items plp match checkout) X
+// test checkout link to pdp X                    X
 // test financial data tax, total, etc
 // test checkout form validation (parameterize missing fields)
 // test finish
@@ -24,26 +24,57 @@ test.describe('Checkout', () => {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
       test.use({ storageState: persona.storageState });
 
-      test.skip('Items match PLP data', async ({ loc, act, query }) => {
+      test('Items match PLP data', async ({ loc, act, query }) => {
         const expected = await test.step('⬜ Scrape PLP items data', async () => {
-          return await query.plp.readItems({ index: itemIndexes, imgSrc: false });
+          return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
         });
 
         await test.step('🟦 Add items and complete checkout', async () => {
-          await act.plp.addToCart({ index: itemIndexes });
+          await act.plp.addToCart({ indexes: itemIndexes });
           await act.cart.openCart();
           await act.checkout.submitInfo();
         });
 
         await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
         await test.step('🟧 UI: Cart items match PLP source', async () => {
-          expect(await query.cart.items()).toMatchObject(expected);
+          expect(await query.checkout.readItems()).toMatchObject(expected);
+        });
+      });
+
+      test('Cart links to PDP', async ({ loc, act, query }) => {
+        await test.step('⬜ Add items and submit checkout info', async () => {
+          await act.plp.addToCart({ indexes: itemIndexes });
+          await act.cart.openCart();
+          await act.checkout.submitInfo();
+        });
+
+        const expected = await test.step('⬜ Scrape Checkout item data', async () => {
+          return await query.checkout.readItems({ index: 2 });
+        });
+
+        await test.step('🟦 Navigate from Checkout to PDP', async () => {
+          await act.checkout.openItem({ index: 2 });
+        });
+
+        await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+        await test.step('🟧 UI: PDP item match Checkout source', async () => {
+          expect(await query.pdp.readItem()).toMatchObject(expected);
         });
       });
 
       if (persona.isBaseline) {
-        test.skip('Visual layout', { tag: '@visual' }, async ({ page }) => {
-          await expect(page, '🟧 Visual').toHaveScreenshot({ fullPage: true });
+        test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
+          await test.step('⬜ Add items and submit checkout info', async () => {
+            await act.plp.addToCart({ indexes: itemIndex });
+            await act.cart.openCart();
+            await act.checkout.submitInfo();
+          });
+
+          await test.step('⬜ Mock Checkout List', async () => {
+            await act.checkout.mockList();
+          });
+
+          await expect(page, '🟧 UI: Layout visual check').toHaveScreenshot({ fullPage: true });
         });
       }
     });

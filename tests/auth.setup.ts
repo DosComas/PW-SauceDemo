@@ -9,7 +9,7 @@ setup.describe('Setup', () => {
       });
 
       await setup.step('🟦 Log in to app', async () => {
-        await act.login.submitCredentials({ user: persona.user, pass: persona.pass });
+        await act.login.submitCredentials({ username: persona.user, password: persona.pass });
       });
 
       await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
