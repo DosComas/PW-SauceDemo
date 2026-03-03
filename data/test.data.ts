@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker';
 
 // Core Maps
 export type InputMap = { textInput: string; checkbox: boolean; select: string };
-export type InjectMap = { textField: string; priceField: string };
+export type InjectMap = { textField: string; priceField: number };
 
 // Generic Schema
 export type ConfigSchema<M> = { readonly key: string; readonly type: keyof M };
@@ -88,8 +88,8 @@ const checkoutPriceConfig = [
 export const checkoutPrice = {
   config: checkoutPriceConfig,
   data: {
-    itemTotal: '$189.98',
-    tax: '$15.20',
-    total: '$205.18',
+    itemTotal: 189.98,
+    tax: 15.2,
+    total: 205.18,
   } as const satisfies CheckoutPriceData,
 };

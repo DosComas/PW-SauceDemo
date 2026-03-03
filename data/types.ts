@@ -22,7 +22,7 @@ export type StateKeys = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];
 // 🏛️ ITEM TYPES
 // ==========================================
 
-export type SortOption = PLP['sort'][keyof PLP['sort']];
+export type SortOption = keyof PLP['sort'];
 export type SortableLocators = { names: Locator; prices: Locator };
 export type SortCriteria = { by: keyof SortableLocators; order: 'asc' | 'desc' };
 

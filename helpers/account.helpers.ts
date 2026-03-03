@@ -5,23 +5,28 @@ import type * as d from '@data';
 import { t, STATE_KEYS, loginConfig } from '@data';
 
 // ==========================================
-// 🏛️ DOMAIN TYPES
+// 🏛️ DOMAIN SCHEMA
 // ==========================================
 
 type AccountSchema = {
   loc: ReturnType<typeof accountLocators>;
   act: {
     login: {
+      /** Performs the submission of the login credentials. */
       submitCredentials: (args: c.FormOptions<d.LoginData>) => Promise<void>;
     };
     menu: {
+      /** Performs the logout sequence via the navigation menu. */
       logout: () => Promise<void>;
+      /** Performs the opening of the navigation menu panel. */
       openMenu: () => Promise<void>;
     };
   };
   query: {
     session: {
+      /** Retrieves the user session cookie from the browser. */
       readUser: () => Promise<Cookie | undefined>;
+      /** Retrieves the cart items list from local storage. */
       readCart: () => Promise<number[]>;
     };
   };
@@ -31,8 +36,8 @@ type AccountSchema = {
 // 🏛️ DOMAIN LOCATORS
 // ==========================================
 
-const accountLocators = (page: Page) =>
-  ({
+const accountLocators = (page: Page) => {
+  return {
     login: {
       input: {
         username: page.getByPlaceholder(t.login.username),
@@ -41,20 +46,20 @@ const accountLocators = (page: Page) =>
       loginBtn: page.getByRole('button', { name: t.login.button }),
       errorMsg: page.getByTestId('error'),
     },
-  }) as const satisfies d.LocatorSchema;
+  } as const satisfies d.LocatorSchema;
+};
 
 // ==========================================
 // 🏛️ DOMAIN GATEWAY
 // ==========================================
 
-/** Account domain: login, menu, and session queries */
-export const account = (page: Page) => {
+export const account = (page: Page): AccountSchema => {
   const loc = accountLocators(page);
-  const { header } = c.layoutLocators(page);
+  const headerLoc = c.layoutLocators(page).header;
 
   const _openMenu = async () => {
-    await header.menu.panel.waitFor({ state: 'hidden' });
-    await header.menu.openBtn.click();
+    await headerLoc.menu.panel.waitFor({ state: 'hidden' });
+    await headerLoc.menu.openBtn.click();
   };
 
   return {
@@ -70,7 +75,7 @@ export const account = (page: Page) => {
       menu: {
         logout: async () => {
           await _openMenu();
-          await header.menu.logoutBtn.click();
+          await headerLoc.menu.logoutBtn.click();
         },
         openMenu: async () => _openMenu(),
       },
@@ -85,20 +90,18 @@ export const account = (page: Page) => {
         },
       },
     },
-  } as const satisfies AccountSchema;
+  } as const;
 };
 
 // ==========================================
 // 🏛️ DOMAIN PRIVATE ACTIONS
 // ==========================================
 
-/** Retrieves a specific cookie by name */
 async function _getCookie(page: Page, name: string): Promise<Cookie | undefined> {
   const cookies = await page.context().cookies();
   return cookies.find((c) => c.name === name);
 }
 
-/** Retrieves data from LocalStorage with polling resilience */
 async function _getStorageData<T>(page: Page, key: d.StateKeys, options?: { timeout?: number }): Promise<T> {
   const { value, pass } = await u.pollUntil<T>(
     // CALLBACK: How to get the data

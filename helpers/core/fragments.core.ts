@@ -5,7 +5,6 @@ import type * as d from '@data';
 // 🏛️ FRAGMENTS LOCATORS
 // ==========================================
 
-/** Reusable item fragment: name, price, desc, add/remove buttons */
 export const _itemFragment = (root: Page | Locator) =>
   ({
     name: root.getByTestId('inventory-item-name'),
@@ -13,4 +12,4 @@ export const _itemFragment = (root: Page | Locator) =>
     desc: root.getByTestId('inventory-item-desc'),
   }) as const satisfies d.ItemLocators;
 
-export const _itemCard = (page: Page) => page.getByTestId('inventory-item');
+export const _cardFragment = (page: Page) => page.getByTestId('inventory-item');

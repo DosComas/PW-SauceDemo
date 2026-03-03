@@ -1,37 +1,44 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
-import * as d from '@data';
-import { t, sampleItem, checkoutInfo } from '@data';
+import type * as d from '@data';
+import { t, sampleItem, checkoutInfo, checkoutPrice } from '@data';
 
 // ==========================================
-// 🏛️ DOMAIN TYPES
+// 🏛️ DOMAIN SCHEMA
 // ==========================================
-
-type ReadResult<T> = T extends number ? d.ItemData : d.ItemData[];
-type PurchaseReadFn = <T extends number | undefined = undefined>(args?: { index?: T }) => Promise<ReadResult<T>>;
 
 type PurchaseSchema = {
   loc: ReturnType<typeof purchaseLocators>;
   act: {
     cart: {
+      /** Performs the opening of the shopping cart page. */
       openCart: () => Promise<void>;
+      /** Performs the navigation to an item's detail page from the cart. */
       openItem: (args: { index: number }) => Promise<void>;
-      removeFromCart: (args: { indexes: c.IndexSet }) => Promise<void>;
+      /** Performs the removal of items from the cart list. */
+      removeFromCart: (args: { indexes: number[] }) => Promise<void>;
+      /** Performs the navigation back to the PLP page. */
       goBack: () => Promise<void>;
+      /** Performs the UI injection of mock items into the cart list. */
       mockList: (args?: { size?: number }) => Promise<void>;
     };
     checkout: {
+      /** Performs the submission of the checkout information form. */
       submitInfo: (args?: c.FormPartial<d.CheckoutInfoData>) => Promise<void>;
+      /** Performs the navigation to an item's detail page from the checkout summary. */
       openItem: (args: { index: number }) => Promise<void>;
+      /** Performs the UI injection of mock items into the checkout summary list. */
       mockList: (args?: { size?: number }) => Promise<void>;
     };
   };
   query: {
     cart: {
-      readItems: PurchaseReadFn;
+      /** Retrieves item data from the shopping cart list. */
+      readItems: (args?: { index?: number }) => Promise<d.ItemData[]>;
     };
     checkout: {
-      readItems: PurchaseReadFn;
+      /** Retrieves item data from the checkout summary list. */
+      readItems: (args?: { index?: number }) => Promise<d.ItemData[]>;
     };
   };
 };
@@ -41,18 +48,18 @@ type PurchaseSchema = {
 // ==========================================
 
 const purchaseLocators = (page: Page) => {
-  const _cards = c._itemCard(page);
-  const _list = page.getByTestId('cart-list');
+  const _cardsLoc = c._cardFragment(page);
+  const _listLoc = page.getByTestId('cart-list');
 
   return {
     cart: {
-      list: _list,
+      list: _listLoc,
       items: {
-        cards: _cards,
+        cards: _cardsLoc,
       },
       item: (index: number) => ({
-        removeBtn: _cards.nth(index).getByRole('button', { name: t.item.remove }),
-        ...c._itemFragment(_cards.nth(index)),
+        removeBtn: _cardsLoc.nth(index).getByRole('button', { name: t.item.remove }),
+        ...c._itemFragment(_cardsLoc.nth(index)),
       }),
       backBtn: page.getByRole('button', { name: t.cart.goBack }),
     },
@@ -63,12 +70,12 @@ const purchaseLocators = (page: Page) => {
         lastName: page.getByPlaceholder(t.checkout.lastName),
         zipCode: page.getByPlaceholder(t.checkout.zipCode),
       } satisfies d.CheckoutInfoLocators,
-      list: _list,
+      list: _listLoc,
       items: {
-        cards: _cards,
+        cards: _cardsLoc,
       },
       item: (index: number) => ({
-        ...c._itemFragment(_cards.nth(index)),
+        ...c._itemFragment(_cardsLoc.nth(index)),
       }),
       price: {
         itemTotal: page.getByTestId('subtotal-label'),
@@ -85,33 +92,32 @@ const purchaseLocators = (page: Page) => {
 // 🏛️ DOMAIN GATEWAY
 // ==========================================
 
-/** Purchase domain: cart locators, actions, and item queries */
-export const purchase = (page: Page) => {
+export const purchase = (page: Page): PurchaseSchema => {
   const loc = purchaseLocators(page);
-  const { header } = c.layoutLocators(page);
+  const headerLoc = c.layoutLocators(page).header;
 
-  const _cartCards = loc.cart.items.cards;
+  const _cartCardsLoc = loc.cart.items.cards;
   const _getCartItem = (i: number) => loc.cart.item(i);
 
-  const _checkoutCards = loc.checkout.items.cards;
+  const _checkoutCardsLoc = loc.checkout.items.cards;
   const _getCheckoutItem = (i: number) => loc.checkout.item(i);
 
   return {
     loc,
     act: {
       cart: {
-        openCart: async () => await header.cart.openBtn.click(),
+        openCart: async () => await headerLoc.cart.openBtn.click(),
         openItem: async ({ index }) => await _getCartItem(index).name.click(),
         removeFromCart: async ({ indexes }) => {
-          const iis = await c._ensureIndexes(_cartCards, indexes);
-          for (const i of iis) await _getCartItem(i).removeBtn.click();
+          await c._ensureIndexes(_cartCardsLoc, indexes);
+          for (const i of indexes) await _getCartItem(i).removeBtn.click();
         },
         goBack: async () => await loc.cart.backBtn.click(),
         mockList: async ({ size = 3 } = {}) => {
-          const blueprint = _cartCards.first();
+          const blueprint = _cartCardsLoc.first();
           await c._injectText(sampleItem.config, loc.cart.item(0), sampleItem.data);
           await c._injectClones(loc.cart.list, blueprint, size);
-          await _injectBadgeNumber(header.cart.badge, size);
+          await _injectBadgeNumber(headerLoc.cart.badge, size);
         },
       },
       checkout: {
@@ -124,26 +130,26 @@ export const purchase = (page: Page) => {
         },
         openItem: async ({ index }) => await _getCheckoutItem(index).name.click(),
         mockList: async ({ size = 3 } = {}) => {
-          const blueprint = _checkoutCards.first();
+          const blueprint = _checkoutCardsLoc.first();
           await c._injectText(
-            [...sampleItem.config, ...d.checkoutPrice.config],
+            [...sampleItem.config, ...checkoutPrice.config],
             { ...loc.checkout.item(0), ...loc.checkout.price },
-            { ...sampleItem.data, ...d.checkoutPrice.data },
+            { ...sampleItem.data, ...checkoutPrice.data },
           );
           await c._injectClones(loc.checkout.list, blueprint, size);
-          await _injectBadgeNumber(header.cart.badge, size);
+          await _injectBadgeNumber(headerLoc.cart.badge, size);
         },
       },
     },
     query: {
       cart: {
-        readItems: async ({ index } = {}) => await _readPurchaseItems(_cartCards, _getCartItem, index),
+        readItems: async ({ index } = {}) => await _readPurchaseItems(_cartCardsLoc, _getCartItem, index),
       },
       checkout: {
-        readItems: async ({ index } = {}) => await _readPurchaseItems(_checkoutCards, _getCheckoutItem, index),
+        readItems: async ({ index } = {}) => await _readPurchaseItems(_checkoutCardsLoc, _getCheckoutItem, index),
       },
     },
-  } as const satisfies PurchaseSchema;
+  } as const;
 };
 
 // ==========================================
@@ -154,19 +160,19 @@ async function _injectBadgeNumber(badgeLoc: Locator, count: number): Promise<voi
   if (await badgeLoc.isVisible()) await badgeLoc.evaluate((el, val) => (el.textContent = val.toString()), count);
 }
 
-async function _readPurchaseItems<T extends number | undefined>(
+async function _readPurchaseItems(
   cardsLoc: Locator,
   getItem: (i: number) => d.ItemLocators,
-  index?: T,
-): Promise<ReadResult<T>> {
-  if (index === undefined) {
+  index?: number,
+): Promise<d.ItemData[]> {
+  const readItem = async (i: number) => await c._readTextFields(sampleItem.config, getItem(i));
+
+  if (index == null) {
     await cardsLoc.first().waitFor();
     const range = Array.from({ length: await cardsLoc.count() }, (_, i) => i);
-    const items: d.ItemData[] = await Promise.all(range.map((i) => c._readItem(getItem(i))));
-    return items as ReadResult<T>;
+    return await Promise.all(range.map((i) => readItem(i)));
   }
 
-  const [i] = await c._ensureIndexes(cardsLoc, index);
-  const item: d.ItemData = await c._readItem(getItem(i));
-  return item as ReadResult<T>;
+  await c._ensureIndexes(cardsLoc, [index]);
+  return [await readItem(index)];
 }

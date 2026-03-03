@@ -61,7 +61,7 @@ test.describe('Cart', () => {
         });
 
         await test.step('⬜ Remove item from Cart and continue shopping', async () => {
-          await act.cart.removeFromCart({ indexes: 0 });
+          await act.cart.removeFromCart({ indexes: [0] });
           await act.cart.goBack();
         });
 
@@ -74,12 +74,12 @@ test.describe('Cart', () => {
 
       test('Remove button toggles Cart state', async ({ loc, act, query }) => {
         await test.step('⬜ Add items and navigate to cart', async () => {
-          await act.plp.addToCart({ indexes: itemIndex });
+          await act.plp.addToCart({ indexes: [itemIndex] });
           await act.cart.openCart();
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await act.cart.removeFromCart({ indexes: 0 });
+          await act.cart.removeFromCart({ indexes: [0] });
         });
 
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
@@ -91,7 +91,7 @@ test.describe('Cart', () => {
       if (persona.isBaseline) {
         test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
           await test.step('⬜ Add an item and go to cart', async () => {
-            await act.plp.addToCart({ indexes: itemIndex });
+            await act.plp.addToCart({ indexes: [itemIndex] });
             await act.cart.openCart();
           });
 

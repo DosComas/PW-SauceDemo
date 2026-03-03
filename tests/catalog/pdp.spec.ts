@@ -19,7 +19,7 @@ test.describe('PDP', () => {
 
       test('Content matches PLP data', async ({ act, query }) => {
         const expected = await test.step('⬜ Scrape PLP Item data', async () => {
-          return await query.plp.readItems({ indexes: itemIndex });
+          return await query.plp.readItems({ indexes: [itemIndex] });
         });
 
         await test.step('🟦 Navigate to PDP', async () => {

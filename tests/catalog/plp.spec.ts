@@ -22,8 +22,8 @@ test.describe('PLP', () => {
 
       (
         [
-          { option: t.plp.sort.az, by: 'names', order: 'asc' },
-          { option: t.plp.sort.hiLo, by: 'prices', order: 'desc' },
+          { option: 'az', by: 'names', order: 'asc' },
+          { option: 'hiLo', by: 'prices', order: 'desc' },
         ] as const satisfies SortScenario[]
       ).forEach(({ option, by, order }) => {
         test(`Items follow ${option} order`, async ({ loc, act }) => {
@@ -31,7 +31,7 @@ test.describe('PLP', () => {
             await act.plp.sortGrid({ option });
           });
 
-          await expect(loc.plp.items[by], `🟧 UI: Sorted by ${option}`).toBeSortedBy(by, order);
+          await expect(loc.plp.items[by], `🟧 UI: Sorted by ${t.plp.sort[option]}`).toBeSortedBy(by, order);
         });
       });
 
@@ -47,7 +47,7 @@ test.describe('PLP', () => {
         });
 
         await test.step('🟦 Remove item from cart', async () => {
-          await act.plp.removeFromCart({ indexes: itemIndex });
+          await act.plp.removeFromCart({ indexes: [itemIndex] });
         });
 
         await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();

@@ -1,33 +1,28 @@
 import type { Locator } from '@playwright/test';
 import type * as d from '@data';
-import { sampleItem } from '@data';
 
 // ==========================================
 // 🏛️ LOGIC TYPES
 // ==========================================
 
-export type IndexSet = number | readonly number[];
-export type FormPartial<T> = Partial<T> & { skip?: (keyof T)[] };
-export type FormOptions<T> = T & { skip?: (keyof T)[] };
+type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+export type FormPartial<T> = Expand<Partial<T> & { skip?: (keyof T)[] }>;
+export type FormOptions<T> = Expand<T & { skip?: (keyof T)[] }>;
 
 // ==========================================
 // 🏛️ LOGIC ACTIONS
 // ==========================================
 
-/** Validates requested indexes exist in DOM, throws if any index out of bounds */
-export async function _ensureIndexes(locator: Locator, input: IndexSet): Promise<number[]> {
-  const list: number[] = Array.isArray(input) ? input : [input];
-  if (list.length === 0) return [];
+export async function _ensureIndexes(locator: Locator, indexes: number[]): Promise<void> {
+  if (indexes.length === 0) return;
 
-  const max = Math.max(...list);
+  const max = Math.max(...indexes);
   try {
     await locator.nth(max).waitFor();
   } catch {
     const count = await locator.count();
     throw new Error(`[_ensureIndexes] Index out of bounds, requested: ${max}, available: ${count}`);
   }
-
-  return list;
 }
 
 export async function _injectText<T extends readonly d.ConfigSchema<d.InjectMap>[]>(
@@ -36,27 +31,27 @@ export async function _injectText<T extends readonly d.ConfigSchema<d.InjectMap>
   data: Partial<d.DataOf<d.InjectMap, T>>,
 ): Promise<void> {
   for (const field of config) {
-    const key = field.key as keyof d.LocatorsOf<d.InjectMap, T>;
+    const key = field.key as T[number]['key'];
     const locator = locators[key] as Locator;
-    const value = data[key as keyof d.DataOf<d.InjectMap, T>];
+    const value = data[key];
 
-    if (value === undefined || value === null) continue;
+    if (value === null) continue;
+
     await locator.waitFor();
 
     switch (field.type) {
       case 'textField':
-        await locator.evaluate((el, txt) => {
-          el.textContent = String(txt);
-        }, value);
+        await locator.evaluate((el, val) => {
+          el.textContent = val;
+        }, String(value));
         break;
 
       case 'priceField':
-        await locator.evaluate((el, txt) => {
-          // Note: regex must be inside evaluate to exist in browser scope
+        await locator.evaluate((el, val) => {
           const regex = /\$[\d,.]+/;
           const current = el.textContent || '';
-          el.textContent = current.replace(regex, String(txt));
-        }, value);
+          el.textContent = current.replace(regex, `$${val}`);
+        }, Number(value).toFixed(2));
         break;
 
       default: {
@@ -88,20 +83,6 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function _readItem(itemLoc: d.ItemLocators): Promise<d.ItemData> {
-  const itemData: d.ItemData = { name: '', desc: '', price: '' };
-
-  for (const field of sampleItem.config) {
-    if (field.type !== 'textField') continue;
-    itemData[field.key] = ((await itemLoc[field.key].textContent()) || '').trim();
-  }
-
-  const missingData = Object.keys(itemData).filter((key) => !itemData[key as keyof d.ItemData]);
-  if (missingData.length > 0) throw new Error(`[_readItem] Missing item data: ${missingData.join(', ')}`);
-
-  return itemData;
-}
-
 export async function _fillForm<T extends readonly d.ConfigSchema<d.InputMap>[]>(
   config: T,
   locators: d.LocatorsOf<d.InputMap, T>,
@@ -109,9 +90,9 @@ export async function _fillForm<T extends readonly d.ConfigSchema<d.InputMap>[]>
   skip: T[number]['key'][] = [],
 ): Promise<void> {
   for (const field of config) {
-    const key = field.key as keyof d.LocatorsOf<d.InputMap, T>;
+    const key = field.key as T[number]['key'];
     const locator = locators[key] as Locator;
-    const value = data[key as keyof d.DataOf<d.InputMap, T>];
+    const value = data[key];
 
     if (skip.includes(field.key) || value === undefined || value === null) continue;
 
@@ -134,4 +115,32 @@ export async function _fillForm<T extends readonly d.ConfigSchema<d.InputMap>[]>
       }
     }
   }
+}
+
+export async function _readTextFields<T extends readonly d.ConfigSchema<d.InjectMap>[]>(
+  config: T,
+  locators: d.LocatorsOf<d.InjectMap, T>,
+): Promise<d.DataOf<d.InjectMap, T>> {
+  const result = {} as d.DataOf<d.InjectMap, T>;
+
+  for (const field of config) {
+    const key = field.key as T[number]['key'];
+    const locator = locators[key] as Locator;
+    const textContent = ((await locator.textContent()) ?? '').trim();
+
+    switch (field.type) {
+      case 'textField':
+        result[key] = textContent as d.DataOf<d.InjectMap, T>[typeof key];
+        break;
+
+      case 'priceField':
+        result[key] = Number(textContent.replace(/^.*?\$/, '')).toFixed(2) as d.DataOf<d.InjectMap, T>[typeof key];
+        break;
+    }
+  }
+
+  const missing = Object.keys(result).filter((key) => !result[key as keyof typeof result]);
+  if (missing.length > 0) throw new Error(`[_readTextFields] Missing fields: ${missing.join(', ')}`);
+
+  return result;
 }
