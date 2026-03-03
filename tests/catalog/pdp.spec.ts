@@ -27,7 +27,7 @@ test.describe('PDP', () => {
         });
 
         await test.step('🟧 UI: PDP item match PLP source', async () => {
-          expect(await query.pdp.readItem()).toMatchObject(expected);
+          expect(await query.pdp.readItem(), 'Item match').toMatchObject(expected);
         });
       });
 
@@ -38,9 +38,11 @@ test.describe('PDP', () => {
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
+
         await test.step('🟧 Data: Local storage has 1 item', async () => {
-          expect(await query.session.readCart()).toHaveLength(1);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(1);
         });
 
         await test.step('🟦 Remove item from cart', async () => {
@@ -48,9 +50,11 @@ test.describe('PDP', () => {
         });
 
         await expect.soft(loc.pdp.item.addBtn, '🟧 UI: Add button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge removed').not.toBeVisible();
+
         await test.step('🟧 Data: Local storage is empty', async () => {
-          expect(await query.session.readCart()).toHaveLength(0);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(0);
         });
       });
 
@@ -64,9 +68,11 @@ test.describe('PDP', () => {
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 3 items').toHaveText('3');
+
         await test.step('🟧 Data: Local storage has 3 items`', async () => {
-          expect(await query.session.readCart()).toHaveLength(3);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(3);
         });
       });
 
@@ -81,9 +87,11 @@ test.describe('PDP', () => {
         });
 
         await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
+
         await test.step('🟧 Data: Local storage has 1 item', async () => {
-          expect(await query.session.readCart()).toHaveLength(1);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(1);
         });
       });
 

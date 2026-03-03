@@ -38,14 +38,14 @@ export type ItemData = DataOf<InjectMap, typeof itemConfig>;
 const itemConfig = [
   { key: 'name', type: 'textField' },
   { key: 'desc', type: 'textField' },
-  { key: 'price', type: 'textField' },
+  { key: 'price', type: 'priceField' },
 ] as const satisfies readonly ConfigSchema<InjectMap>[];
 
 export const sampleItem = {
   config: itemConfig,
   data: {
     name: 'Standardized Product',
-    price: '$99.99',
+    price: 99.99,
     desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
   } as const satisfies ItemData,
 };
@@ -76,20 +76,20 @@ export const checkoutInfo = {
 // 🏛️ STATIC CHECKOUT MOCK DATA
 // ==========================================
 
-export type CheckoutPriceLocators = LocatorsOf<InjectMap, typeof checkoutPriceConfig>;
-export type CheckoutPriceData = DataOf<InjectMap, typeof checkoutPriceConfig>;
+export type CheckoutTotalsLocators = LocatorsOf<InjectMap, typeof checkoutTotalsConfig>;
+export type CheckoutTotalsData = DataOf<InjectMap, typeof checkoutTotalsConfig>;
 
-const checkoutPriceConfig = [
+const checkoutTotalsConfig = [
   { key: 'itemTotal', type: 'priceField' },
   { key: 'tax', type: 'priceField' },
   { key: 'total', type: 'priceField' },
 ] as const satisfies readonly ConfigSchema<InjectMap>[];
 
-export const checkoutPrice = {
-  config: checkoutPriceConfig,
+export const checkoutTotals = {
+  config: checkoutTotalsConfig,
   data: {
     itemTotal: 189.98,
     tax: 15.2,
     total: 205.18,
-  } as const satisfies CheckoutPriceData,
+  } as const satisfies CheckoutTotalsData,
 };

@@ -28,8 +28,9 @@ test.describe('Cart', () => {
         });
 
         await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
+
         await test.step('🟧 UI: Cart items match PLP source', async () => {
-          expect(await query.cart.readItems()).toMatchObject(expected);
+          expect(await query.cart.readItems(), 'Items match').toMatchObject(expected);
         });
       });
 
@@ -48,8 +49,9 @@ test.describe('Cart', () => {
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
         await test.step('🟧 UI: PDP item match Cart source', async () => {
-          expect(await query.pdp.readItem()).toMatchObject(expected);
+          expect(await query.pdp.readItem(), 'Local storage match').toMatchObject(expected);
         });
       });
 
@@ -66,9 +68,11 @@ test.describe('Cart', () => {
         });
 
         await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
+
         await test.step('🟧 Data: Local storage has 0 items', async () => {
-          expect(await query.session.readCart()).toHaveLength(0);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(0);
         });
       });
 
@@ -83,8 +87,9 @@ test.describe('Cart', () => {
         });
 
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
+
         await test.step('🟧 Data: Local storage has 0 items', async () => {
-          expect(await query.session.readCart()).toHaveLength(0);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(0);
         });
       });
 

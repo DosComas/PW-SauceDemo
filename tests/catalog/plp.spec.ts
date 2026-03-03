@@ -41,9 +41,11 @@ test.describe('PLP', () => {
         });
 
         await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 3').toHaveText('3');
+
         await test.step('🟧 Data: Local storage has 3 items', async () => {
-          expect(await query.session.readCart()).toHaveLength(3);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(3);
         });
 
         await test.step('🟦 Remove item from cart', async () => {
@@ -51,9 +53,11 @@ test.describe('PLP', () => {
         });
 
         await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
+
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 2').toHaveText('2');
+
         await test.step('🟧 Data: Local storage has 2 items', async () => {
-          expect(await query.session.readCart()).toHaveLength(2);
+          expect(await query.session.readCart(), 'Local storage match').toHaveLength(2);
         });
       });
 

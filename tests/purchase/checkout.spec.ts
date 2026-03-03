@@ -8,10 +8,10 @@ const itemIndex = random.target(itemIndexes);
 
 // test data integrity (items plp match checkout) X
 // test checkout link to pdp X                    X
-// test financial data tax, total, etc
+// test financial data tax, total, etc            X
 // test checkout form validation (parameterize missing fields)
 // test finish
-// test visutal?
+// test visutal? of the final page? no?
 
 test.describe('Checkout', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe('Checkout', () => {
       test.use({ storageState: persona.storageState });
 
       test('Items match PLP data', async ({ loc, act, query }) => {
-        const expected = await test.step('⬜ Scrape PLP items data', async () => {
+        const expectedItems = await test.step('⬜ Scrape PLP items data', async () => {
           return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
         });
 
@@ -35,9 +35,15 @@ test.describe('Checkout', () => {
           await act.checkout.submitInfo();
         });
 
-        await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
-        await test.step('🟧 UI: Cart items match PLP source', async () => {
-          expect(await query.checkout.readItems()).toMatchObject(expected);
+        await expect
+          .soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection')
+          .toHaveCount(expectedItems.length);
+
+        await test.step('🟧 UI: Checkout summary items match PLP source', async () => {
+          expect.soft(await query.checkout.readItems(), 'Items match').toMatchObject(expectedItems);
+
+          const expectedTotals = query.checkout.calculateTotals({ items: expectedItems });
+          expect(await query.checkout.readTotals(), 'Totals match').toMatchObject(expectedTotals);
         });
       });
 
@@ -57,6 +63,7 @@ test.describe('Checkout', () => {
         });
 
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
         await test.step('🟧 UI: PDP item match Checkout source', async () => {
           expect(await query.pdp.readItem()).toMatchObject(expected);
         });

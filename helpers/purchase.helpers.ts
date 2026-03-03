@@ -1,7 +1,7 @@
 import type { Page, Locator } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { t, sampleItem, checkoutInfo, checkoutPrice } from '@data';
+import { t, sampleItem, checkoutInfo, checkoutTotals } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN SCHEMA
@@ -23,11 +23,11 @@ type PurchaseSchema = {
       mockList: (args?: { size?: number }) => Promise<void>;
     };
     checkout: {
-      /** Performs the submission of the checkout information form. */
+      /** Performs the submission of the checkout user information form. */
       submitInfo: (args?: c.FormPartial<d.CheckoutInfoData>) => Promise<void>;
       /** Performs the navigation to an item's detail page from the checkout summary. */
       openItem: (args: { index: number }) => Promise<void>;
-      /** Performs the UI injection of mock items into the checkout summary list. */
+      /** Performs the UI injection of mock items into the checkout summary. */
       mockList: (args?: { size?: number }) => Promise<void>;
     };
   };
@@ -37,8 +37,12 @@ type PurchaseSchema = {
       readItems: (args?: { index?: number }) => Promise<d.ItemData[]>;
     };
     checkout: {
-      /** Retrieves item data from the checkout summary list. */
+      /** Retrieves item data from the checkout summary. */
       readItems: (args?: { index?: number }) => Promise<d.ItemData[]>;
+      /** Retrieves price total data from the checkout summary. */
+      readTotals: () => Promise<d.CheckoutTotalsData>;
+      /** Retrieves the expected price totals based on a provided list of items. */
+      calculateTotals: (args: { items: d.ItemData[] }) => d.CheckoutTotalsData;
     };
   };
 };
@@ -81,7 +85,7 @@ const purchaseLocators = (page: Page) => {
         itemTotal: page.getByTestId('subtotal-label'),
         tax: page.getByTestId('tax-label'),
         total: page.getByTestId('total-label'),
-      } satisfies d.CheckoutPriceLocators,
+      } satisfies d.CheckoutTotalsLocators,
       continueBtn: page.getByRole('button', { name: t.checkout.continue }),
       finishBtn: page.getByRole('button', { name: t.checkout.finish }),
     },
@@ -132,9 +136,9 @@ export const purchase = (page: Page): PurchaseSchema => {
         mockList: async ({ size = 3 } = {}) => {
           const blueprint = _checkoutCardsLoc.first();
           await c._injectText(
-            [...sampleItem.config, ...checkoutPrice.config],
+            [...sampleItem.config, ...checkoutTotals.config],
             { ...loc.checkout.item(0), ...loc.checkout.price },
-            { ...sampleItem.data, ...checkoutPrice.data },
+            { ...sampleItem.data, ...checkoutTotals.data },
           );
           await c._injectClones(loc.checkout.list, blueprint, size);
           await _injectBadgeNumber(headerLoc.cart.badge, size);
@@ -147,6 +151,12 @@ export const purchase = (page: Page): PurchaseSchema => {
       },
       checkout: {
         readItems: async ({ index } = {}) => await _readPurchaseItems(_checkoutCardsLoc, _getCheckoutItem, index),
+        readTotals: async () => await c._readTextFields(checkoutTotals.config, loc.checkout.price),
+        calculateTotals: ({ items }) => {
+          const itemTotal = items.reduce((sum, item) => sum + item.price, 0);
+          const tax = Number((itemTotal * 0.08).toFixed(2)); // Assuming 8% (not hard coded)
+          return { itemTotal, tax, total: Number((itemTotal + tax).toFixed(2)) };
+        },
       },
     },
   } as const;
