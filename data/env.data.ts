@@ -1,12 +1,12 @@
 // ==========================================
-// 🏛️ ENV TYPES
+// 🏛️ ENVIROMENT TYPES
 // ==========================================
 
 type EnvConfig = { baseUrl: string; environment: string };
 type EnvKey = keyof typeof ENV_MAP;
 
 // ==========================================
-// 🏛️ ENV DATA
+// 🏛️ ENVIROMENT DATA
 // ==========================================
 
 const ENV_MAP = {
