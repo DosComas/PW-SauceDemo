@@ -27,7 +27,7 @@ test.describe('Cart', () => {
           await act.cart.openCart();
         });
 
-        await expect.soft(loc.cart.items.cards, '🟧 UI: Cart count matches selection').toHaveCount(expected.length);
+        await expect.soft(loc.header.cart.badge, '🟧 UI: Badge match selection').toHaveText(String(itemIndexes.length));
 
         await test.step('🟧 UI: Cart items match PLP source', async () => {
           expect(await query.cart.readItems(), 'Items match').toMatchObject(expected);

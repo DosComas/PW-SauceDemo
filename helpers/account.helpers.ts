@@ -18,6 +18,7 @@ type AccountSchema = {
     menu: {
       /** Performs the logout sequence via the navigation menu. */
       logout: () => Promise<void>;
+
       /** Performs the opening of the navigation menu panel. */
       openMenu: () => Promise<void>;
     };
@@ -26,6 +27,7 @@ type AccountSchema = {
     session: {
       /** Retrieves the user session cookie from the browser. */
       readUser: () => Promise<Cookie | undefined>;
+
       /** Retrieves the cart items list from local storage. */
       readCart: () => Promise<number[]>;
     };
@@ -77,7 +79,7 @@ export const account = (page: Page): AccountSchema => {
           await _openMenu();
           await headerLoc.menu.logoutBtn.click();
         },
-        openMenu: async () => _openMenu(),
+        openMenu: async () => await _openMenu(),
       },
     },
     query: {

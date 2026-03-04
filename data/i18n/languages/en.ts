@@ -72,5 +72,12 @@ export const EN = {
     zipCode: 'Zip/Postal Code',
     continue: 'Continue',
     finish: 'Finish',
+    complete: {
+      title: 'Checkout: Complete!',
+      ponyAlt: 'Pony Express',
+      success: 'Thank you for your order!',
+      dispatchedNote: 'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
+      backHome: 'Back Home',
+    },
   },
 } as const;

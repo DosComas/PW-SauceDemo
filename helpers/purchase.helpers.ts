@@ -13,20 +13,29 @@ type PurchaseSchema = {
     cart: {
       /** Performs the opening of the shopping cart page. */
       openCart: () => Promise<void>;
+
       /** Performs the navigation to an item's detail page from the cart. */
       openItem: (args: { index: number }) => Promise<void>;
+
       /** Performs the removal of items from the cart list. */
       removeFromCart: (args: { indexes: number[] }) => Promise<void>;
+
       /** Performs the navigation back to the PLP page. */
       goBack: () => Promise<void>;
+
       /** Performs the UI injection of mock items into the cart list. */
       mockList: (args?: { size?: number }) => Promise<void>;
     };
     checkout: {
       /** Performs the submission of the checkout user information form. */
       submitInfo: (args?: c.FormPartial<d.CheckoutInfoData>) => Promise<void>;
+
       /** Performs the navigation to an item's detail page from the checkout summary. */
       openItem: (args: { index: number }) => Promise<void>;
+
+      /** Performs the final submission to complete the order. */
+      completeOrder: () => Promise<void>;
+
       /** Performs the UI injection of mock items into the checkout summary. */
       mockList: (args?: { size?: number }) => Promise<void>;
     };
@@ -39,8 +48,10 @@ type PurchaseSchema = {
     checkout: {
       /** Retrieves item data from the checkout summary. */
       readItems: (args?: { index?: number }) => Promise<d.ItemData[]>;
+
       /** Retrieves price total data from the checkout summary. */
       readTotals: () => Promise<d.CheckoutTotalsData>;
+
       /** Retrieves the expected price totals based on a provided list of items. */
       calculateTotals: (args: { items: d.ItemData[] }) => d.CheckoutTotalsData;
     };
@@ -68,6 +79,7 @@ const purchaseLocators = (page: Page) => {
       backBtn: page.getByRole('button', { name: t.cart.goBack }),
     },
     checkout: {
+      title: page.getByTestId('secondary-header'),
       checkoutBtn: page.getByRole('button', { name: t.cart.checkout }),
       input: {
         firstName: page.getByPlaceholder(t.checkout.firstName),
@@ -88,6 +100,10 @@ const purchaseLocators = (page: Page) => {
       } satisfies d.CheckoutTotalsLocators,
       continueBtn: page.getByRole('button', { name: t.checkout.continue }),
       finishBtn: page.getByRole('button', { name: t.checkout.finish }),
+      complete: {
+        container: page.getByTestId('checkout-complete-container'),
+        header: page.getByTestId('complete-header'),
+      },
     },
   } as const satisfies d.LocatorSchema;
 };
@@ -133,6 +149,7 @@ export const purchase = (page: Page): PurchaseSchema => {
           await loc.checkout.continueBtn.click();
         },
         openItem: async ({ index }) => await _getCheckoutItem(index).name.click(),
+        completeOrder: async () => loc.checkout.finishBtn.click(),
         mockList: async ({ size = 3 } = {}) => {
           const blueprint = _checkoutCardsLoc.first();
           await c._injectText(

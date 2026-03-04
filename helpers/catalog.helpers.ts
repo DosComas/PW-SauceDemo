@@ -13,22 +13,29 @@ type CatalogSchema = {
     plp: {
       /** Performs the addition of multiple items to the cart via the PLP grid. */
       addToCart: (args: { indexes: number[] }) => Promise<void>;
+
       /** Performs the removal of multiple items from the cart via the PLP grid. */
       removeFromCart: (args: { indexes: number[] }) => Promise<void>;
+
       /** Performs the navigation to an item's detail page via a specific element. */
       openItem: (args: { index: number; via: 'name' | 'img' }) => Promise<void>;
+
       /** Performs the selection of a sorting option for the PLP grid. */
       sortGrid: (args: { option: d.SortOption }) => Promise<void>;
+
       /** Performs the UI injection of mock items into the PLP grid. */
       mockGrid: (args?: { size?: number }) => Promise<void>;
     };
     pdp: {
       /** Performs the addition of the current item to the cart via the PDP. */
       addToCart: () => Promise<void>;
+
       /** Performs the removal of the current item from the cart via the PDP. */
       removeFromCart: () => Promise<void>;
+
       /** Performs the navigation back to the PLP page. */
       goBack: () => Promise<void>;
+
       /** Performs the UI injection of mock data into the PDP item. */
       mockItem: () => Promise<void>;
     };
