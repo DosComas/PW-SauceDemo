@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import type { SortOption, SortableLocators, SortCriteria } from '@data';
-import { t, AUTHENTICATED } from '@data';
+import { AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
 type SortScenario = { option: SortOption; by: keyof SortableLocators; order: SortCriteria['order'] };
@@ -31,7 +31,7 @@ test.describe('PLP', () => {
             await act.plp.sortGrid({ option });
           });
 
-          await expect(loc.plp.items[by], `🟧 UI: Sorted by ${t.plp.sort[option]}`).toBeSortedBy(by, order);
+          await expect(loc.plp.items[by], `🟧 UI: Sorted by ${option}`).toBeSortedBy(by, order);
         });
       });
 

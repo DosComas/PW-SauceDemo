@@ -23,6 +23,9 @@ type PurchaseSchema = {
       /** Performs the navigation back to the PLP page. */
       goBack: () => Promise<void>;
 
+      /** Performs the initiation of the checkout process. */
+      startCheckout: () => Promise<void>;
+
       /** Performs the UI injection of mock items into the cart list. */
       mockList: (args?: { size?: number }) => Promise<void>;
     };
@@ -76,16 +79,17 @@ const purchaseLocators = (page: Page) => {
         removeBtn: _cardsLoc.nth(index).getByRole('button', { name: t.item.remove }),
         ...c._itemFragment(_cardsLoc.nth(index)),
       }),
-      backBtn: page.getByRole('button', { name: t.cart.goBack }),
+      backBtn: page.getByRole('button', { name: t.cart.continueShopping }),
+      checkoutBtn: page.getByRole('button', { name: t.cart.checkout }),
     },
     checkout: {
       title: page.getByTestId('secondary-header'),
-      checkoutBtn: page.getByRole('button', { name: t.cart.checkout }),
-      input: {
-        firstName: page.getByPlaceholder(t.checkout.firstName),
-        lastName: page.getByPlaceholder(t.checkout.lastName),
-        zipCode: page.getByPlaceholder(t.checkout.zipCode),
+      infoInput: {
+        firstName: page.getByPlaceholder(t.checkout.info.form.firstName),
+        lastName: page.getByPlaceholder(t.checkout.info.form.lastName),
+        zipCode: page.getByPlaceholder(t.checkout.info.form.zipCode),
       } satisfies d.CheckoutInfoLocators,
+      infoError: page.getByTestId('error'),
       list: _listLoc,
       items: {
         cards: _cardsLoc,
@@ -98,8 +102,8 @@ const purchaseLocators = (page: Page) => {
         tax: page.getByTestId('tax-label'),
         total: page.getByTestId('total-label'),
       } satisfies d.CheckoutTotalsLocators,
-      continueBtn: page.getByRole('button', { name: t.checkout.continue }),
-      finishBtn: page.getByRole('button', { name: t.checkout.finish }),
+      continueBtn: page.getByRole('button', { name: t.checkout.info.continue }),
+      finishBtn: page.getByRole('button', { name: t.checkout.overview.finish }),
       complete: {
         container: page.getByTestId('checkout-complete-container'),
         header: page.getByTestId('complete-header'),
@@ -133,6 +137,7 @@ export const purchase = (page: Page): PurchaseSchema => {
           for (const i of indexes) await _getCartItem(i).removeBtn.click();
         },
         goBack: async () => await loc.cart.backBtn.click(),
+        startCheckout: async () => await loc.cart.checkoutBtn.click(),
         mockList: async ({ size = 3 } = {}) => {
           const blueprint = _cartCardsLoc.first();
           await c._injectText(sampleItem.config, loc.cart.item(0), sampleItem.data);
@@ -144,8 +149,7 @@ export const purchase = (page: Page): PurchaseSchema => {
         submitInfo: async (args = {}) => {
           const { skip, ...data } = args;
           const formData = { ...checkoutInfo.generate(), ...data };
-          await loc.checkout.checkoutBtn.click();
-          await c._fillForm(checkoutInfo.config, loc.checkout.input, formData, skip);
+          await c._fillForm(checkoutInfo.config, loc.checkout.infoInput, formData, skip);
           await loc.checkout.continueBtn.click();
         },
         openItem: async ({ index }) => await _getCheckoutItem(index).name.click(),

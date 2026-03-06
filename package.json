@@ -4,8 +4,9 @@
   "main": "index.js",
   "scripts": {
     "all": "playwright test",
-    "base": "playwright test -g \"@👤\" --project=Chrome",
-    "stress": "npm run base -- --repeat-each 100 --retries 0 -x --trace retain-on-failure",
+    "base": "playwright test -g \"@👤\"",
+    "dev": "playwright test -g \"@👤\" --project=Chrome",
+    "stress": "npm run dev -- --repeat-each 100 --retries 0 -x --trace retain-on-failure",
     "report": "playwright show-report",
     "list": "npm run base -- --list",
     "check": "concurrently -s -k false -n \"PRETTIER,ESLINT,TSC\" -c \"cyan,magenta,green\" \"prettier --check . --log-level warn\" \"eslint . --max-warnings=0\" \"tsc --noEmit\"",

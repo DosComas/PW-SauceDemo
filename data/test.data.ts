@@ -1,4 +1,5 @@
 import type { Locator } from '@playwright/test';
+import type { LanguageData } from './i18n/dictionary';
 import { faker } from '@faker-js/faker';
 
 // ==========================================
@@ -54,6 +55,7 @@ export const sampleItem = {
 // 🏛️ DYNAMIC CHECKOUT INPUT DATA
 // ==========================================
 
+type CheckoutConfig = { readonly key: keyof LanguageData['checkout']['info']['form']; readonly type: keyof InputMap };
 export type CheckoutInfoLocators = LocatorsOf<InputMap, typeof checkoutInfoConfig>;
 export type CheckoutInfoData = DataOf<InputMap, typeof checkoutInfoConfig>;
 
@@ -61,7 +63,7 @@ const checkoutInfoConfig = [
   { key: 'firstName', type: 'textInput' },
   { key: 'lastName', type: 'textInput' },
   { key: 'zipCode', type: 'textInput' },
-] as const satisfies readonly ConfigSchema<InputMap>[];
+] as const satisfies readonly CheckoutConfig[];
 
 export const checkoutInfo = {
   config: checkoutInfoConfig,

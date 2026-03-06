@@ -10,7 +10,7 @@ test.describe('Login', () => {
 
   for (const persona of UNAUTHORIZED) {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
-      test('Reject invalid credentials', async ({ loc, act }) => {
+      test('Validation for invalid credentials', async ({ loc, act }) => {
         await test.step('🟦 Log into the app', async () => {
           await act.login.submitCredentials({ username: persona.user, password: persona.pass });
         });
@@ -24,7 +24,7 @@ test.describe('Login', () => {
 
   for (const persona of BASELINE) {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
-      test('Accept valid credentials', async ({ loc, act, query }) => {
+      test('Successful authentication', async ({ loc, act, query }) => {
         await test.step('🟦 Log in to app', async () => {
           await act.login.submitCredentials({ username: persona.user, password: persona.pass });
         });

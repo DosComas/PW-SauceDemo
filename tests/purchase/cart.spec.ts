@@ -95,7 +95,7 @@ test.describe('Cart', () => {
 
       if (persona.isBaseline) {
         test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
-          await test.step('⬜ Add an item and go to cart', async () => {
+          await test.step('⬜ Add an item and navigate to cart', async () => {
             await act.plp.addToCart({ indexes: [itemIndex] });
             await act.cart.openCart();
           });

@@ -1,12 +1,13 @@
 import { test, expect } from '@fixtures';
+import type { CheckoutInfoData, CheckoutInfoError } from '@data';
 import { t, AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
+
+type InfoScenario = { skipInput: keyof CheckoutInfoData; expectedError: CheckoutInfoError };
 
 const random = createRandom();
 const itemIndexes = random.basket(3);
 const itemIndex = random.target(itemIndexes);
-
-// test checkout form validation (parameterize missing fields)
 
 test.describe('Checkout', () => {
   test.beforeEach(async ({ page }) => {
@@ -27,15 +28,16 @@ test.describe('Checkout', () => {
         await test.step('🟦 Add items and complete checkout', async () => {
           await act.plp.addToCart({ indexes: itemIndexes });
           await act.cart.openCart();
+          await act.cart.startCheckout();
           await act.checkout.submitInfo();
         });
 
         await expect.soft(loc.header.cart.badge, '🟧 UI: Badge match selection').toHaveText(String(itemIndexes.length));
 
         await test.step('🟧 UI: Checkout summary match PLP source', async () => {
-          expect.soft(await query.checkout.readItems(), 'Items match').toMatchObject(expectedItems);
-
           const expectedTotals = query.checkout.calculateTotals({ items: expectedItems });
+
+          expect.soft(await query.checkout.readItems(), 'Items match').toMatchObject(expectedItems);
           expect(await query.checkout.readTotals(), 'Totals match').toMatchObject(expectedTotals);
         });
 
@@ -52,6 +54,7 @@ test.describe('Checkout', () => {
         await test.step('⬜ Add items and submit checkout info', async () => {
           await act.plp.addToCart({ indexes: itemIndexes });
           await act.cart.openCart();
+          await act.cart.startCheckout();
           await act.checkout.submitInfo();
         });
 
@@ -70,11 +73,34 @@ test.describe('Checkout', () => {
         });
       });
 
+      (
+        [
+          { skipInput: 'firstName', expectedError: t.checkout.info.errors.firstName },
+          { skipInput: 'lastName', expectedError: t.checkout.info.errors.lastName },
+          { skipInput: 'zipCode', expectedError: t.checkout.info.errors.zipCode },
+        ] as const satisfies InfoScenario[]
+      ).forEach(({ skipInput, expectedError }) => {
+        test(`Validation error when ${t.checkout.info.form[skipInput]} is missing`, async ({ loc, act }) => {
+          await test.step('⬜ Add items and go to cart', async () => {
+            await act.plp.addToCart({ indexes: itemIndexes });
+            await act.cart.openCart();
+          });
+
+          await test.step('🟦 Submit checkout info', async () => {
+            await act.cart.startCheckout();
+            await act.checkout.submitInfo({ skip: [skipInput] });
+          });
+
+          await expect(loc.checkout.infoError, '🟧 UI: Error message matches').toHaveText(expectedError);
+        });
+      });
+
       if (persona.isBaseline) {
         test('Visual layout', { tag: '@visual' }, async ({ page, act }) => {
           await test.step('⬜ Add items and submit checkout info', async () => {
             await act.plp.addToCart({ indexes: [itemIndex] });
             await act.cart.openCart();
+            await act.cart.startCheckout();
             await act.checkout.submitInfo();
           });
 

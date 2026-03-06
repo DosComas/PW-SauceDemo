@@ -87,7 +87,7 @@ const catalogLocators = (page: Page) => {
         addBtn: _getAddBtn(page),
         removeBtn: _getRemoveBtn(page),
       },
-      backBtn: page.getByRole('button', { name: t.pdp.goBack }),
+      backBtn: page.getByRole('button', { name: t.pdp.goBackToProducts }),
     },
   } as const satisfies d.LocatorSchema;
 };
