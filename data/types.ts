@@ -1,28 +1,21 @@
 import type { Locator } from '@playwright/test';
 import type { LanguageData } from './i18n/dictionary';
-import { STATE_KEYS } from './session.data';
 
 // ==========================================
 // 🏛️ I18N DERIVED TYPES
 // ==========================================
 
-type PLP = LanguageData['plp'];
 type Footer = LanguageData['footer'];
-
 export type SocialPlatform = keyof Footer['social'];
 export type SocialPlatformData = Footer['social'][SocialPlatform];
-
-// ==========================================
-// 🏛️ SESSION DERIVED TYPES
-// ==========================================
-
-export type StateKeys = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];
+export type CheckoutInfoError =
+  LanguageData['checkout']['info']['errors'][keyof LanguageData['checkout']['info']['errors']];
 
 // ==========================================
 // 🏛️ ITEM TYPES
 // ==========================================
 
-export type SortOption = keyof PLP['sort'];
+export type SortOption = keyof LanguageData['plp']['sort'];
 export type SortableLocators = { names: Locator; prices: Locator };
 export type SortCriteria = { by: keyof SortableLocators; order: 'asc' | 'desc' };
 
