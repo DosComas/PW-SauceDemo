@@ -84,12 +84,12 @@ const purchaseLocators = (page: Page) => {
     },
     checkout: {
       title: page.getByTestId('secondary-header'),
-      infoInput: {
+      form: {
         firstName: page.getByPlaceholder(t.checkout.info.form.firstName),
         lastName: page.getByPlaceholder(t.checkout.info.form.lastName),
         zipCode: page.getByPlaceholder(t.checkout.info.form.zipCode),
       } satisfies d.CheckoutInfoLocators,
-      infoError: page.getByTestId('error'),
+      error: page.getByTestId('error'),
       list: _listLoc,
       items: {
         cards: _cardsLoc,
@@ -149,7 +149,7 @@ export const purchase = (page: Page): PurchaseSchema => {
         submitInfo: async (args = {}) => {
           const { skip, ...data } = args;
           const formData = { ...checkoutInfo.generate(), ...data };
-          await c._fillForm(checkoutInfo.config, loc.checkout.infoInput, formData, skip);
+          await c._fillForm(checkoutInfo.config, loc.checkout.form, formData, skip);
           await loc.checkout.continueBtn.click();
         },
         openItem: async ({ index }) => await _getCheckoutItem(index).name.click(),

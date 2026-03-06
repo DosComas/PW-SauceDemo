@@ -91,7 +91,7 @@ test.describe('Checkout', () => {
             await act.checkout.submitInfo({ skip: [skipInput] });
           });
 
-          await expect(loc.checkout.infoError, '🟧 UI: Error message matches').toHaveText(expectedError);
+          await expect(loc.checkout.error, '🟧 UI: Error message matches').toHaveText(expectedError);
         });
       });
 
