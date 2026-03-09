@@ -3,7 +3,7 @@ import type { SortOption, SortableLocators, SortCriteria } from '@data';
 import { AUTHENTICATED } from '@data';
 import { createRandom } from '@utils';
 
-type SortScenario = { option: SortOption; by: keyof SortableLocators; order: SortCriteria['order'] };
+type SortScenario = { sortBy: SortOption; by: keyof SortableLocators; order: SortCriteria['order'] };
 
 const random = createRandom();
 const itemIndexes = random.basket(3);
@@ -22,16 +22,16 @@ test.describe('PLP', () => {
 
       (
         [
-          { option: 'az', by: 'names', order: 'asc' },
-          { option: 'hiLo', by: 'prices', order: 'desc' },
+          { sortBy: 'az', by: 'names', order: 'asc' },
+          { sortBy: 'hiLo', by: 'prices', order: 'desc' },
         ] as const satisfies SortScenario[]
-      ).forEach(({ option, by, order }) => {
-        test(`Items follow ${option} order`, async ({ loc, act }) => {
+      ).forEach(({ sortBy, by, order }) => {
+        test(`Items follow ${sortBy} order`, async ({ loc, act }) => {
           await test.step('🟦 Sort items', async () => {
-            await act.plp.sortGrid({ option });
+            await act.plp.sortGrid({ sortBy });
           });
 
-          await expect(loc.plp.items[by], `🟧 UI: Sorted by ${option}`).toBeSortedBy(by, order);
+          await expect(loc.plp.items[by], `🟧 UI: Sorted by ${sortBy}`).toBeSortedBy(by, order);
         });
       });
 

@@ -31,6 +31,7 @@ test.describe('Navigation', () => {
         });
 
         await expect.soft(loc.header.menu.aboutBtn, '🟧 UI: About button visible').toBeVisible();
+
         await expect(loc.header.menu.aboutBtn, `🟧 UI: About link URL`).toHaveAttribute('href', t.menu.about.url);
       });
     });

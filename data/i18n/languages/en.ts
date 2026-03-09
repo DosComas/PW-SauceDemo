@@ -23,6 +23,9 @@ export const EN = {
       facebook: { label: 'Facebook', url: 'https://www.facebook.com/saucelabs' },
       linkedin: { label: 'LinkedIn', url: 'https://www.linkedin.com/company/sauce-labs/' },
     },
+    copy: 'All Rights Reserved',
+    terms: 'Terms of Service',
+    privacy: 'Privacy Policy',
   },
 
   /** Authentication: User credentials and login-specific validation messages */
@@ -56,22 +59,36 @@ export const EN = {
 
   /** Detail View: Single Product Details Page (PDP) specific navigation */
   pdp: {
-    goBack: 'Back to products',
+    goBackToProducts: 'Back to products',
   },
 
   /** Shopping Experience: Cart overview and entry point to checkout */
   cart: {
+    title: 'Your Cart',
     checkout: 'Checkout',
-    goBack: 'Continue Shopping',
+    continueShopping: 'Continue Shopping',
   },
 
   /** Transaction Flow: Customer information and order completion */
   checkout: {
-    firstName: 'First Name',
-    lastName: 'Last Name',
-    zipCode: 'Zip/Postal Code',
-    continue: 'Continue',
-    finish: 'Finish',
+    info: {
+      title: 'Checkout: Your Information',
+      form: {
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        zipCode: 'Zip/Postal Code',
+      },
+      errors: {
+        firstName: 'Error: First Name is required',
+        lastName: 'Error: Last Name is required',
+        zipCode: 'Error: Postal Code is required',
+      },
+      continue: 'Continue',
+    },
+    overview: {
+      title: 'Checkout: Overview',
+      finish: 'Finish',
+    },
     complete: {
       title: 'Checkout: Complete!',
       ponyAlt: 'Pony Express',
@@ -79,5 +96,11 @@ export const EN = {
       dispatchedNote: 'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
       backHome: 'Back Home',
     },
+    cancel: 'Cancel',
   },
+  purchase: {
+    qty: 'QTY',
+    description: 'Description',
+  },
+  goBackAlt: 'Go back',
 } as const;

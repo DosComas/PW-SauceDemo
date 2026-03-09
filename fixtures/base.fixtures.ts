@@ -1,27 +1,25 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
+import type { AppModules, AppLocs, AppActs, AppQueries, AppArias } from '../helpers';
+import { getModules, createLoc, createAct, createQuery, createAria } from '../helpers';
 import { customMatchers } from '@utils';
-import { type Gateway, createGateway } from '../helpers';
 
 // ==========================================
 // 🏛️ CUSTOM FIXTURES
 // ==========================================
 
-type MyFixtures = { _gateway: Gateway; loc: Gateway['loc']; act: Gateway['act']; query: Gateway['query'] };
+type MyFixtures = { _modules: AppModules; loc: AppLocs; act: AppActs; query: AppQueries; aria: AppArias };
 
-/** Fixture: Provides gateway access to loc, act, query */
 export const test = base.extend<MyFixtures>({
-  _gateway: async ({ page }, use) => {
-    await use(createGateway(page));
-  },
+  _modules: async ({ page }, use) => await use(getModules(page)),
 
-  loc: async ({ _gateway }, use) => await use(_gateway.loc),
-  act: async ({ _gateway }, use) => await use(_gateway.act),
-  query: async ({ _gateway }, use) => await use(_gateway.query),
+  loc: async ({ _modules }, use) => await use(createLoc(_modules)),
+  act: async ({ _modules }, use) => await use(createAct(_modules)),
+  query: async ({ _modules }, use) => await use(createQuery(_modules)),
+  aria: async ({ _modules }, use) => await use(createAria(_modules)),
 });
 
 // ==========================================
 // 🏛️ CUSTOM ASSERTIONS
 // ==========================================
 
-/** Custom matchers extended with toBeSortedBy */
 export const expect = baseExpect.extend(customMatchers);

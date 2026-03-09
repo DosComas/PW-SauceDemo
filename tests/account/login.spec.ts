@@ -24,13 +24,21 @@ test.describe('Login', () => {
 
   for (const persona of BASELINE) {
     test.describe(`${persona.role}`, { tag: persona.tag }, () => {
-      test('Successful authentication', async ({ loc, act, query }) => {
+      test('Successful authentication', { tag: '@aria' }, async ({ loc, act, query, aria }) => {
+        await test.step('🟧 ARIA: Login page milestone', async () => {
+          await aria.login();
+        });
+
         await test.step('🟦 Log in to app', async () => {
           await act.login.submitCredentials({ username: persona.user, password: persona.pass });
         });
 
         await expect.soft(loc.plp.title, '🟧 UI: Products title check').toHaveText(t.plp.title);
-        await expect.soft(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
+
+        await test.step('🟧 ARIA: Post login PLP state', async () => {
+          await aria.plp({ itemCount: 0, sortBy: 'az', itemsInCart: [] });
+        });
+
         expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
       });
 

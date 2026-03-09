@@ -45,9 +45,11 @@ test.describe('Checkout', () => {
           await act.checkout.completeOrder();
         });
 
-        await expect(loc.checkout.title, '🟧 UI: Page Title').toHaveText(t.checkout.complete.title);
+        await expect(loc.header.container.secondary, '🟧 UI: Page Title').toHaveText(t.checkout.complete.title);
 
-        await expect(loc.checkout.complete.header, '🟧 UI: Success Heading').toHaveText(t.checkout.complete.success);
+        await expect(loc.checkout.successMsgTitle, '🟧 UI: Success Message Title').toHaveText(
+          t.checkout.complete.success,
+        );
       });
 
       test('Cart links to PDP', async ({ loc, act, query }) => {
@@ -69,7 +71,7 @@ test.describe('Checkout', () => {
         await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
 
         await test.step('🟧 UI: PDP item match Checkout source', async () => {
-          expect(await query.pdp.readItem()).toMatchObject(expected);
+          expect(await query.pdp.readItem(), 'Match item object').toMatchObject(expected);
         });
       });
 

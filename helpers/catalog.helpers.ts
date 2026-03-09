@@ -1,7 +1,7 @@
-import type { Page, Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { t, sampleItem } from '@data';
+import { t, sampleItem, catalogSnapshots } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN SCHEMA
@@ -9,6 +9,7 @@ import { t, sampleItem } from '@data';
 
 type CatalogSchema = {
   loc: ReturnType<typeof catalogLocators>;
+
   act: {
     plp: {
       /** Performs the addition of multiple items to the cart via the PLP grid. */
@@ -21,7 +22,7 @@ type CatalogSchema = {
       openItem: (args: { index: number; via: 'name' | 'img' }) => Promise<void>;
 
       /** Performs the selection of a sorting option for the PLP grid. */
-      sortGrid: (args: { option: d.SortOption }) => Promise<void>;
+      sortGrid: (args: { sortBy: d.SortOption }) => Promise<void>;
 
       /** Performs the UI injection of mock items into the PLP grid. */
       mockGrid: (args?: { size?: number }) => Promise<void>;
@@ -40,6 +41,7 @@ type CatalogSchema = {
       mockItem: () => Promise<void>;
     };
   };
+
   query: {
     plp: {
       /** Retrieves the data for specific items from the PLP grid. */
@@ -49,6 +51,14 @@ type CatalogSchema = {
       /** Retrieves the data for the currently displayed item on the PDP. */
       readItem: () => Promise<(d.ItemData & { imgSrc?: string })[]>;
     };
+  };
+
+  aria: {
+    /** Performs ARIA snapshot validation for the full PLP page. */
+    plp: (args: { itemCount: number; sortBy: d.SortOption; itemsInCart: readonly number[] }) => Promise<void>;
+
+    /** Performs ARIA snapshot validation for the full PDP page. */
+    pdp: (args: { itemCount: number; inCart: boolean }) => Promise<void>;
   };
 };
 
@@ -82,6 +92,7 @@ const catalogLocators = (page: Page) => {
     },
     pdp: {
       item: {
+        card: _cardsLoc.first(),
         ...c._itemFragment(page),
         img: page.locator('.inventory_details_img_container').getByRole('img'),
         addBtn: _getAddBtn(page),
@@ -98,6 +109,7 @@ const catalogLocators = (page: Page) => {
 
 export const catalog = (page: Page): CatalogSchema => {
   const loc = catalogLocators(page);
+  const aria = c.layout(page).aria;
 
   const _itemLoc = loc.pdp.item;
   const _cardsLoc = loc.plp.items.cards;
@@ -121,8 +133,8 @@ export const catalog = (page: Page): CatalogSchema => {
           const itemLoc = _getItem(index);
           await (via === 'img' ? itemLoc.img : itemLoc.name).click();
         },
-        sortGrid: async ({ option }) => {
-          await loc.plp.sort.selectOption({ label: t.plp.sort[option] });
+        sortGrid: async ({ sortBy }) => {
+          await loc.plp.sort.selectOption({ label: t.plp.sort[sortBy] });
         },
         mockGrid: async ({ size = 5 } = {}) => {
           const blueprint = _cardsLoc.first();
@@ -148,6 +160,25 @@ export const catalog = (page: Page): CatalogSchema => {
         readItem: async () => {
           return [await _readCatalogItem(_itemLoc, true)];
         },
+      },
+    },
+    aria: {
+      plp: async ({ itemCount, sortBy, itemsInCart }) => {
+        const content = catalogSnapshots.plp;
+        await aria.expectPrimary({ itemCount });
+        await aria.expectSecondary({ snapshot: content.titleAndSort({ sortBy }) });
+        for (const [i, card] of (await _cardsLoc.all()).entries()) {
+          const inCart = itemsInCart.includes(i);
+          await expect(card, `PLP item ${i} ARIA snapshot`).toMatchAriaSnapshot(content.item({ inCart }));
+        }
+        await aria.expectFooter();
+      },
+      pdp: async ({ itemCount, inCart }) => {
+        const content = catalogSnapshots.pdp;
+        await aria.expectPrimary({ itemCount });
+        await aria.expectSecondary({ snapshot: content.goBack });
+        await expect(_itemLoc.card, 'PDP item ARIA snapshot').toMatchAriaSnapshot(content.item({ inCart }));
+        await aria.expectFooter();
       },
     },
   } as const;

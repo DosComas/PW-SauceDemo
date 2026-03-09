@@ -1,7 +1,7 @@
-import type { Page, Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { t, sampleItem, checkoutInfo, checkoutTotals } from '@data';
+import { t, sampleItem, checkoutInfo, checkoutTotals, cartSnapshot, checkoutSnapshots } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN SCHEMA
@@ -9,6 +9,7 @@ import { t, sampleItem, checkoutInfo, checkoutTotals } from '@data';
 
 type PurchaseSchema = {
   loc: ReturnType<typeof purchaseLocators>;
+
   act: {
     cart: {
       /** Performs the opening of the shopping cart page. */
@@ -43,6 +44,7 @@ type PurchaseSchema = {
       mockList: (args?: { size?: number }) => Promise<void>;
     };
   };
+
   query: {
     cart: {
       /** Retrieves item data from the shopping cart list. */
@@ -59,6 +61,22 @@ type PurchaseSchema = {
       calculateTotals: (args: { items: d.ItemData[] }) => d.CheckoutTotalsData;
     };
   };
+
+  aria: {
+    /** Performs ARIA snapshot validation for the full Cart page. */
+    cart: (args: { itemCount: number }) => Promise<void>;
+
+    checkout: {
+      /** Performs ARIA snapshot validation for the full Checkout Info page. */
+      info: (args: { itemCount: number }) => Promise<void>;
+
+      /** Performs ARIA snapshot validation for the full Checkout Overview page. */
+      overview: (args: { itemCount: number }) => Promise<void>;
+
+      /** Performs ARIA snapshot validation for the full Checkout Complete page. */
+      complete: () => Promise<void>;
+    };
+  };
 };
 
 // ==========================================
@@ -71,6 +89,7 @@ const purchaseLocators = (page: Page) => {
 
   return {
     cart: {
+      container: page.getByTestId('cart-contents-container'),
       list: _listLoc,
       items: {
         cards: _cardsLoc,
@@ -83,7 +102,11 @@ const purchaseLocators = (page: Page) => {
       checkoutBtn: page.getByRole('button', { name: t.cart.checkout }),
     },
     checkout: {
-      title: page.getByTestId('secondary-header'),
+      container: {
+        info: page.getByTestId('checkout-info-container'),
+        summary: page.getByTestId('checkout-summary-container'),
+        complete: page.getByTestId('checkout-complete-container'),
+      },
       form: {
         firstName: page.getByPlaceholder(t.checkout.info.form.firstName),
         lastName: page.getByPlaceholder(t.checkout.info.form.lastName),
@@ -104,10 +127,7 @@ const purchaseLocators = (page: Page) => {
       } satisfies d.CheckoutTotalsLocators,
       continueBtn: page.getByRole('button', { name: t.checkout.info.continue }),
       finishBtn: page.getByRole('button', { name: t.checkout.overview.finish }),
-      complete: {
-        container: page.getByTestId('checkout-complete-container'),
-        header: page.getByTestId('complete-header'),
-      },
+      successMsgTitle: page.getByTestId('complete-header'),
     },
   } as const satisfies d.LocatorSchema;
 };
@@ -118,7 +138,8 @@ const purchaseLocators = (page: Page) => {
 
 export const purchase = (page: Page): PurchaseSchema => {
   const loc = purchaseLocators(page);
-  const headerLoc = c.layoutLocators(page).header;
+  const headerLoc = c.layout(page).loc.header;
+  const aria = c.layout(page).aria;
 
   const _cartCardsLoc = loc.cart.items.cards;
   const _getCartItem = (i: number) => loc.cart.item(i);
@@ -177,6 +198,46 @@ export const purchase = (page: Page): PurchaseSchema => {
           const itemTotal = items.reduce((sum, item) => sum + item.price, 0);
           const tax = Number((itemTotal * 0.08).toFixed(2)); // Assuming 8% (not hard coded)
           return { itemTotal, tax, total: Number((itemTotal + tax).toFixed(2)) };
+        },
+      },
+    },
+    aria: {
+      cart: async ({ itemCount }) => {
+        const content = cartSnapshot;
+        await aria.expectPrimary({ itemCount });
+        await aria.expectSecondary({ snapshot: content.title });
+        await expect(loc.cart.container, 'Cart list ARIA snapshot').toMatchAriaSnapshot(
+          content.container({ itemCount }),
+        );
+        await aria.expectFooter();
+      },
+      checkout: {
+        info: async ({ itemCount }) => {
+          const content = checkoutSnapshots.info;
+          await aria.expectPrimary({ itemCount });
+          await aria.expectSecondary({ snapshot: content.title });
+          await expect(loc.checkout.container.info, 'Checkout Info form ARIA snapshot').toMatchAriaSnapshot(
+            content.container,
+          );
+          await aria.expectFooter();
+        },
+        overview: async ({ itemCount }) => {
+          const content = checkoutSnapshots.overview;
+          await aria.expectPrimary({ itemCount });
+          await aria.expectSecondary({ snapshot: content.title });
+          await expect(loc.checkout.container.summary, 'Checkout Overview list ARIA snapshot').toMatchAriaSnapshot(
+            content.container({ itemCount }),
+          );
+          await aria.expectFooter();
+        },
+        complete: async () => {
+          const content = checkoutSnapshots.complete;
+          await aria.expectPrimary({ itemCount: 0 });
+          await aria.expectSecondary({ snapshot: content.title });
+          await expect(loc.checkout.container.complete, 'Checkout Complete message ARIA snapshot').toMatchAriaSnapshot(
+            content.container,
+          );
+          await aria.expectFooter();
         },
       },
     },

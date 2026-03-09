@@ -1,8 +1,8 @@
-import type { Page, Cookie } from '@playwright/test';
+import { type Page, type Cookie, expect } from '@playwright/test';
 import * as c from './core';
 import * as u from '@utils';
 import type * as d from '@data';
-import { t, STATE_KEYS, loginConfig } from '@data';
+import { t, STATE_KEYS, loginConfig, loginSnapshots } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN SCHEMA
@@ -10,6 +10,7 @@ import { t, STATE_KEYS, loginConfig } from '@data';
 
 type AccountSchema = {
   loc: ReturnType<typeof accountLocators>;
+
   act: {
     login: {
       /** Performs the submission of the login credentials. */
@@ -23,6 +24,7 @@ type AccountSchema = {
       openMenu: () => Promise<void>;
     };
   };
+
   query: {
     session: {
       /** Retrieves the user session cookie from the browser. */
@@ -31,6 +33,11 @@ type AccountSchema = {
       /** Retrieves the cart items list from local storage. */
       readCart: () => Promise<number[]>;
     };
+  };
+
+  aria: {
+    /** Performs ARIA snapshot validation for the full Login page. */
+    login: () => Promise<void>;
   };
 };
 
@@ -41,6 +48,8 @@ type AccountSchema = {
 const accountLocators = (page: Page) => {
   return {
     login: {
+      container: page.locator('.login_wrapper-inner'),
+      credentials: page.getByTestId('login-credentials-container'),
       input: {
         username: page.getByPlaceholder(t.login.username),
         password: page.getByPlaceholder(t.login.password),
@@ -57,7 +66,7 @@ const accountLocators = (page: Page) => {
 
 export const account = (page: Page): AccountSchema => {
   const loc = accountLocators(page);
-  const headerLoc = c.layoutLocators(page).header;
+  const headerLoc = c.layout(page).loc.header;
 
   const _openMenu = async () => {
     await headerLoc.menu.panel.waitFor({ state: 'hidden' });
@@ -90,6 +99,15 @@ export const account = (page: Page): AccountSchema => {
         readCart: async () => {
           return await _getStorageData<number[]>(page, STATE_KEYS.cart);
         },
+      },
+    },
+    aria: {
+      login: async () => {
+        await expect(headerLoc.appLogo, 'App Logo ARIA snapshot').toMatchAriaSnapshot(loginSnapshots.logo);
+        await expect(loc.login.container, 'Login ARIA snapshot').toMatchAriaSnapshot(loginSnapshots.login);
+        await expect(loc.login.credentials, 'Credentials ARIA snapshot').toMatchAriaSnapshot(
+          loginSnapshots.credentials,
+        );
       },
     },
   } as const;
