@@ -327,3 +327,33 @@ import { test, expect } from '@fixtures'; // fixtures/index.ts
 npm run check  # Format, lint, type-check
 npm run base   # Run baseline tests
 ```
+
+🏛️ Testing Standards: The Flat Slug Protocol
+
+We use Flat Slugs to ensure our test reports read like a Business Requirement Document. Every test name should describe
+a specific rule or behavior without technical "stutter." 📜 Core Naming Rules
+
+    No Redundancy: Do not repeat the folder or file name in the test title (e.g., in cart.spec.ts, use remove item logic instead of Cart remove item).
+
+    Business Slugs: Use lowercase, space-separated English for actions (e.g., first name required).
+
+    Technical Contexts: Use underscores for roles and system identifiers (e.g., problem_user, mobile_safari).
+
+    The Colon Exception: Use a colon (:) only to group variations or categories (e.g., visual: cart layout).
+
+🏛️ Standard Mapping Category Technical Style (Avoid) Flat Slug (Use) Auth Authenticate as standard_user standard_user
+login Flows Purchase and Order Data Match purchase and data consistency Forms Error when zipCode is missing zip code
+required Sorting Sorting: Price (High to Low) price descending sorting Visual Layout Visual Check visual: login page 🏛️
+Step Emoji Protocol
+
+We use emojis to identify the "Layer" of each test step in the report:
+
+    ⬜ Setup/Data: Internal state or data scraping (e.g., ⬜ Scrape PLP data).
+
+    🟦 Action: User interactions (e.g., 🟦 Add items to cart).
+
+    🟧 Assertion: Verifications and UI checks (e.g., 🟧 UI: Badge match).
+
+🏛️ Example Log Entry
+
+[chrome] › purchase/checkout.spec.ts › normal_user › zip code required

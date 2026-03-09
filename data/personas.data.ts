@@ -20,7 +20,7 @@ const VALID_PASS = process.env.VALID_PASSWORD as string;
 
 const AUTHENTICATED_PERSONAS = [
   {
-    role: 'Normal User',
+    role: 'normal_user',
     user: VALID_USER,
     pass: VALID_PASS,
     tag: '@👤',
@@ -29,7 +29,7 @@ const AUTHENTICATED_PERSONAS = [
     isBaseline: true,
   },
   {
-    role: 'Problem User',
+    role: 'problem_user',
     user: 'problem_user',
     pass: VALID_PASS,
     tag: '@⚠️',
@@ -38,7 +38,7 @@ const AUTHENTICATED_PERSONAS = [
     isBaseline: false,
   },
   {
-    role: 'Error User',
+    role: 'error_user',
     user: 'error_user',
     pass: VALID_PASS,
     tag: '@💣',
@@ -47,7 +47,7 @@ const AUTHENTICATED_PERSONAS = [
     isBaseline: false,
   },
   {
-    role: 'Visual User',
+    role: 'visual_user',
     user: 'visual_user',
     pass: VALID_PASS,
     tag: '@🎨',
@@ -59,7 +59,7 @@ const AUTHENTICATED_PERSONAS = [
 
 const UNAUTHORIZED_PERSONAS = [
   {
-    role: 'Invalid Password User',
+    role: 'invalid_password',
     user: VALID_USER,
     pass: 'wrong_sauce',
     tag: '@🔑',
@@ -67,7 +67,7 @@ const UNAUTHORIZED_PERSONAS = [
     expectedError: 'unauthorized',
   },
   {
-    role: 'Invalid Username User',
+    role: 'invalid_username',
     user: 'ghost_user',
     pass: VALID_PASS,
     tag: '@🎭',
@@ -75,7 +75,7 @@ const UNAUTHORIZED_PERSONAS = [
     expectedError: 'unauthorized',
   },
   {
-    role: 'Locked Out User',
+    role: 'locked_out',
     user: 'locked_out_user',
     pass: VALID_PASS,
     tag: '@🔒',

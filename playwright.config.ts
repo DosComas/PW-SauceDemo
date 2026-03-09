@@ -34,40 +34,40 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
-  snapshotPathTemplate: `{testDir}/__snapshots__/{projectName}/[${t.meta.locale}]-{arg}{ext}`,
+  snapshotPathTemplate: `{testDir}/__screenshots__/{projectName}/[${t.meta.locale}]-{arg}{ext}`,
   timeout: 20_000,
   expect: { timeout: 3_000 },
 
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'Setup',
+      name: 'setup',
       use: { ...devices['Desktop Chrome'] },
       testMatch: 'auth.setup.ts',
     },
 
     /* Test against desktop viewports. */
     {
-      name: 'Chrome',
+      name: 'chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-      dependencies: ['Setup'],
+      dependencies: ['setup'],
     },
     {
-      name: 'Safari',
+      name: 'safari',
       use: { ...devices['Desktop Safari'] },
-      dependencies: ['Setup'],
+      dependencies: ['setup'],
     },
 
     /* Test against mobile viewports. */
     {
-      name: 'Android',
+      name: 'mobile-chrome',
       use: { ...devices['Pixel 7'] },
-      dependencies: ['Setup'],
+      dependencies: ['setup'],
     },
     {
-      name: 'iPhone',
+      name: 'mobile-safari',
       use: { ...devices['iPhone 14'] },
-      dependencies: ['Setup'],
+      dependencies: ['setup'],
     },
   ],
 
