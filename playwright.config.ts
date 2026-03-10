@@ -33,10 +33,12 @@ export default defineConfig({
     testIdAttribute: 'data-test',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    actionTimeout: 4_000,
+    navigationTimeout: 8_000,
   },
   snapshotPathTemplate: `{testDir}/__screenshots__/{projectName}/[${t.meta.locale}]-{arg}{ext}`,
   timeout: 20_000,
-  expect: { timeout: 3_000 },
+  expect: { timeout: 4_000 },
 
   /* Configure projects for major browsers */
   projects: [

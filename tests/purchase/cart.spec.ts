@@ -92,6 +92,32 @@ for (const persona of AUTHENTICATED) {
       });
     });
 
+    test('persistence: session logout', async ({ loc, act, query }) => {
+      const expected = await test.step('⬜ Scrape PLP item data', async () => {
+        return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
+      });
+
+      await test.step('🟦 Add items and logout', async () => {
+        await act.plp.addToCart({ indexes: itemIndexes });
+        await act.menu.logout();
+      });
+
+      await test.step('🟦 Login and navigate to cart', async () => {
+        await act.login.submitCredentials({ username: persona.user, password: persona.pass });
+        await act.cart.openCart();
+      });
+
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge still match selection').toHaveText('3');
+
+      await test.step('🟧 UI: Cart items still match PLP source', async () => {
+        expect.soft(await query.cart.readItems(), 'Items match').toMatchObject(expected);
+      });
+
+      await test.step('🟧 Data: Local storage still has 3 items', async () => {
+        expect(await query.session.readCart(), 'Local storage match').toHaveLength(3);
+      });
+    });
+
     if (persona.isBaseline) {
       test('visual: cart', { tag: '@visual' }, async ({ page, act }) => {
         await test.step('⬜ Add an item and navigate to cart', async () => {

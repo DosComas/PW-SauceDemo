@@ -76,7 +76,8 @@ const catalogLocators = (page: Page) => {
     plp: {
       title: page.getByTestId('title'),
       grid: page.getByTestId('inventory-list'),
-      sort: page.getByTestId('product-sort-container'),
+      sortSelect: page.getByTestId('product-sort-container'),
+      activeSort: page.getByTestId('active-option'),
       items: {
         cards: _cardsLoc,
         prices: c._itemFragment(page).price,
@@ -134,7 +135,9 @@ export const catalog = (page: Page): CatalogSchema => {
           await (via === 'img' ? itemLoc.img : itemLoc.name).click();
         },
         sortGrid: async ({ sortBy }) => {
-          await loc.plp.sort.selectOption({ label: t.plp.sort[sortBy] });
+          const label = t.plp.sort[sortBy];
+          await loc.plp.sortSelect.selectOption({ label });
+          await expect(loc.plp.activeSort, 'Active sort updated').toHaveText(label);
         },
         mockGrid: async ({ size = 5 } = {}) => {
           const blueprint = _cardsLoc.first();
