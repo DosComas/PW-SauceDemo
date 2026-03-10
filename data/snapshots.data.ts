@@ -64,14 +64,18 @@ ${_renderOverviewList(itemCount)}
 };
 
 function _renderOverviewList(itemCount: number): string {
+  const s = t.checkout.overview.summary;
   const header = `- text: "${t.purchase.qty} ${t.purchase.description} 1"`;
+
   const items = Array.from({ length: itemCount }, (_, i) => {
     const isLast = i === itemCount - 1;
-    const priceLine = isLast
-      ? `- text: /.* \\$\\d*\\.\\d{2} Payment Information:\\s.* Shipping Information:\\s.* Price Total Item total:\\s\\$\\d*\\.\\d{2} Tax:\\s\\$\\d*\\.\\d{2} Total:\\s\\$\\d*\\.\\d{2}/`
-      : `- text: /.* \\$\\d*\\.\\d{2}/`;
 
-    return `- link /.*/:\n  - /url: "#"\n${priceLine}`;
+    let summaryLine = `- text: /.* \\$\\d*\\.\\d{2}/`;
+    if (isLast) {
+      summaryLine = `- text: /.* \\$\\d*\\.\\d{2} ${s.payment}\\s.* ${s.shipping}\\s.* ${s.priceTotal} ${s.itemTotal}\\s\\$\\d*\\.\\d{2} ${s.tax}\\s\\$\\d*\\.\\d{2} Total:\\s\\$\\d*\\.\\d{2}/`;
+    }
+
+    return `- link /.*/:\n  - /url: "#"\n${summaryLine}`;
   }).join('\n');
 
   return `${header}\n${items}`;

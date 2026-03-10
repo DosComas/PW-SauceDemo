@@ -87,6 +87,14 @@ export const EN = {
     },
     overview: {
       title: 'Checkout: Overview',
+      summary: {
+        payment: 'Payment Information:',
+        shipping: 'Shipping Information:',
+        priceTotal: 'Price Total',
+        itemTotal: 'Item total:',
+        tax: 'Tax:',
+        total: 'Total:',
+      },
       finish: 'Finish',
     },
     complete: {
