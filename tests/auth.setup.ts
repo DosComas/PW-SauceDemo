@@ -12,7 +12,9 @@ for (const persona of AUTHENTICATED) {
     });
 
     await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
+
     await expect(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
+
     expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
 
     await setup.step('⬜ Save authentication state', async () => {

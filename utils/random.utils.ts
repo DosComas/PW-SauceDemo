@@ -29,12 +29,12 @@ export const createRandom = () => {
     },
 
     /** Picks random item from array or generates target from max */
-    target: (input: number | number[] = 5): number => {
+    target: (input: number | number[]): number => {
       if (Array.isArray(input)) {
         const randomIndex = Math.floor(rng() * input.length);
         return input[randomIndex];
       }
-      return Math.floor(rng() * (input + 1));
+      return Math.floor(rng() * input);
     },
   };
 };

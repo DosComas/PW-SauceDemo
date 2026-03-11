@@ -20,18 +20,21 @@ for (const persona of AUTHENTICATED) {
     test.use({ storageState: persona.storageState });
 
     test('purchase and data consistency', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       const expectedItems = await test.step('⬜ Scrape PLP items data', async () => {
         return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
       });
 
       await test.step('🟦 Add items and complete checkout', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
         await act.cart.openCart();
         await act.cart.startCheckout();
         await act.checkout.submitInfo();
       });
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge match selection').toHaveText(String(itemIndexes.length));
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge match selection').toHaveText(String(itemCount));
 
       await test.step('🟧 UI: Checkout summary match PLP source', async () => {
         const expectedTotals = query.checkout.calculateTotals({ items: expectedItems });
@@ -52,19 +55,24 @@ for (const persona of AUTHENTICATED) {
     });
 
     test('pdp link navigation', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       await test.step('⬜ Add items and submit checkout info', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
         await act.cart.openCart();
         await act.cart.startCheckout();
         await act.checkout.submitInfo();
       });
 
+      const newItemIndex = random.target(itemCount);
+
       const expected = await test.step('⬜ Scrape Checkout item data', async () => {
-        return await query.checkout.readItems({ index: 2 });
+        return await query.checkout.readItems({ index: newItemIndex });
       });
 
       await test.step('🟦 Navigate from Checkout to PDP', async () => {
-        await act.checkout.openItem({ index: 2 });
+        await act.checkout.openItem({ index: newItemIndex });
       });
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
@@ -82,8 +90,8 @@ for (const persona of AUTHENTICATED) {
       ] as const satisfies InfoScenario[]
     ).forEach(({ label, skipInput, expectedError }) => {
       test(`${label} required`, async ({ loc, act }) => {
-        await test.step('⬜ Add items and go to cart', async () => {
-          await act.plp.addToCart({ indexes: itemIndexes });
+        await test.step('⬜ Add item and go to cart', async () => {
+          await act.plp.addToCart({ indexes: [itemIndex] });
           await act.cart.openCart();
         });
 

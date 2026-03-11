@@ -35,28 +35,32 @@ for (const persona of AUTHENTICATED) {
     });
 
     test('add/remove item logic', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       await test.step('🟦 Add items to cart', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
       });
 
       await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 3').toHaveText('3');
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows ${itemCount}`).toHaveText(String(itemCount));
 
-      await test.step('🟧 Data: Local storage has 3 items', async () => {
-        expect(await query.session.readCart(), 'Local storage match').toHaveLength(3);
+      await test.step(`🟧 Data: Local storage has ${itemCount} items`, async () => {
+        expect(await query.session.readCart(), 'Local storage match').toHaveLength(itemCount);
       });
 
       await test.step('🟦 Remove item from cart', async () => {
         await act.plp.removeFromCart({ indexes: [itemIndex] });
+        itemCount -= 1;
       });
 
       await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge shows 2').toHaveText('2');
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows ${itemCount}`).toHaveText(String(itemCount));
 
-      await test.step('🟧 Data: Local storage has 2 items', async () => {
-        expect(await query.session.readCart(), 'Local storage match').toHaveLength(2);
+      await test.step(`🟧 Data: Local storage has ${itemCount} items`, async () => {
+        expect(await query.session.readCart(), 'Local storage match').toHaveLength(itemCount);
       });
     });
 

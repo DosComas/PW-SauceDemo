@@ -17,16 +17,19 @@ for (const persona of AUTHENTICATED) {
     test.use({ storageState: persona.storageState });
 
     test('item data consistency', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       const expected = await test.step('⬜ Scrape PLP items data', async () => {
         return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
       });
 
       await test.step('🟦 Add items and navigate to cart', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
         await act.cart.openCart();
       });
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge match selection').toHaveText(String(itemIndexes.length));
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge match selection').toHaveText(String(itemCount));
 
       await test.step('🟧 UI: Cart items match PLP source', async () => {
         expect(await query.cart.readItems(), 'Items match').toMatchObject(expected);
@@ -34,17 +37,19 @@ for (const persona of AUTHENTICATED) {
     });
 
     test('pdp link navigation', async ({ loc, act, query }) => {
+      const cartItemIndex = random.target(itemIndexes.length);
+
       await test.step('⬜ Add items and navigate to cart', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
         await act.cart.openCart();
       });
 
       const expected = await test.step('⬜ Scrape Cart item data', async () => {
-        return await query.cart.readItems({ index: 2 });
+        return await query.cart.readItems({ index: cartItemIndex });
       });
 
       await test.step('🟦 Navigate from Cart to PDP', async () => {
-        await act.cart.openItem({ index: 2 });
+        await act.cart.openItem({ index: cartItemIndex });
       });
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
@@ -68,7 +73,7 @@ for (const persona of AUTHENTICATED) {
 
       await expect.soft(loc.plp.item(itemIndex).addBtn, '🟧 UI: Add button visible').toBeVisible();
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge removed').not.toBeVisible();
 
       await test.step('🟧 Data: Local storage has 0 items', async () => {
         expect(await query.session.readCart(), 'Local storage match').toHaveLength(0);
@@ -76,29 +81,36 @@ for (const persona of AUTHENTICATED) {
     });
 
     test('remove item logic', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       await test.step('⬜ Add items and navigate to cart', async () => {
-        await act.plp.addToCart({ indexes: [itemIndex] });
+        await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
         await act.cart.openCart();
       });
 
       await test.step('🟦 Remove item from cart', async () => {
-        await act.cart.removeFromCart({ indexes: [0] });
+        await act.cart.removeFromCart({ indexes: [random.target(itemCount)] });
+        itemCount -= 1;
       });
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge removed').not.toBeVisible();
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge match selection').toHaveText(String(itemCount));
 
-      await test.step('🟧 Data: Local storage has 0 items', async () => {
-        expect(await query.session.readCart(), 'Local storage match').toHaveLength(0);
+      await test.step(`🟧 Data: Local storage has ${itemCount} items`, async () => {
+        expect(await query.session.readCart(), 'Local storage match').toHaveLength(itemCount);
       });
     });
 
     test('persistence: session logout', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       const expected = await test.step('⬜ Scrape PLP item data', async () => {
         return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
       });
 
       await test.step('🟦 Add items and logout', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
         await act.menu.logout();
       });
 
@@ -107,14 +119,14 @@ for (const persona of AUTHENTICATED) {
         await act.cart.openCart();
       });
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Badge still match selection').toHaveText('3');
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge still match selection').toHaveText(String(itemCount));
 
       await test.step('🟧 UI: Cart items still match PLP source', async () => {
         expect.soft(await query.cart.readItems(), 'Items match').toMatchObject(expected);
       });
 
-      await test.step('🟧 Data: Local storage still has 3 items', async () => {
-        expect(await query.session.readCart(), 'Local storage match').toHaveLength(3);
+      await test.step(`🟧 Data: Local storage still has ${itemCount} items`, async () => {
+        expect(await query.session.readCart(), 'Local storage match').toHaveLength(itemCount);
       });
     });
 

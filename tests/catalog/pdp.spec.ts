@@ -38,7 +38,7 @@ for (const persona of AUTHENTICATED) {
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1').toHaveText('1');
 
       await test.step('🟧 Data: Local storage has 1 item', async () => {
         expect(await query.session.readCart(), 'Local storage match').toHaveLength(1);
@@ -58,8 +58,11 @@ for (const persona of AUTHENTICATED) {
     });
 
     test('cart persistence: on entry', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
       await test.step('⬜ Add items to cart on PLP', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
       });
 
       await test.step('🟦 Navigate to PDP', async () => {
@@ -68,9 +71,9 @@ for (const persona of AUTHENTICATED) {
 
       await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 3 items').toHaveText('3');
+      await expect.soft(loc.header.cart.badge, `🟧 UI: Cart Badge shows ${itemCount}`).toHaveText(String(itemCount));
 
-      await test.step('🟧 Data: Local storage has 3 items`', async () => {
+      await test.step(`🟧 Data: Local storage has ${itemCount} items`, async () => {
         expect(await query.session.readCart(), 'Local storage match').toHaveLength(3);
       });
     });
@@ -87,7 +90,7 @@ for (const persona of AUTHENTICATED) {
 
       await expect.soft(loc.plp.item(itemIndex).removeBtn, '🟧 UI: Remove button visible').toBeVisible();
 
-      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1 item').toHaveText('1');
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge shows 1').toHaveText('1');
 
       await test.step('🟧 Data: Local storage has 1 item', async () => {
         expect(await query.session.readCart(), 'Local storage match').toHaveLength(1);
