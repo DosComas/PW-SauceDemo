@@ -147,15 +147,13 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function runAxeScan(page: Page, testInfo: TestInfo | undefined, label: string): Promise<void> {
+export async function runAxeScan(page: Page, testInfo: TestInfo, label: string): Promise<void> {
   const result = await new AxeBuilder({ page }).analyze();
 
-  if (testInfo) {
-    await testInfo.attach(`${label}-accessibility-scan-results`, {
-      body: JSON.stringify(result, null, 2),
-      contentType: 'application/json',
-    });
-  }
+  await testInfo.attach(`${label}-accessibility-scan-results`, {
+    body: JSON.stringify(result, null, 2),
+    contentType: 'application/json',
+  });
 
   expect.soft(result.violations, `${label.toUpperCase()} accessibility scan`).toEqual([]);
 }
