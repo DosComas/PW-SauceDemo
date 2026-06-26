@@ -66,7 +66,7 @@
       "const random = createRandom();",
       "const testData = random.basket(3);",
       "",
-      "test.describe.parallel('${1:Feature Name}', () => {",
+      "test.describe('${1:Feature Name}', () => {",
       "  test.beforeEach(async ({ page }) => {",
       "    await test.step('⬜ Navigate', async () => {",
       "      await page.goto('/${2:url-path}');",
@@ -155,7 +155,7 @@
     "prefix": "pw-describe",
     "body": [
       "for (const persona of AUTHENTICATED) {",
-      "  test.describe(`Persona: {persona.role}`, { tag: persona.tag }, () => {",
+      "  test.describe(`${persona.role}`, { tag: persona.tag }, () => {",
       "    test.use({ storageState: persona.storageState });",
       "",
       "    $0",

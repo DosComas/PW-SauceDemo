@@ -1,4 +1,4 @@
-import { type Page, type Cookie, expect } from '@playwright/test';
+import { type Page, Cookie, expect, TestInfo } from '@playwright/test';
 import * as c from './core';
 import * as u from '@utils';
 import type * as d from '@data';
@@ -35,9 +35,16 @@ type AccountSchema = {
     };
   };
 
-  aria: {
-    /** Performs ARIA snapshot validation for the full Login page. */
-    login: () => Promise<void>;
+  a11y: {
+    aria: {
+      /** Performs ARIA snapshot validation for the full Login page. */
+      login: () => Promise<void>;
+    };
+
+    axe: {
+      /** Performs Accessibility validation for the full Login page. */
+      login: (args: { testInfo: TestInfo }) => Promise<void>;
+    };
   };
 };
 
@@ -101,13 +108,20 @@ export const account = (page: Page): AccountSchema => {
         },
       },
     },
-    aria: {
-      login: async () => {
-        await expect(headerLoc.appLogo, 'App Logo ARIA snapshot').toMatchAriaSnapshot(loginSnapshots.logo);
-        await expect(loc.login.container, 'Login ARIA snapshot').toMatchAriaSnapshot(loginSnapshots.login);
-        await expect(loc.login.credentials, 'Credentials ARIA snapshot').toMatchAriaSnapshot(
-          loginSnapshots.credentials,
-        );
+    a11y: {
+      aria: {
+        login: async () => {
+          await expect(headerLoc.appLogo, 'App Logo ARIA snapshot').toMatchAriaSnapshot(loginSnapshots.logo);
+          await expect(loc.login.container, 'Login ARIA snapshot').toMatchAriaSnapshot(loginSnapshots.login);
+          await expect(loc.login.credentials, 'Credentials ARIA snapshot').toMatchAriaSnapshot(
+            loginSnapshots.credentials,
+          );
+        },
+      },
+      axe: {
+        login: async ({ testInfo }) => {
+          await c.runAxeScan(page, testInfo, 'login');
+        },
       },
     },
   } as const;

@@ -12,7 +12,7 @@ export type AppModules = ReturnType<typeof getModules>;
 export type AppLocs = ReturnType<typeof createLoc>;
 export type AppActs = ReturnType<typeof createAct>;
 export type AppQueries = ReturnType<typeof createQuery>;
-export type AppArias = ReturnType<typeof createAria>;
+export type AppA11y = ReturnType<typeof createA11y>;
 
 export const getModules = (page: Page) => ({
   layout: layout(page),
@@ -46,10 +46,17 @@ export const createQuery = (m: AppModules) => {
   };
 };
 
-export const createAria = (m: AppModules) => {
+export const createA11y = (m: AppModules) => {
   return {
-    ...m.account.aria,
-    ...m.catalog.aria,
-    ...m.purchase.aria,
+    aria: {
+      ...m.account.a11y.aria,
+      ...m.catalog.a11y.aria,
+      ...m.purchase.a11y.aria,
+    },
+    axe: {
+      ...m.account.a11y.axe,
+      ...m.catalog.a11y.axe,
+      ...m.purchase.a11y.axe,
+    },
   };
 };

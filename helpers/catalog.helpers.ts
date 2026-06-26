@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, Locator, expect, TestInfo } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
 import { t, sampleItem, catalogSnapshots } from '@data';
@@ -53,12 +53,22 @@ type CatalogSchema = {
     };
   };
 
-  aria: {
-    /** Performs ARIA snapshot validation for the full PLP page. */
-    plp: (args: { itemCount: number; sortBy: d.SortOption; itemsInCart: readonly number[] }) => Promise<void>;
+  a11y: {
+    aria: {
+      /** Performs ARIA snapshot validation for the full PLP page. */
+      plp: (args: { itemCount: number; sortBy: d.SortOption; itemsInCart: readonly number[] }) => Promise<void>;
 
-    /** Performs ARIA snapshot validation for the full PDP page. */
-    pdp: (args: { itemCount: number; inCart: boolean }) => Promise<void>;
+      /** Performs ARIA snapshot validation for the full PDP page. */
+      pdp: (args: { itemCount: number; inCart: boolean }) => Promise<void>;
+    };
+
+    axe: {
+      /** Performs Accessibility validation for the full PLP page. */
+      plp: (args: { testInfo: TestInfo }) => Promise<void>;
+
+      /** Performs Accessibility validation for the full PDP page. */
+      pdp: (args: { testInfo: TestInfo }) => Promise<void>;
+    };
   };
 };
 
@@ -165,23 +175,33 @@ export const catalog = (page: Page): CatalogSchema => {
         },
       },
     },
-    aria: {
-      plp: async ({ itemCount, sortBy, itemsInCart }) => {
-        const content = catalogSnapshots.plp;
-        await aria.expectPrimary({ itemCount });
-        await aria.expectSecondary({ snapshot: content.titleAndSort({ sortBy }) });
-        for (const [i, card] of (await _cardsLoc.all()).entries()) {
-          const inCart = itemsInCart.includes(i);
-          await expect(card, `PLP item ${i} ARIA snapshot`).toMatchAriaSnapshot(content.item({ inCart }));
-        }
-        await aria.expectFooter();
+    a11y: {
+      aria: {
+        plp: async ({ itemCount, sortBy, itemsInCart }) => {
+          const content = catalogSnapshots.plp;
+          await aria.expectPrimary({ itemCount });
+          await aria.expectSecondary({ snapshot: content.titleAndSort({ sortBy }) });
+          for (const [i, card] of (await _cardsLoc.all()).entries()) {
+            const inCart = itemsInCart.includes(i);
+            await expect(card, `PLP item ${i} ARIA snapshot`).toMatchAriaSnapshot(content.item({ inCart }));
+          }
+          await aria.expectFooter();
+        },
+        pdp: async ({ itemCount, inCart }) => {
+          const content = catalogSnapshots.pdp;
+          await aria.expectPrimary({ itemCount });
+          await aria.expectSecondary({ snapshot: content.goBack });
+          await expect(_itemLoc.card, 'PDP item ARIA snapshot').toMatchAriaSnapshot(content.item({ inCart }));
+          await aria.expectFooter();
+        },
       },
-      pdp: async ({ itemCount, inCart }) => {
-        const content = catalogSnapshots.pdp;
-        await aria.expectPrimary({ itemCount });
-        await aria.expectSecondary({ snapshot: content.goBack });
-        await expect(_itemLoc.card, 'PDP item ARIA snapshot').toMatchAriaSnapshot(content.item({ inCart }));
-        await aria.expectFooter();
+      axe: {
+        plp: async ({ testInfo }) => {
+          await c.runAxeScan(page, testInfo, 'plp');
+        },
+        pdp: async ({ testInfo }) => {
+          await c.runAxeScan(page, testInfo, 'pdp');
+        },
       },
     },
   } as const;

@@ -23,22 +23,24 @@ for (const persona of UNAUTHORIZED) {
 
 for (const persona of BASELINE) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
-    test('login success', { tag: '@aria' }, async ({ loc, act, query, aria }) => {
-      await test.step('🟧 ARIA: Login page milestone', async () => {
-        await aria.login();
-      });
-
+    test('login success', async ({ loc, act, query }) => {
       await test.step('🟦 Log in to app', async () => {
         await act.login.submitCredentials({ username: persona.user, password: persona.pass });
       });
 
       await expect.soft(loc.plp.title, '🟧 UI: Products title check').toHaveText(t.plp.title);
 
-      await test.step('🟧 ARIA: Post login PLP state', async () => {
-        await aria.plp({ itemCount: 0, sortBy: 'az', itemsInCart: [] });
+      expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
+    });
+
+    test('login accessibility', { tag: ['@aria', '@axe'] }, async ({ a11y }, testInfo) => {
+      await test.step('🟧 ARIA: Login page', async () => {
+        await a11y.aria.login();
       });
 
-      expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
+      await test.step('🟧 AXE: Login page', async () => {
+        await a11y.axe.login({ testInfo });
+      });
     });
 
     test('visual: login', { tag: '@visual' }, async ({ page, loc }) => {

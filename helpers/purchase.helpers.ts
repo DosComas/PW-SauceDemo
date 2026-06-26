@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, Locator, expect, TestInfo } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
 import { t, sampleItem, checkoutInfo, checkoutTotals, cartSnapshot, checkoutSnapshots } from '@data';
@@ -62,19 +62,37 @@ type PurchaseSchema = {
     };
   };
 
-  aria: {
-    /** Performs ARIA snapshot validation for the full Cart page. */
-    cart: (args: { itemCount: number }) => Promise<void>;
+  a11y: {
+    aria: {
+      /** Performs ARIA snapshot validation for the full Cart page. */
+      cart: (args: { itemCount: number }) => Promise<void>;
 
-    checkout: {
-      /** Performs ARIA snapshot validation for the full Checkout Info page. */
-      info: (args: { itemCount: number }) => Promise<void>;
+      checkout: {
+        /** Performs ARIA snapshot validation for the full Checkout Info page. */
+        info: (args: { itemCount: number }) => Promise<void>;
 
-      /** Performs ARIA snapshot validation for the full Checkout Overview page. */
-      overview: (args: { itemCount: number }) => Promise<void>;
+        /** Performs ARIA snapshot validation for the full Checkout Overview page. */
+        overview: (args: { itemCount: number }) => Promise<void>;
 
-      /** Performs ARIA snapshot validation for the full Checkout Complete page. */
-      complete: () => Promise<void>;
+        /** Performs ARIA snapshot validation for the full Checkout Complete page. */
+        complete: () => Promise<void>;
+      };
+    };
+
+    axe: {
+      /** Performs Accessibility validation for the full Cart page. */
+      cart: (args: { testInfo: TestInfo }) => Promise<void>;
+
+      checkout: {
+        /** Performs Accessibility validation for the full Checkout Info page. */
+        info: (args: { testInfo: TestInfo }) => Promise<void>;
+
+        /** Performs Accessibility validation for the full Checkout Overview page. */
+        overview: (args: { testInfo: TestInfo }) => Promise<void>;
+
+        /** Performs Accessibility validation for the full Checkout Complete page. */
+        complete: (args: { testInfo: TestInfo }) => Promise<void>;
+      };
     };
   };
 };
@@ -201,43 +219,63 @@ export const purchase = (page: Page): PurchaseSchema => {
         },
       },
     },
-    aria: {
-      cart: async ({ itemCount }) => {
-        const content = cartSnapshot;
-        await aria.expectPrimary({ itemCount });
-        await aria.expectSecondary({ snapshot: content.title });
-        await expect(loc.cart.container, 'Cart list ARIA snapshot').toMatchAriaSnapshot(
-          content.container({ itemCount }),
-        );
-        await aria.expectFooter();
-      },
-      checkout: {
-        info: async ({ itemCount }) => {
-          const content = checkoutSnapshots.info;
+    a11y: {
+      aria: {
+        cart: async ({ itemCount }) => {
+          const content = cartSnapshot;
           await aria.expectPrimary({ itemCount });
           await aria.expectSecondary({ snapshot: content.title });
-          await expect(loc.checkout.container.info, 'Checkout Info form ARIA snapshot').toMatchAriaSnapshot(
-            content.container,
-          );
-          await aria.expectFooter();
-        },
-        overview: async ({ itemCount }) => {
-          const content = checkoutSnapshots.overview;
-          await aria.expectPrimary({ itemCount });
-          await aria.expectSecondary({ snapshot: content.title });
-          await expect(loc.checkout.container.summary, 'Checkout Overview list ARIA snapshot').toMatchAriaSnapshot(
+          await expect(loc.cart.container, 'Cart list ARIA snapshot').toMatchAriaSnapshot(
             content.container({ itemCount }),
           );
           await aria.expectFooter();
         },
-        complete: async () => {
-          const content = checkoutSnapshots.complete;
-          await aria.expectPrimary({ itemCount: 0 });
-          await aria.expectSecondary({ snapshot: content.title });
-          await expect(loc.checkout.container.complete, 'Checkout Complete message ARIA snapshot').toMatchAriaSnapshot(
-            content.container,
-          );
-          await aria.expectFooter();
+        checkout: {
+          info: async ({ itemCount }) => {
+            const content = checkoutSnapshots.info;
+            await aria.expectPrimary({ itemCount });
+            await aria.expectSecondary({ snapshot: content.title });
+            await expect(loc.checkout.container.info, 'Checkout Info form ARIA snapshot').toMatchAriaSnapshot(
+              content.container,
+            );
+            await aria.expectFooter();
+          },
+          overview: async ({ itemCount }) => {
+            const content = checkoutSnapshots.overview;
+            await aria.expectPrimary({ itemCount });
+            await aria.expectSecondary({ snapshot: content.title });
+            await expect(loc.checkout.container.summary, 'Checkout Overview list ARIA snapshot').toMatchAriaSnapshot(
+              content.container({ itemCount }),
+            );
+            await aria.expectFooter();
+          },
+          complete: async () => {
+            const content = checkoutSnapshots.complete;
+            await aria.expectPrimary({ itemCount: 0 });
+            await aria.expectSecondary({ snapshot: content.title });
+            await expect(
+              loc.checkout.container.complete,
+              'Checkout Complete message ARIA snapshot',
+            ).toMatchAriaSnapshot(content.container);
+            await aria.expectFooter();
+          },
+        },
+      },
+
+      axe: {
+        cart: async ({ testInfo }) => {
+          await c.runAxeScan(page, testInfo, 'cart');
+        },
+        checkout: {
+          info: async ({ testInfo }) => {
+            await c.runAxeScan(page, testInfo, 'checkout-info');
+          },
+          overview: async ({ testInfo }) => {
+            await c.runAxeScan(page, testInfo, 'checkout-overview');
+          },
+          complete: async ({ testInfo }) => {
+            await c.runAxeScan(page, testInfo, 'checkout-complete');
+          },
         },
       },
     },

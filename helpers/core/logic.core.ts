@@ -1,5 +1,7 @@
-import type { Locator } from '@playwright/test';
+import { AxeBuilder } from '@axe-core/playwright';
+import type { Page, TestInfo, Locator } from '@playwright/test';
 import type * as d from '@data';
+import { expect } from 'fixtures/base.fixtures';
 
 // ==========================================
 // 🏛️ LOGIC TYPES
@@ -143,4 +145,17 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
     },
     { blueprintNode: handle, n: count },
   );
+}
+
+export async function runAxeScan(page: Page, testInfo: TestInfo | undefined, label: string): Promise<void> {
+  const result = await new AxeBuilder({ page }).analyze();
+
+  if (testInfo) {
+    await testInfo.attach(`${label}-accessibility-scan-results`, {
+      body: JSON.stringify(result, null, 2),
+      contentType: 'application/json',
+    });
+  }
+
+  expect.soft(result.violations, `${label.toUpperCase()} accessibility scan`).toEqual([]);
 }
