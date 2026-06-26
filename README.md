@@ -42,6 +42,7 @@ the suite's Axe/ARIA coverage.
 ### Test Tag Summary
 
 - `@👤` — baseline authenticated user tests
+- `@e2e` — functional flow tests — fast regression
 - `@aria` — ARIA milestone/accessibility assertions
 - `@axe` — Axe scan validation
 - `@visual` — screenshot/layout visual checks

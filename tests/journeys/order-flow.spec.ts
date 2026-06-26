@@ -16,7 +16,7 @@ for (const persona of BASELINE) {
   test.describe(`${persona.role}`, { tag: persona.tag }, () => {
     test.use({ storageState: persona.storageState });
 
-    test('purchase via pdp', async ({ loc, act }) => {
+    test('purchase via pdp', { tag: '@e2e' }, async ({ loc, act }) => {
       await test.step('🟦 Sort items', async () => {
         await act.plp.sortGrid({ sortBy: 'hiLo' });
       });
@@ -40,7 +40,7 @@ for (const persona of BASELINE) {
       );
     });
 
-    test('bulk plp purchase', async ({ loc, act }) => {
+    test('bulk plp purchase', { tag: '@e2e' }, async ({ loc, act }) => {
       await test.step('🟦 Add three items', async () => {
         await act.plp.addToCart({ indexes: itemIndexes });
       });
