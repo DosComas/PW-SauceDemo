@@ -1,0 +1,43 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.printWidth": 120,
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 120,
+  "editor.rulers": [120],
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "explorer.compactFolders": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, tsconfig.json, eslint.config.mjs, .prettierrc, .gitignore"
+  },
+
+  "files.exclude": {
+    "**/node_modules/**": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true,
+    "**/.git/**": true
+  },
+
+  "search.exclude": {
+    "**/__snapshots__/**": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true,
+    "**/node_modules/**": true,
+    "**/.git/**": true
+  },
+
+  "files.watcherExclude": {
+    "**/__snapshots__/**": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true,
+    "**/node_modules/**": true,
+    "**/.git/**": true
+  },
+  "js/ts.tsdk.path": "node_modules\\typescript\\lib"
+}

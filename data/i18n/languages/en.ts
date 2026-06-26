@@ -1,0 +1,114 @@
+// ==========================================
+// 🏛️ TRANSLATION BUNDLE (English)
+// ==========================================
+
+export const EN = {
+  /** Global Configuration: Locale and Branding */
+  meta: {
+    locale: 'en-US',
+    storeName: 'Swag Labs',
+  },
+
+  /** Navigation Drawer items */
+  menu: {
+    logout: 'Logout',
+    openMenu: 'Open Menu',
+    about: { label: 'About', url: 'https://saucelabs.com/' },
+  },
+
+  /** * Footer: Social media presence */
+  footer: {
+    social: {
+      twitter: { label: 'Twitter', url: 'https://twitter.com/saucelabs' },
+      facebook: { label: 'Facebook', url: 'https://www.facebook.com/saucelabs' },
+      linkedin: { label: 'LinkedIn', url: 'https://www.linkedin.com/company/sauce-labs/' },
+    },
+    copy: 'All Rights Reserved',
+    terms: 'Terms of Service',
+    privacy: 'Privacy Policy',
+  },
+
+  /** Authentication: User credentials and login-specific validation messages */
+  login: {
+    username: 'Username',
+    password: 'Password',
+    button: 'Login',
+    errors: {
+      unauthorized: 'Epic sadface: Username and password do not match any user in this service',
+      lockedOut: 'Epic sadface: Sorry, this user has been locked out.',
+      restricted: "Epic sadface: You can only access '/inventory.html' when you are logged in.",
+    },
+  },
+
+  /** Item Components: Shared actions available on both PLP and PDP */
+  item: {
+    addToCart: 'Add to cart',
+    remove: 'Remove',
+  },
+
+  /** Item Grid: Product Listing Page (PLP) layout and sorting options */
+  plp: {
+    title: 'Products',
+    sort: {
+      az: 'Name (A to Z)',
+      za: 'Name (Z to A)',
+      loHi: 'Price (low to high)',
+      hiLo: 'Price (high to low)',
+    },
+  },
+
+  /** Detail View: Single Product Details Page (PDP) specific navigation */
+  pdp: {
+    goBackToProducts: 'Back to products',
+  },
+
+  /** Shopping Experience: Cart overview and entry point to checkout */
+  cart: {
+    title: 'Your Cart',
+    checkout: 'Checkout',
+    continueShopping: 'Continue Shopping',
+  },
+
+  /** Transaction Flow: Customer information and order completion */
+  checkout: {
+    info: {
+      title: 'Checkout: Your Information',
+      form: {
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        zipCode: 'Zip/Postal Code',
+      },
+      errors: {
+        firstName: 'Error: First Name is required',
+        lastName: 'Error: Last Name is required',
+        zipCode: 'Error: Postal Code is required',
+      },
+      continue: 'Continue',
+    },
+    overview: {
+      title: 'Checkout: Overview',
+      summary: {
+        payment: 'Payment Information:',
+        shipping: 'Shipping Information:',
+        priceTotal: 'Price Total',
+        itemTotal: 'Item total:',
+        tax: 'Tax:',
+        total: 'Total:',
+      },
+      finish: 'Finish',
+    },
+    complete: {
+      title: 'Checkout: Complete!',
+      ponyAlt: 'Pony Express',
+      success: 'Thank you for your order!',
+      dispatchedNote: 'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
+      backHome: 'Back Home',
+    },
+    cancel: 'Cancel',
+  },
+  purchase: {
+    qty: 'QTY',
+    description: 'Description',
+  },
+  goBackAlt: 'Go back',
+} as const;

@@ -1,20 +1,24 @@
-import { test as setup, expect } from '@playwright/test';
-import { doLogin } from '../helpers/loginHelpers';
-import { getTranslation } from '../helpers/translationHelpers';
-import path from 'path';
+import { test as setup, expect } from '@fixtures';
+import { t, AUTHENTICATED } from '@data';
 
-const authFile = path.join(__dirname, '../.auth/user.json');
+for (const persona of AUTHENTICATED) {
+  setup(`${persona.role} login`, { tag: persona.tag }, async ({ page, loc, act, query }) => {
+    await setup.step('⬜ Go to login', async () => {
+      await page.goto('/');
+    });
 
-const validUsername = process.env.VALID_USERNAME as string;
-const validPassword = process.env.VALID_PASSWORD as string;
+    await setup.step('🟦 Log in to app', async () => {
+      await act.login.submitCredentials({ username: persona.user, password: persona.pass });
+    });
 
-setup('Authenticate', async ({ page }) => {
-  await page.goto('');
-  await doLogin(page, validUsername, validPassword);
+    await expect(loc.plp.title, '🟧 UI: PLP title check').toHaveText(t.plp.title);
 
-  await expect(page, 'User should be logged into the landing page').toHaveURL(
-    '/inventory.html'
-  );
+    await expect(loc.header.cart.openBtn, '🟧 UI: Cart icon visible').toBeVisible();
 
-  await page.context().storageState({ path: authFile });
-});
+    expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
+
+    await setup.step('⬜ Save authentication state', async () => {
+      await page.context().storageState({ path: persona.storageState });
+    });
+  });
+}

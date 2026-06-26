@@ -1,0 +1,134 @@
+import { test, expect } from '@fixtures';
+import type { CheckoutInfoData, CheckoutInfoError } from '@data';
+import { t, AUTHENTICATED } from '@data';
+import { createRandom } from '@utils';
+
+type InfoScenario = { label: string; skipInput: keyof CheckoutInfoData; expectedError: CheckoutInfoError };
+
+const random = createRandom();
+const itemIndexes = random.basket(3);
+const itemIndex = random.target(itemIndexes);
+
+test.beforeEach(async ({ page }) => {
+  await test.step('⬜ Go to inventory', async () => {
+    await page.goto('/inventory.html');
+  });
+});
+
+for (const persona of AUTHENTICATED) {
+  test.describe(`${persona.role}`, { tag: persona.tag }, () => {
+    test.use({ storageState: persona.storageState });
+
+    test('purchase and data consistency', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
+      const expectedItems = await test.step('⬜ Scrape PLP items data', async () => {
+        return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
+      });
+
+      await test.step('🟦 Add items and complete checkout', async () => {
+        await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
+        await act.cart.openCart();
+        await act.cart.startCheckout();
+        await act.checkout.submitInfo();
+      });
+
+      await expect.soft(loc.header.cart.badge, '🟧 UI: Cart Badge match selection').toHaveText(String(itemCount));
+
+      await test.step('🟧 UI: Checkout summary match PLP source', async () => {
+        const expectedTotals = query.checkout.calculateTotals({ items: expectedItems });
+
+        expect.soft(await query.checkout.readItems(), 'Items match').toMatchObject(expectedItems);
+        expect(await query.checkout.readTotals(), 'Totals match').toMatchObject(expectedTotals);
+      });
+
+      await test.step('🟦 Complete the purchase', async () => {
+        await act.checkout.completeOrder();
+      });
+
+      await expect(loc.header.container.secondary, '🟧 UI: Page Title').toHaveText(t.checkout.complete.title);
+
+      await expect(loc.checkout.successMsgTitle, '🟧 UI: Success Message Title').toHaveText(
+        t.checkout.complete.success,
+      );
+    });
+
+    test('pdp link navigation', async ({ loc, act, query }) => {
+      let itemCount: number = 0;
+
+      await test.step('⬜ Add items and submit checkout info', async () => {
+        await act.plp.addToCart({ indexes: itemIndexes });
+        itemCount += itemIndexes.length;
+        await act.cart.openCart();
+        await act.cart.startCheckout();
+        await act.checkout.submitInfo();
+      });
+
+      const newItemIndex = random.target(itemCount);
+
+      const expected = await test.step('⬜ Scrape Checkout item data', async () => {
+        return await query.checkout.readItems({ index: newItemIndex });
+      });
+
+      await test.step('🟦 Navigate from Checkout to PDP', async () => {
+        await act.checkout.openItem({ index: newItemIndex });
+      });
+
+      await expect.soft(loc.pdp.item.removeBtn, '🟧 UI: Remove button visible').toBeVisible();
+
+      await test.step('🟧 UI: PDP item match Checkout source', async () => {
+        expect(await query.pdp.readItem(), 'Match item object').toMatchObject(expected);
+      });
+    });
+
+    (
+      [
+        { label: 'first name', skipInput: 'firstName', expectedError: t.checkout.info.errors.firstName },
+        { label: 'last name', skipInput: 'lastName', expectedError: t.checkout.info.errors.lastName },
+        { label: 'zip code', skipInput: 'zipCode', expectedError: t.checkout.info.errors.zipCode },
+      ] as const satisfies InfoScenario[]
+    ).forEach(({ label, skipInput, expectedError }) => {
+      test(`${label} required`, async ({ loc, act }) => {
+        await test.step('⬜ Add item and go to cart', async () => {
+          await act.plp.addToCart({ indexes: [itemIndex] });
+          await act.cart.openCart();
+        });
+
+        await test.step('🟦 Submit checkout info', async () => {
+          await act.cart.startCheckout();
+          await act.checkout.submitInfo({ skip: [skipInput] });
+        });
+
+        await expect(loc.checkout.error, '🟧 UI: Error message matches').toHaveText(expectedError);
+      });
+    });
+
+    if (persona.isBaseline) {
+      test('visual: checkout', { tag: '@visual' }, async ({ page, act }) => {
+        await test.step('⬜ Add items and submit checkout info', async () => {
+          await act.plp.addToCart({ indexes: [itemIndex] });
+          await act.cart.openCart();
+          await act.cart.startCheckout();
+          await act.checkout.submitInfo();
+        });
+
+        await test.step('⬜ Mock Checkout List', async () => {
+          await act.checkout.mockList();
+        });
+
+        await expect(page, '🟧 UI: Layout visual check').toHaveScreenshot('checkout-summary-page.png', {
+          fullPage: true,
+        });
+
+        await test.step('🟦 Complete the purchase', async () => {
+          await act.checkout.completeOrder();
+        });
+
+        await expect(page, '🟧 UI: Layout visual check').toHaveScreenshot('checkout-complete-page.png', {
+          fullPage: true,
+        });
+      });
+    }
+  });
+}
