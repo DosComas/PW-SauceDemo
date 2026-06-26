@@ -141,8 +141,8 @@ const user = await query.session.readUser(); // returns Cookie | undefined
 | **Account**  | 7 tests  | Login, logout, layout/navigation                          |
 | **Catalog**  | 8 tests  | PLP sorting, PDP behavior, add/remove flows               |
 | **Purchase** | 10 tests | Cart and checkout workflows                               |
-| **Journeys** | 3 tests  | End-to-end order flow                                     |
-| **Total**    | **108**  | Baseline execution across Chrome, Safari, Android, iPhone |
+| **Journeys** | 6 tests  | End-to-end order flows (including ARIA and AXE variants)  |
+| **Total**    | **116**  | Baseline execution across Chrome, Safari, Android, iPhone |
 
 ## Type System
 

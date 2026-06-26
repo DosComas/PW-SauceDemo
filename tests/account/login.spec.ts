@@ -33,11 +33,13 @@ for (const persona of BASELINE) {
       expect(await query.session.readUser(), '🟧 Data: Session cookies present').toBeTruthy();
     });
 
-    test('login accessibility', { tag: ['@aria', '@axe'] }, async ({ a11y }, testInfo) => {
+    test('aria: login accessibility', { tag: ['@aria'] }, async ({ a11y }) => {
       await test.step('🟧 ARIA: Login page', async () => {
         await a11y.aria.login();
       });
+    });
 
+    test('axe: login accessibility', { tag: ['@axe'] }, async ({ a11y }, testInfo) => {
       await test.step('🟧 AXE: Login page', async () => {
         await a11y.axe.login({ testInfo });
       });
