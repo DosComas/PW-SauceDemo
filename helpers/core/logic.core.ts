@@ -1,7 +1,7 @@
 import { AxeBuilder } from '@axe-core/playwright';
+import { expect } from '@playwright/test';
 import type { Page, TestInfo, Locator } from '@playwright/test';
 import type * as d from '@data';
-import { expect } from 'fixtures/base.fixtures';
 
 // ==========================================
 // 🏛️ LOGIC TYPES

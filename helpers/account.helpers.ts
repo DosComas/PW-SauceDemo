@@ -1,4 +1,5 @@
-import { type Page, Cookie, expect, TestInfo } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Page, Cookie, TestInfo } from '@playwright/test';
 import * as c from './core';
 import * as u from '@utils';
 import type * as d from '@data';

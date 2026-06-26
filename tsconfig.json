@@ -2,13 +2,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
+    "moduleResolution": "bundler",
     "paths": {
-      "@fixtures": ["fixtures/index.ts"],
-      "@data": ["data/index.ts"],
-      "@utils": ["utils/index.ts"]
+      "@fixtures": ["./fixtures/index.ts"],
+      "@data": ["./data/index.ts"],
+      "@utils": ["./utils/index.ts"]
     },
     "strict": true,
     "esModuleInterop": true,

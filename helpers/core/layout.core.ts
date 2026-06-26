@@ -1,4 +1,5 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 import type * as d from '@data';
 import { t, layoutSnapshots } from '@data';
 
