@@ -187,9 +187,9 @@ export const purchase = (page: Page): PurchaseSchema => {
       },
       checkout: {
         submitInfo: async (args = {}) => {
-          const { skip, ...data } = args;
-          const formData = { ...checkoutInfo.generate(), ...data };
-          await c._fillForm(checkoutInfo.config, loc.checkout.form, formData, skip);
+          const { skip = [], ...data } = args;
+          const formData = c._excludeData({ ...checkoutInfo.generate(), ...data }, skip);
+          await c._fillForm(checkoutInfo.config, loc.checkout.form, formData);
           await loc.checkout.continueBtn.click();
         },
         openItem: async ({ index }) => await _getCheckoutItem(index).name.click(),
@@ -265,17 +265,17 @@ export const purchase = (page: Page): PurchaseSchema => {
 
       axe: {
         cart: async ({ testInfo }) => {
-          await c.runAxeScan(page, testInfo, 'cart');
+          await c._runAxeScan(page, testInfo, 'cart');
         },
         checkout: {
           info: async ({ testInfo }) => {
-            await c.runAxeScan(page, testInfo, 'checkout-info');
+            await c._runAxeScan(page, testInfo, 'checkout-info');
           },
           overview: async ({ testInfo }) => {
-            await c.runAxeScan(page, testInfo, 'checkout-overview');
+            await c._runAxeScan(page, testInfo, 'checkout-overview');
           },
           complete: async ({ testInfo }) => {
-            await c.runAxeScan(page, testInfo, 'checkout-complete');
+            await c._runAxeScan(page, testInfo, 'checkout-complete');
           },
         },
       },

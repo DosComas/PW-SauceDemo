@@ -31,14 +31,13 @@ export async function _fillForm<T extends readonly d.ConfigSchema<d.InputMap>[]>
   config: T,
   locators: d.LocatorsOf<d.InputMap, T>,
   data: Partial<d.DataOf<d.InputMap, T>>,
-  skip: T[number]['key'][] = [],
 ): Promise<void> {
   for (const field of config) {
     const key = field.key as T[number]['key'];
     const locator = locators[key] as Locator;
     const value = data[key];
 
-    if (skip.includes(field.key) || value === undefined || value === null) continue;
+    if (value === undefined || value === null) continue;
 
     switch (field.type) {
       case 'textInput':
@@ -80,6 +79,11 @@ export async function _readTextFields<T extends readonly d.ConfigSchema<d.Inject
       case 'priceField':
         result[key] = Number(textContent.replace(/^.*?\$/, '')) as d.DataOf<d.InjectMap, T>[typeof key];
         break;
+
+      default: {
+        const _exhaustiveCheck: never = field.type;
+        throw new Error(`[_readTextFields] Forgot to handle type: ${_exhaustiveCheck}`);
+      }
     }
   }
 
@@ -147,7 +151,7 @@ export async function _injectClones(containerLoc: Locator, blueprintLoc: Locator
   );
 }
 
-export async function runAxeScan(page: Page, testInfo: TestInfo, label: string): Promise<void> {
+export async function _runAxeScan(page: Page, testInfo: TestInfo, label: string): Promise<void> {
   const result = await new AxeBuilder({ page }).analyze();
 
   await testInfo.attach(`${label}-accessibility-scan-results`, {
@@ -156,4 +160,12 @@ export async function runAxeScan(page: Page, testInfo: TestInfo, label: string):
   });
 
   expect.soft(result.violations, `${label.toUpperCase()} accessibility scan`).toEqual([]);
+}
+
+export function _excludeData<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result = { ...obj };
+
+  for (const key of keys) delete result[key];
+
+  return result;
 }
