@@ -86,8 +86,9 @@ export const account = (page: Page): AccountSchema => {
     act: {
       login: {
         submitCredentials: async (args) => {
-          const { skip, ...data } = args;
-          await c._fillForm(loginConfig, loc.login.input, data, skip);
+          const { skip = [], ...data } = args;
+          const formData = c._excludeData(data, skip);
+          await c._fillForm(loginConfig, loc.login.input, formData);
           await loc.login.loginBtn.click();
         },
       },
@@ -121,7 +122,7 @@ export const account = (page: Page): AccountSchema => {
       },
       axe: {
         login: async ({ testInfo }) => {
-          await c.runAxeScan(page, testInfo, 'login');
+          await c._runAxeScan(page, testInfo, 'login');
         },
       },
     },

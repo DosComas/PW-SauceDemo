@@ -198,10 +198,10 @@ export const catalog = (page: Page): CatalogSchema => {
       },
       axe: {
         plp: async ({ testInfo }) => {
-          await c.runAxeScan(page, testInfo, 'plp');
+          await c._runAxeScan(page, testInfo, 'plp');
         },
         pdp: async ({ testInfo }) => {
-          await c.runAxeScan(page, testInfo, 'pdp');
+          await c._runAxeScan(page, testInfo, 'pdp');
         },
       },
     },
