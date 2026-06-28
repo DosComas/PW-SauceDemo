@@ -27,6 +27,7 @@ npm run all
 npm run base
 npm run e2e
 npm run a11y
+npm run visual
 npm run dev
 npm run stress
 npm run report
