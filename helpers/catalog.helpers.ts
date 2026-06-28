@@ -62,7 +62,6 @@ type CatalogSchema = {
       /** Performs ARIA snapshot validation for the full PDP page. */
       pdp: (args: { itemCount: number; inCart: boolean }) => Promise<void>;
     };
-
     axe: {
       /** Performs Accessibility validation for the full PLP page. */
       plp: (args: { testInfo: TestInfo }) => Promise<void>;

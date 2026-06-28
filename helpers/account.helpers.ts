@@ -41,7 +41,6 @@ type AccountSchema = {
       /** Performs ARIA snapshot validation for the full Login page. */
       login: () => Promise<void>;
     };
-
     axe: {
       /** Performs Accessibility validation for the full Login page. */
       login: (args: { testInfo: TestInfo }) => Promise<void>;

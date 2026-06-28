@@ -8,36 +8,32 @@ data-driven testing across multiple browsers and viewports.
 
 Prerequisites: Node.js 18+ and npm.
 
+1. Install project dependencies
+
 ```bash
 npm install
-npm run all
-npm run dev
-npm run a11y
-npm run base
-npm run check
-npm run fix
-npm run report
-npm run list
-npm run stress
 ```
 
-## Custom Scripts
+2. Install Playwright browsers
 
-| Script   | Purpose                                                             |
-| -------- | ------------------------------------------------------------------- |
-| `all`    | Run the full Playwright suite                                       |
-| `dev`    | Run the baseline authenticated smoke suite in Chrome                |
-| `base`   | Run baseline tests tagged with `@👤`, excluding accessibility cases |
-| `a11y`   | Run accessibility-focused tests tagged with `@aria` and `@axe`      |
-| `stress` | Repeat the smoke suite with no retries and trace retention          |
-| `report` | Open the Playwright HTML report                                     |
-| `list`   | List tests for the baseline suite                                   |
-| `check`  | Run Prettier, ESLint, and TypeScript checks                         |
-| `fix`    | Apply formatting and lint fixes                                     |
+```bash
+npx playwright install
+```
 
-`npm run base` executes the baseline authenticated flow across configured browser projects while excluding ARIA and
-Axe-tagged accessibility checks. `npm run a11y` runs the accessibility-focused tags and is the current way to validate
-the suite's Axe/ARIA coverage.
+3. Run the tests
+
+```bash
+npm run all
+npm run base
+npm run e2e
+npm run a11y
+npm run dev
+npm run stress
+npm run report
+npm run list
+npm run check
+npm run fix
+```
 
 ### Test Tag Summary
 
@@ -87,9 +83,8 @@ PW-SauceDemo/
 ├── helpers/                       # Reusable actions, locators, queries, and a11y helpers
 ├── tests/                         # Test specs grouped by area
 ├── utils/                         # Testing utilities and custom matchers
-├── playwright.config.ts           # Playwright configuration
-├── tsconfig.json                  # TypeScript configuration
-└── package.json                   # Scripts and dependencies
+├── package.json                   # Scripts and dependencies
+└── playwright.config.ts           # Playwright configuration
 ```
 
 ## Test Philosophy
@@ -187,11 +182,22 @@ import { test, expect } from '@fixtures'; // fixtures/index.ts
 - Use `.soft()` for non-critical checks (continues test on failure)
 - Collect data during Arrange, compare in Assert
 
-**Before Commit:**
+**Before Commit**
+
+1. Verify Stability: Use `test.only` on your target test case and run the stress script to ensure it remains stable
+   under load.
+
+> Note: Ensure all `.only` annotations are removed before committing; the check script will flag any remaining
+> instances.
+
+2. Quality Gate: Run the `check` script to ensure formatting, linting, and type-checking pass.
 
 ```bash
-npm run check  # Format, lint, type-check
-npm run base   # Run baseline tests
+# Run the stress suite for your isolated test
+npm run stress
+
+# Run quality checks
+npm run check
 ```
 
 ## Testing Standards: The Flat Slug Protocol
