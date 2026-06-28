@@ -35,6 +35,16 @@ npm run check
 npm run fix
 ```
 
+4. Setup the local application (optional)
+
+```bash
+git submodule update --init --recursive
+cd app-source && npm install
+```
+
+> Note: Ensure your `.env` file is configured with `ENVIRONMENT=local` to target the local server instead of a remote
+> environment.
+
 ### Test Tag Summary
 
 - `@👤` — baseline authenticated user tests

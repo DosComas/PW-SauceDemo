@@ -1,4 +1,5 @@
 import { EN } from './languages/en';
+import { runLanguage } from './../../runtime';
 
 // ==========================================
 // 🏛️ TRANSLATION TYPES
@@ -13,8 +14,7 @@ export type LanguageData = typeof EN;
 
 const DICTIONARY = { EN };
 
-const requestedLang = process.env.LANGUAGE as Languages;
-const activeLang = DICTIONARY[requestedLang] ? requestedLang : 'EN';
+const activeLang = _getLanguage(runLanguage);
 const baseBundle = DICTIONARY[activeLang];
 
 const handler: ProxyHandler<LanguageData> = {
@@ -35,3 +35,16 @@ const handler: ProxyHandler<LanguageData> = {
 // ==========================================
 
 export const t: LanguageData = new Proxy(baseBundle, handler);
+
+// ==========================================
+// 🏛️ PRIVATE ACTIONS
+// ==========================================
+
+function _getLanguage(language: string | undefined): Languages {
+  if (!language) throw new Error('[_getLanguage] LANGUAGE is undefined. Expected: EN');
+
+  const key = language.toUpperCase();
+  if (!(key in DICTIONARY)) throw new Error(`[_getLanguage] Unknown LANGUAGE: "${language}"`);
+
+  return key as Languages;
+}
