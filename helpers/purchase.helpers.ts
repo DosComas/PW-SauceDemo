@@ -79,7 +79,6 @@ type PurchaseSchema = {
         complete: () => Promise<void>;
       };
     };
-
     axe: {
       /** Performs Accessibility validation for the full Cart page. */
       cart: (args: { testInfo: TestInfo }) => Promise<void>;
