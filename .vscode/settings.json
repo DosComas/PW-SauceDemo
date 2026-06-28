@@ -14,8 +14,8 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "package.json": "package-lock.json, tsconfig.json, eslint.config.mjs, .prettierrc, .gitignore",
-    "playwright.config.ts": ".env, .env.example, global.setup.ts"
+    "package.json": "package-lock.json, tsconfig.json, eslint.config.mjs, .prettierrc, .gitignore, .gitmodules",
+    "playwright.config.ts": ".env, .env.example, global.setup.ts, runtime.ts"
   },
 
   "files.exclude": {
@@ -26,6 +26,7 @@
   },
 
   "search.exclude": {
+    "**/app-source/**": true,
     "**/__snapshots__/**": true,
     "**/test-results/**": true,
     "**/playwright-report/**": true,
@@ -34,6 +35,7 @@
   },
 
   "files.watcherExclude": {
+    "**/app-source/**": true,
     "**/__snapshots__/**": true,
     "**/test-results/**": true,
     "**/playwright-report/**": true,

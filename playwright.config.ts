@@ -1,13 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
-import { t, CURRENT_ENV } from '@data';
-import { createRandom } from '@utils';
-import dotenv from 'dotenv';
-import path from 'path';
+import { t } from '@data';
+import { runSeed, runEnv } from './runtime';
 import os from 'os';
-
-dotenv.config({ path: path.resolve(__dirname, '.env'), quiet: true });
-
-const runSeed = createRandom().seed;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -24,21 +18,21 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? undefined : Math.max(os.cpus().length - 1, 1),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [['html', { title: `${CURRENT_ENV.environment} [${t.meta.locale}] [seed: ${runSeed}]` }], ['dot']],
+  reporter: [['html', { title: `${runEnv.name} [${t.meta.locale}] [seed: ${runSeed}]` }], ['dot']],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: CURRENT_ENV.baseUrl,
+    baseURL: runEnv.baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     locale: t.meta.locale,
     testIdAttribute: 'data-test',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    actionTimeout: 4_000,
-    navigationTimeout: 8_000,
+    actionTimeout: 6_000,
+    navigationTimeout: 12_000,
   },
   snapshotPathTemplate: `{testDir}/__screenshots__/{projectName}/[${t.meta.locale}]-{arg}{ext}`,
-  timeout: 20_000,
+  timeout: 24_000,
   expect: { timeout: 4_000 },
 
   /* Configure projects for major browsers */
@@ -75,9 +69,13 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer:
+    runEnv.name === 'Local'
+      ? {
+          command: 'cd app-source && set NODE_OPTIONS=--no-deprecation && npm run start',
+          url: runEnv.baseUrl,
+          reuseExistingServer: !process.env.CI,
+          timeout: 60_000,
+        }
+      : undefined,
 });

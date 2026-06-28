@@ -1,0 +1,3 @@
+[submodule "app-source"]
+	path = app-source
+	url = https://github.com/DosComas/sample-app-web.git

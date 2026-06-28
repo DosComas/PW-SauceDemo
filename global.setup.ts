@@ -1,9 +1,10 @@
-import { t, CURRENT_ENV } from '@data';
+import { t } from '@data';
+import { runSeed, runEnv } from './runtime';
 
 async function globalSetup(): Promise<void> {
-  console.log(`> Environment: ${CURRENT_ENV.environment}`);
+  console.log(`> Environment: ${runEnv.name}`);
   console.log(`> Locale: ${t.meta.locale}`);
-  console.log(`> Seed: ${process.env.TEST_SEED}`);
+  console.log(`> Seed: ${runSeed}`);
 }
 
 export default globalSetup;
