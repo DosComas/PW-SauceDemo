@@ -8,36 +8,32 @@ data-driven testing across multiple browsers and viewports.
 
 Prerequisites: Node.js 18+ and npm.
 
+# 1. Install project dependencies
+
 ```bash
 npm install
-npm run all
-npm run dev
-npm run a11y
-npm run base
-npm run check
-npm run fix
-npm run report
-npm run list
-npm run stress
 ```
 
-## Custom Scripts
+# 2. Install Playwright browsers
 
-| Script   | Purpose                                                             |
-| -------- | ------------------------------------------------------------------- |
-| `all`    | Run the full Playwright suite                                       |
-| `dev`    | Run the baseline authenticated smoke suite in Chrome                |
-| `base`   | Run baseline tests tagged with `@👤`, excluding accessibility cases |
-| `a11y`   | Run accessibility-focused tests tagged with `@aria` and `@axe`      |
-| `stress` | Repeat the smoke suite with no retries and trace retention          |
-| `report` | Open the Playwright HTML report                                     |
-| `list`   | List tests for the baseline suite                                   |
-| `check`  | Run Prettier, ESLint, and TypeScript checks                         |
-| `fix`    | Apply formatting and lint fixes                                     |
+```bash
+npx playwright install
+```
 
-`npm run base` executes the baseline authenticated flow across configured browser projects while excluding ARIA and
-Axe-tagged accessibility checks. `npm run a11y` runs the accessibility-focused tags and is the current way to validate
-the suite's Axe/ARIA coverage.
+# 3. Run the tests
+
+```bash
+npm run all
+npm run base
+npm run e2e
+npm run a11y
+npm run dev
+npm run stress
+npm run report
+npm run list
+npm run check
+npm run fix
+```
 
 ### Test Tag Summary
 
