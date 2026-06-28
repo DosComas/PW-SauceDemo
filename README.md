@@ -8,19 +8,19 @@ data-driven testing across multiple browsers and viewports.
 
 Prerequisites: Node.js 18+ and npm.
 
-# 1. Install project dependencies
+1. Install project dependencies
 
 ```bash
 npm install
 ```
 
-# 2. Install Playwright browsers
+2. Install Playwright browsers
 
 ```bash
 npx playwright install
 ```
 
-# 3. Run the tests
+3. Run the tests
 
 ```bash
 npm run all
@@ -83,9 +83,8 @@ PW-SauceDemo/
 ├── helpers/                       # Reusable actions, locators, queries, and a11y helpers
 ├── tests/                         # Test specs grouped by area
 ├── utils/                         # Testing utilities and custom matchers
-├── playwright.config.ts           # Playwright configuration
-├── tsconfig.json                  # TypeScript configuration
-└── package.json                   # Scripts and dependencies
+├── package.json                   # Scripts and dependencies
+└── playwright.config.ts           # Playwright configuration
 ```
 
 ## Test Philosophy
@@ -183,11 +182,22 @@ import { test, expect } from '@fixtures'; // fixtures/index.ts
 - Use `.soft()` for non-critical checks (continues test on failure)
 - Collect data during Arrange, compare in Assert
 
-**Before Commit:**
+**Before Commit**
+
+1. Verify Stability: Use `test.only` on your target test case and run the stress script to ensure it remains stable
+   under load.
+
+> Note: Ensure all `.only` annotations are removed before committing; the check script will flag any remaining
+> instances.
+
+2. Quality Gate: Run the `check` script to ensure formatting, linting, and type-checking pass.
 
 ```bash
-npm run check  # Format, lint, type-check
-npm run base   # Run baseline tests
+# Run the stress suite for your isolated test
+npm run stress
+
+# Run quality checks
+npm run check
 ```
 
 ## Testing Standards: The Flat Slug Protocol
