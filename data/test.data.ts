@@ -29,6 +29,12 @@ export const loginConfig = [
 ] as const satisfies readonly ConfigSchema<InputMap>[];
 
 // ==========================================
+// 🏛️ TAX RATE
+// ==========================================
+
+export const taxRate = 0.08;
+
+// ==========================================
 // 🏛️ STATIC ITEM MOCK DATA
 // ==========================================
 
