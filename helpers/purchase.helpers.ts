@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import type { Page, Locator, TestInfo } from '@playwright/test';
 import * as c from './core';
 import type * as d from '@data';
-import { t, sampleItem, checkoutInfo, checkoutTotals, cartSnapshot, checkoutSnapshots } from '@data';
+import { t, sampleItem, checkoutInfo, checkoutTotals, cartSnapshot, checkoutSnapshots, taxRate } from '@data';
 
 // ==========================================
 // 🏛️ DOMAIN SCHEMA
@@ -213,9 +213,9 @@ export const purchase = (page: Page): PurchaseSchema => {
         readItems: async ({ index } = {}) => await _readPurchaseItems(_checkoutCardsLoc, _getCheckoutItem, index),
         readTotals: async () => await c._readTextFields(checkoutTotals.config, loc.checkout.price),
         calculateTotals: ({ items }) => {
-          const itemTotal = items.reduce((sum, item) => sum + item.price, 0);
-          const tax = Number((itemTotal * 0.08).toFixed(2)); // Assuming 8% (not hard coded)
-          return { itemTotal, tax, total: Number((itemTotal + tax).toFixed(2)) };
+          const itemTotalCents = items.reduce((sum, item) => sum + Math.round(item.price * 100), 0);
+          const taxCents = Math.round(itemTotalCents * taxRate);
+          return { itemTotal: itemTotalCents / 100, tax: taxCents / 100, total: (itemTotalCents + taxCents) / 100 };
         },
       },
     },

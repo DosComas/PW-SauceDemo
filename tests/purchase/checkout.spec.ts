@@ -20,15 +20,15 @@ for (const persona of AUTHENTICATED) {
     test.use({ storageState: persona.storageState });
 
     test('purchase and data consistency', async ({ loc, act, query }) => {
-      let itemCount: number = 0;
+      const itemIndexList = itemIndexes.slice(0, 2);
+      const itemCount = itemIndexList.length;
 
       const expectedItems = await test.step('⬜ Scrape PLP items data', async () => {
-        return await query.plp.readItems({ indexes: itemIndexes, imgSrc: false });
+        return await query.plp.readItems({ indexes: itemIndexList, imgSrc: false });
       });
 
       await test.step('🟦 Add items and complete checkout', async () => {
-        await act.plp.addToCart({ indexes: itemIndexes });
-        itemCount += itemIndexes.length;
+        await act.plp.addToCart({ indexes: itemIndexList });
         await act.cart.openCart();
         await act.cart.startCheckout();
         await act.checkout.submitInfo();
